@@ -1,0 +1,42 @@
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+// Define the schema for the USER collection
+const userSchema = new Schema({
+    username: {
+        type: String,
+        required: true
+    },
+    password: {
+        type: String,
+        required: true,
+        default: '123'
+    },
+    email: {
+        type: String,
+        required: true
+    },
+    colorWeaknesses: [{
+        background_color: {
+            type: String,
+            required: true
+        },
+        font_color: {
+            type: String,
+            required: true
+        }
+    }],
+    sizeWeaknesses: [{
+        fontSize: {
+            type: Number,
+            required: true
+        },
+        distance: {
+            type: Number,
+            required: true
+        }
+    }]
+});
+
+export const User = mongoose.models?.User || mongoose.model('User', userSchema);
+

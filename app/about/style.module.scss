@@ -1,0 +1,43 @@
+.contain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 95vw;
+    height: 50vw;
+    direction: rtl;
+    color: var(--orange-yellow);
+}
+
+.typingEffect {
+    font-size: 30px;
+    border-left: 2px solid rgba(255, 255, 255, 0.75);
+    white-space: nowrap;
+    overflow: hidden;
+    width: 90vw;
+    animation: typing 5s steps(35) infinite, border 1s infinite ease-in-out;
+}
+
+@keyframes border {
+    0% {
+        border-left-color: rgba(255, 255, 255, 0.75);
+
+    }
+
+    100% {
+        border-left-color: transparent;
+
+    }
+}
+
+@keyframes typing {
+
+    0%,
+    100% {
+        width: 0;
+    }
+
+    50%,
+    90% {
+        width: 600px;
+    }
+}

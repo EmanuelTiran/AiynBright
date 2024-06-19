@@ -1,0 +1,6 @@
+.current{
+    color: var(--orange-yellow);
+}
+.notCurrent{
+    color: var(--gray);
+}

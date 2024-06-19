@@ -1,0 +1,77 @@
+.bckPi {
+    /* position: fixed; */
+    animation: enlargeImage 5s 2 alternate;
+    position: relative;
+    top: 4rem;
+    z-index: -2;
+}
+
+.section {
+    position: relative;
+    top: 4rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    padding-right: 10vw;
+    padding-left: 10vw;
+    gap: 0rem 4rem;
+    white-space: nowrap;
+    text-overflow: ellipsis; 
+}
+
+.section img {
+    clip-path: inset(10% 0 10% 0);
+    height: 300px;
+    object-fit: cover;
+}
+
+.name {
+    font-weight: 700;
+    color: #9da1a2;
+    font-size: 25px;
+}
+
+
+.link {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: start;
+    padding: 5px;
+    transition: transform 0.6s ease;
+    width:100% ;
+}
+
+.link:hover {
+    transform: scale(1.1);
+
+}
+
+.link:hover .name {
+    color: #f7aa05;
+}
+
+@keyframes enlargeImage {
+    0% {
+        transform: scale(1);
+        /* Start at original size */
+    }
+
+    50% {
+        transform: scale(1.1);
+        /* Enlarge the image by 10% */
+    }
+
+    100% {
+        transform: scale(1);
+        /* Return to original size */
+    }
+}
+
+@media (width > 1600px) {
+    .section img {
+        height: 367px;
+    }
+}

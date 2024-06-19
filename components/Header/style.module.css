@@ -1,0 +1,54 @@
+.header {
+    height: 4rem;
+    max-height: 4rem;
+    width: 100%;
+    background-color: #374151;
+    gap: 10rem;
+    padding: 0.5rem;
+    position: sticky;
+    top: 0px;
+    z-index: 10;
+    box-shadow: 0 4px 6px rgba(247, 170, 5, 0.5);
+    overflow-x: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.lightning {
+    position: absolute;
+    height: 100%;
+    width: 95%;
+    background-color: #374151;
+    filter: blur(10px);
+    animation: lightningAnimation 10s linear forwards;
+}
+.refs{
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+@keyframes lightningAnimation {
+    0% {
+        left: 0;
+        /* Start at the left end of the container */
+        opacity: 1;
+        /* Start with full opacity */
+    }
+
+    50% {
+        left: 100%;
+        /* Move to the right end of the container */
+        opacity: 1;
+        /* Maintain opacity */
+    }
+
+    100% {
+        left: 100%;
+        /* Stay at the right end of the container */
+        opacity: 0;
+        /* Fade out completely */
+    }
+}
