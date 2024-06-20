@@ -8,7 +8,6 @@ import style from "./style.module.css"
 export default async function Dashboard() {
   // const cookieStore = cookies()
   const isUser = await authAction();
-  console.log({isUser});
   return (
     <>
       {isUser ?

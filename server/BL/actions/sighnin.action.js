@@ -2,6 +2,7 @@
 import { connectToMongo } from "@/server/connectToMongo"
 import { cookies } from 'next/headers'
 import { redirect } from "next/navigation";
+import { createUserService } from "../services/user.service";
 const jwt = require('jsonwebtoken');
 const SECRET = process.env.JWT_SECRET
 const EMAIL = process.env.EMAIL_USER
@@ -16,21 +17,12 @@ export async function generate(user) {
 export const signAction = async (fd) => {
     "use server"
     let body = Object.fromEntries(fd)
-    const user = { email: body.email, password: body.password }
+    let user = await createUserService(body);
+    user = {email: user.email, password: user.password}
     let token;
-    try {
-        if (user.email == EMAIL && user.password == PASSWORD) {
-            token = await generate(user);
-            cookies().set('token', token)
-        }
-        else {
-            // redirect('/')
-        }
-    } catch (error) {
-        console.log({ error })
-    }
-    token && redirect('/admin/dashboard')
-
+    token = await generate(user);
+    cookies().set('token', token)
+    // token && redirect('/admin/dashboard')
 }
 
 
@@ -44,7 +36,6 @@ export async function authAction() {
         const userFromToken = jwt.verify(token, SECRET);
         if (!userFromToken) throw "not correct"
         if (userFromToken.email == EMAIL && userFromToken.password == PASSWORD) {
-            console.log({ userFromToken })
             return true;
         }
         else {

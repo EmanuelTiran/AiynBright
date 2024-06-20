@@ -114,10 +114,10 @@ export default async function Home() {
   // const carpets = await readCarpetsService();
 
   const isUser = await authAction();
-console.log({isUser});
+
   return (
 <div>
-    {!isUser ? (
+    {isUser ? (
         <Login />
     ) : (
         <SighnIn />
