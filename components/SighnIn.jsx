@@ -1,8 +1,13 @@
 "use client"
 import { signAction } from '@/server/BL/actions/sighnin.action';
 import React, { useState } from 'react';
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 export default function SighnIn() {
+
+    const path = usePathname()
+
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
@@ -46,6 +51,11 @@ export default function SighnIn() {
                         </button>
                     </div>
                 </form>
+                <Link
+                    href={'login'}
+                    // style={{ color: path === href ? '#f7aa05' : '#9da1a2' }}
+                    className={path === 'signin' ? 'text-amber-500' : 'text-gray-500'}
+                >login</Link>
             </div>
         </div>
     );

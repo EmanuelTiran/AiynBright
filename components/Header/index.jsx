@@ -4,6 +4,7 @@ import style from './style.module.css'
 import Icon from '../Icon'
 
 import CartBadge from '../CartBadge'
+import Logo from '../Logo'
 const linksList = [
    { href: '/', text: 'Home' },
    { href: '/about', text: 'About' },
@@ -22,6 +23,7 @@ export default function Header() {
                   {link.text}
                </Navlink>
             ))}
+            <Logo/>
          </span>
          <div className={style.lightning}></div>
       </header>

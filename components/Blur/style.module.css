@@ -1,0 +1,19 @@
+.contain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 96vw;
+    height: 84vh;
+    background-color: aliceblue;
+    border-radius: 2%;
+}
+
+.inContain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 96vw;
+    height: 42vh;
+}

@@ -7,6 +7,8 @@ import Link from 'next/link'
 import style from './style.module.css'
 import Images from '@/components/Images'
 import Checkout from '@/components/Checkout'
+import Color from '@/components/Color'
+import SnellenChart from '@/components/Snellen'
 
 
 
@@ -17,7 +19,8 @@ export default async function MyCart() {
    
   return (
     <div className={style.container}>
-      <Checkout />
+      {/* <Color/> */}
+      <SnellenChart/>
     </div>
   )
 }

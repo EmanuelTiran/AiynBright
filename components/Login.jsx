@@ -3,6 +3,7 @@ import { authAction, loginAction } from '@/server/BL/actions/login.action'
 import Cookies from 'js-cookie';
 import React, { useEffect, useState } from 'react'
 import jwt from 'jsonwebtoken';
+import Link from 'next/link';
 const SECRET = process.env.JWT_SECRET
 
 export default function Login() {
@@ -54,6 +55,9 @@ export default function Login() {
                             Login
                         </button>
                     </div>
+                    <Link
+                        href={'signin'}
+                    >signin</Link>
                 </div>
             </form>
         </div>

@@ -19,7 +19,7 @@ export default async function page({ params: { user } }) {
    const decodedUser = decodeURIComponent(user); // פענוח הפרמטר
 
    let currentUser = await readUserByFieldService({ email: decodedUser })
-   console.log({ currentUser })
+   // console.log({ currentUser })
    return (<>
       {isUser ?
          <div className={style.container} >
