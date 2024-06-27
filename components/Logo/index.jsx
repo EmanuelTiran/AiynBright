@@ -6,7 +6,7 @@ export default function Logo() {
     const CharBright = ["B", "r", "i", "g", "h", "t"]
     return (
         <span className="text-2xl">
-          <span className="font-thin">AYIN</span>
+          <span className="font-thin text-orange-200">AYIN</span>
           {brightColors.map((color, index) => (
             <span key={index} className={`font-bold ${color} ${style.blur}`}>{CharBright[index]}</span>
           ))}

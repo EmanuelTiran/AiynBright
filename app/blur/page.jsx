@@ -5,6 +5,8 @@ import { unstable_noStore } from 'next/cache'
 import Link from 'next/link'
 import style from './style.module.css'
 import Blur from '@/components/Blur'
+import Blur2 from '@/components/Blur2'
+import SnellenChart from '@/components/Snellen'
 
 
 
@@ -16,7 +18,9 @@ export default async function MyCart() {
 
   return (
     <div className={style.container}>
-      <Blur />
+      {/* <Blur /> */}
+      <Blur2 />
+      {/* <SnellenChart /> */}
     </div>
   )
 }

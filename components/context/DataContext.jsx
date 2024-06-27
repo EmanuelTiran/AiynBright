@@ -1,5 +1,19 @@
-import { createContext } from "react";
+import React, { createContext, useState } from 'react';
 
-const DataContext = createContext("X")
+const MyContext = createContext();
 
-export default DataContext 
+const MyProvider = ({ children }) => {
+    const [data, setData] = useState('');
+
+    const updateData = async () => {
+        setData('gnb');
+    };
+
+    return (
+        <MyContext.Provider value={{ data, updateData }}>
+            {children}
+        </MyContext.Provider>
+    );
+};
+
+export { MyContext, MyProvider };

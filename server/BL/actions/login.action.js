@@ -42,7 +42,7 @@ export async function authAction() {
         if (!token.value) return false;
         token = token.value.split('Bearer ')[1] || "null";
         const userFromToken = jwt.verify(token, SECRET);
-        console.log({ userFromToken }, "_____________-_____________")
+        console.log({ userFromToken })
         if (!userFromToken) throw "not correct"
         return true;
     }

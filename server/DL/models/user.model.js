@@ -24,6 +24,10 @@ const userSchema = new Schema({
         font_color: {
             type: String,
             required: true
+        },
+        date: {
+            type: Date,
+            default: Date.now()
         }
     }],
     sizeWeaknesses: [{
@@ -34,8 +38,13 @@ const userSchema = new Schema({
         distance: {
             type: Number,
             required: true
+        },
+        date: {
+            type: Date,
+            default: Date.now()
         }
-    }]
+    }],
+
 });
 
 export const User = mongoose.models?.User || mongoose.model('User', userSchema);

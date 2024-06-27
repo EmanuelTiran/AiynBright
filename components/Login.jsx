@@ -20,7 +20,7 @@ export default function Login() {
         if (response.success) {
             setError('');
             let user = "Emanuel tiran"
-            window.location.href = `/user/hob@example.com`;
+            window.location.href = `/user/${response.newU}`;
         } else {
             setError(response.message);
             alert(response.message);

@@ -8,7 +8,7 @@ import Logo from '../Logo'
 const linksList = [
    { href: '/', text: 'Home' },
    { href: '/about', text: 'About' },
-   { href: '/mydetails', text: 'My Details' },
+   { href: '/user', text: 'User Details' },
    { href: '/blur', text: 'Blur Vision' },
    { href: '/color', text: 'Color Vision' },
 ]

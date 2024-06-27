@@ -1,0 +1,45 @@
+.outside {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgb(255, 252, 204);
+  opacity: 1;
+  display: grid;
+  place-items: center;
+}
+
+.inside {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  max-height: 80vh; /* Limit the height to 80% of the viewport height */
+  background-color: #053f6f;
+  padding: 20px;
+  text-align: right;
+  outline: 5000px solid rgba(0, 0, 0, 0.8);
+  color: antiquewhite;
+  font-size: 25px;
+  overflow: hidden; /* Hide overflow */
+  animation: scale-in 0.5s ease-in-out;
+}
+
+.scrollContent {
+  max-height: calc(80vh - 40px); /* Subtract padding from max height */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding-right: 15px; /* Add some padding for the scrollbar */
+}
+
+@keyframes scale-in {
+  from {
+      transform: translate(-50%, -50%) scale(0.1);
+      opacity: 0.5;
+  }
+  to {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+  }
+}
