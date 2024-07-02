@@ -18,11 +18,11 @@ export const signAction = async (fd) => {
     "use server"
     let body = Object.fromEntries(fd)
     let user = await createUserService(body);
-    user = {email: user.email, password: user.password}
+    user = { email: user.email, password: user.password }
     let token;
     token = await generate(user);
     cookies().set('token', token)
-    // token && redirect('/admin/dashboard')
+    redirect('/user');
 }
 
 

@@ -4,31 +4,34 @@ import style from './style.module.css';
 import { authAction } from '@/server/BL/actions/login.action';
 import { readUserByFieldService } from '@/server/BL/services/user.service';
 import ColorChanger from '@/components/Color';
+import DetailUser from '@/components/DetailUser';
 
-export default async function Page({ params: { user } }) {
+export default async function Page() {
    await connectToMongo();
-   const isUser = await authAction();
-   const decodedUser = decodeURIComponent(user);
+   const { isUser, userToken: { email } } = await authAction();
 
-   let currentUser = await readUserByFieldService({ email: decodedUser });
-   console.log({ currentUser });
+   let currentUser = await readUserByFieldService({ email });
    const simplifiedUser = {
       username: currentUser.username,
       password: currentUser.password,
       email: currentUser.email,
       colorWeaknesses: currentUser.colorWeaknesses.map(weakness => ({
          background_color: weakness.background_color,
-         font_color: weakness.font_color
+         font_color: weakness.font_color,
+         date: weakness.date
+      })),
+      sizeWeaknesses: currentUser.sizeWeaknesses.map(weakness => ({
+         fontSize: weakness.fontSize,
+         distance: weakness.distance,
+         date: weakness.date
       }))
    };
    return (
       <>
          {isUser ? (
-            <div className={style.container}>
-               <ColorChanger user={simplifiedUser} />
-            </div>
+            <DetailUser simplifiedUser={simplifiedUser} />
          ) : (
-            <h1>no exist!!!</h1>
+            <h1>User does not exist!</h1>
          )}
       </>
    );

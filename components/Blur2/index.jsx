@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import style from './style.module.css';
 import Popup from '../Popup';
 let indexSize = 0, indexWord = 0;
-export default function Blur() {
+export default function Blur({ user }) {
     const words = ["9", "5", "7", "1", "8", "2", "4", "6", "0", "1", "A", "S", "d", "F", "E", "e", "V", "G", "i", "m", "N", "b", "z", "W"];
     const sizes = [14.6, 11, 8.8, 7.3, 5.8, 4.4, 3.66, 2.9, 2.2, 1.46];
     const [open, setOpen] = useState(false);
@@ -24,6 +24,31 @@ export default function Blur() {
     };
     const overWord = () => {
         setCurrentWordIndex((currentWordIndex - 1 + words.length) % words.length); // Cycle through words
+    };
+
+    const handleMistake  = async () => {
+        let taut = { fontSize: fontSize, distance: 1 };
+        user.sizeWeaknesses.push(taut);
+        // שליחת הבקשה ל-API route
+        const response = await fetch('/api/updateUser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                filter: { email: user.email },
+                updateData: { sizeWeaknesses: user.sizeWeaknesses }
+            })
+        });
+
+        if (response.ok) {
+            const updatedUser = await response.json();
+            console.log('User updated successfully:', updatedUser);
+        } else {
+            console.error('Failed to update user');
+        }
+
+        overWord();
     };
 
     return (
@@ -48,12 +73,17 @@ export default function Blur() {
             <button
                 className="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded min-w-96"
                 onClick={decreaseFontSize}>decrease Font Size</button>
+            <div>
+                <button
+                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded min-w-48"
+                    onClick={overWord}>change word</button>
+                <button
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded min-w-48"
+                    onClick={() => handleMistake()}>Mistake</button>
+            </div>
             <button
                 className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded min-w-96"
-                onClick={overWord}>change word</button>
-            <button
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded min-w-96"
-                onClick={()=>setOpen(!open)}>Please read the details before use</button>
+                onClick={() => setOpen(!open)}>Please read the details before use</button>
             <Popup open={open} setOpen={setOpen} />
         </div>
 

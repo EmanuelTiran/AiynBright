@@ -5,6 +5,17 @@
     justify-content: center;
     color: var(--orange-yellow);
 }
+.bgGradientCustom {
+  background: linear-gradient(
+    to bottom right,
+    #FF0000,  /* Red */
+    #0000FF,  /* Blue */
+    #90EE90,  /* Light Green */
+    #FFFF00,  /* Yellow */
+    #FFA500,  /* Orange */
+    #800080   /* Purple */
+  );
+}
 
 .detailCarpet {
     /* padding: 4vh; */

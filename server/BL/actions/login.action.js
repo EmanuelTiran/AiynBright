@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { readUserByFieldService } from "../services/user.service";
 const jwt = require('jsonwebtoken');
 const SECRET = process.env.JWT_SECRET
+const EMAIL_ADMIN = process.env.EMAIL_ADMIN
+const PASSWORD_ADMIN = process.env.PASSWORD_ADMIN
 
 
 export async function generate(user) {
@@ -44,7 +46,7 @@ export async function authAction() {
         const userFromToken = jwt.verify(token, SECRET);
         console.log({ userFromToken })
         if (!userFromToken) throw "not correct"
-        return true;
+        return { isUser: true, userToken: userFromToken };
     }
     catch (e) {
         console.log(e);

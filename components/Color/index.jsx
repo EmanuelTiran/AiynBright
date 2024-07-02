@@ -2,6 +2,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import styles from './style.module.css';
 import { MyContext, MyProvider } from '../context/DataContext';
+import Blur2 from '@/components/Blur2'
+
 
 let indexB = 0, indexF = 0;
 
@@ -106,6 +108,7 @@ const ColorChangerComp = ({ user }) => {
 const ColorChanger = ({ user }) => (
     <MyProvider>
         <ColorChangerComp user={user} />
+        <Blur2 user={user}/>
     </MyProvider>
 );
 
