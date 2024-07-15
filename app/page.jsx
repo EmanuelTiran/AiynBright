@@ -117,7 +117,7 @@ export default async function Home() {
 
   return (
 <div>
-    {!isUser ? (
+    {isUser ? (
         <Login />
     ) : (
         <SighnIn />

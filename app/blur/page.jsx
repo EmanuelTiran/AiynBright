@@ -1,5 +1,3 @@
-
-import { readCarpetsService, createCarpetService } from '@/server/BL/services/carpet.service'
 import { connectToMongo } from '@/server/connectToMongo'
 import { unstable_noStore } from 'next/cache'
 import Link from 'next/link'
@@ -15,8 +13,18 @@ import { readUserByFieldService } from '@/server/BL/services/user.service'
 
 export default async function BlurPage() {
   await connectToMongo();
-  const { isUser, userToken: { email } } = await authAction();
+  const authData = await authAction();
+  console.log({ authData })
+  if (!authData || !authData.userToken) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <h1 className='shake text-orange-200 font-thin text-4xl'>User does not exist or is not authenticated!</h1>
+      </div>
+    );
+  }
 
+  const { email } = authData.userToken;
+  const { isUser } = authData;
   let currentUser = await readUserByFieldService({ email });
   const simplifiedUser = {
     username: currentUser.username,
@@ -36,9 +44,7 @@ export default async function BlurPage() {
   unstable_noStore()
   return (
     <div className={style.container}>
-      {/* <Blur /> */}
       <Blur2 user={simplifiedUser} />
-      {/* <SnellenChart /> */}
     </div>
   )
 }

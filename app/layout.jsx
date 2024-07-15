@@ -9,7 +9,7 @@ const poppins = Poppins({
 
 export const metadata = {
   title: "Create Emanuel App",
-  description: "Generated for sail of carpetim",
+  description: "Generated for optimitries",
 };
 
 export default function RootLayout({ children }) {

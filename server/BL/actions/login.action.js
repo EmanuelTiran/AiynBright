@@ -24,7 +24,7 @@ export const loginAction = async (fd) => {
         if (newU) {
             token = await generate(user);
             cookies().set('token', token);
-            return { success: true ,newU: newU.email };
+            return { success: true, newU: newU.email };
         } else {
             console.error('Could not create new user');
             return { success: false, message: 'Your details are invalid' };
@@ -36,21 +36,34 @@ export const loginAction = async (fd) => {
 }
 
 
+export const logoutAction = async () => {
+    "use server"
+    try {
+        cookies().delete('token');
+        redirect('/');
+        return { success: true, message: 'Logged out successfully' };
+    } catch (error) {
+        console.error('Logout error:', error);
+        return { success: false, message: 'An error occurred during logout' };
+    }
+}
+
 export async function authAction() {
     "use server"
     try {
         let token = cookies().get('token');
-        if (!token) throw "no token provided"
+        if (!token) throw "no token provided";
         if (!token.value) return false;
         token = token.value.split('Bearer ')[1] || "null";
         const userFromToken = jwt.verify(token, SECRET);
-        console.log({ userFromToken })
-        if (!userFromToken) throw "not correct"
-        return { isUser: true, userToken: userFromToken };
+        if (!userFromToken) throw "not correct";
+        if (userFromToken.email === EMAIL_ADMIN && userFromToken.password === PASSWORD_ADMIN)
+            return { isUser: true, userToken: userFromToken, isManager: true };
+        return { isUser: true, userToken: userFromToken, isManager: false };
     }
     catch (e) {
         console.log(e);
-
+        return false;
     }
 }
 

@@ -77,7 +77,7 @@ const ColorChangerComp = ({ user }) => {
     };
 
     return (
-        <div className={styles.contain}>
+        <div className={`w-2/3 ${styles.contain} `}>
             <div className={styles.inContain}>
                 <div className={styles.rekaBackground} style={backgroundTileStyle}>
                     <div className={styles.font} style={fontTileStyle}>
@@ -86,11 +86,11 @@ const ColorChangerComp = ({ user }) => {
                 </div>
                 <br />
                 <button
-                    className="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded min-w-96"
+                    className="bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold py-2 px-4 rounded min-w-96"
                     onClick={changeBackgroundColor}>רקע</button>
                 <br />
                 <button
-                    className="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded min-w-96"
+                    className="bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold py-2 px-4 rounded min-w-96"
                     onClick={changeFontColor}>פונט</button>
                 <div>
                     <button
@@ -108,7 +108,7 @@ const ColorChangerComp = ({ user }) => {
 const ColorChanger = ({ user }) => (
     <MyProvider>
         <ColorChangerComp user={user} />
-        <Blur2 user={user}/>
+        {/* <Blur2 user={user}/> */}
     </MyProvider>
 );
 

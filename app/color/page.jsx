@@ -1,5 +1,4 @@
 
-import { readCarpetsService, createCarpetService } from '@/server/BL/services/carpet.service'
 import { connectToMongo } from '@/server/connectToMongo'
 import { unstable_noStore } from 'next/cache'
 import style from './style.module.css'
@@ -12,8 +11,18 @@ import { authAction } from '@/server/BL/actions/login.action'
 
 export default async function Color() {
   await connectToMongo();
-  const { isUser, userToken: { email } } = await authAction();
 
+  const authData = await authAction();
+
+  if (!authData || !authData.userToken) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <h1 className='shake text-orange-200 font-thin text-4xl'>User does not exist or is not authenticated!</h1>
+    </div>    );
+  }
+
+  const { email } = authData.userToken;
+  const { isUser } = authData;
   let currentUser = await readUserByFieldService({ email });
   const simplifiedUser = {
     username: currentUser.username,

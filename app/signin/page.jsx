@@ -11,7 +11,7 @@ export default async function Signin() {
 
 
   return (<>
-<SighnIn/>
+    <SighnIn />
   </>
   )
 }

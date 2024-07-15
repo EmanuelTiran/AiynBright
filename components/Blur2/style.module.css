@@ -3,10 +3,12 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    width: 96vw;
+    width: 66%;
+    margin: auto;
     height: 84vh;
     background-color: aliceblue;
     border-radius: 2%;
+    border: 2px solid #facc15;
 }
 
 .inContain {

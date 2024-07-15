@@ -1,6 +1,17 @@
 .current{
-    color: var(--orange-yellow);
+    /* color: var(--orange-yellow); */
+    font-weight: 900;
 }
 .notCurrent{
     color: var(--gray);
 }
+
+.myHover {
+    transition:  text-shadow 0.3s;
+}
+
+
+.myHover:hover{
+    text-shadow: 2px 2px 20px rgba(255, 140, 0);
+}
+
