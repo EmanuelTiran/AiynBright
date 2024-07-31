@@ -6,8 +6,7 @@ import { IoMdLogIn } from "react-icons/io";
 
 import Navlink from '../Navlink';
 import style from './style.module.css';
-import Icon from '../Icon';
-import CartBadge from '../CartBadge';
+
 import Logo from '../Logo';
 import { authAction, logoutAction } from '@/server/BL/actions/login.action';
 import Link from 'next/link';
@@ -18,6 +17,7 @@ const linksList = [
    { href: '/user', text: 'User Details' },
    { href: '/blur', text: 'Blur Vision' },
    { href: '/color', text: 'Color Vision' },
+   { href: '/field', text: 'Field Vision' },
 ];
 
 export default function Header() {

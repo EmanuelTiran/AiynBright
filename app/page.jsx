@@ -4,12 +4,12 @@ import Link from 'next/link'
 import style from './style.module.css'
 
 import { cookies } from 'next/headers'
-import { saveCookie } from '@/server/BL/actions/carpet.action'
 import { createUser } from '@/server/DL/controllers/user.controller'
 import { readUsersService } from '@/server/BL/services/user.service'
 import SighnIn from '@/components/SighnIn'
 import Login from '../components/Login'
 import { authAction } from '@/server/BL/actions/login.action'
+import CurrentTime from '@/components/CurrentTime'
 
 const usersJson = [
   {
@@ -122,6 +122,7 @@ export default async function Home() {
     ) : (
         <SighnIn />
     )}
+    {/* <CurrentTime/> */}
 </div>
   )
 }

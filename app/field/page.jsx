@@ -2,18 +2,20 @@
 import { connectToMongo } from '@/server/connectToMongo'
 import { unstable_noStore } from 'next/cache'
 import style from './style.module.css'
+import Field from '@/components/Field'
 import { authAction } from '@/server/BL/actions/login.action'
 import { readUserByFieldService } from '@/server/BL/services/user.service'
+import Login from '@/components/Login'
 import Link from 'next/link'
-import Blur from '@/components/Blur'
 
 
 
 
-export default async function BlurPage() {
+export default async function FieldPage() {
   await new Promise(resolve => setTimeout(resolve, 3000))
   await connectToMongo();
   const authData = await authAction();
+  console.log({ authData })
   if (!authData || !authData.userToken) {
     return (
       <div className="flex  justify-center items-center  h-screen flex-col min-w-full">
@@ -34,8 +36,8 @@ export default async function BlurPage() {
     username: currentUser.username,
     password: currentUser.password,
     email: currentUser.email,
-    sizeWeaknesses: currentUser.sizeWeaknesses.map(weakness => ({
-      fontSize: weakness.fontSize,
+    fieldWeaknesses: currentUser.fieldWeaknesses.map(weakness => ({
+      side: weakness.side,
       distance: weakness.distance,
       date: weakness.date
     })),
@@ -43,7 +45,7 @@ export default async function BlurPage() {
   unstable_noStore()
   return (
     <div className={style.container}>
-      <Blur user={simplifiedUser} />
+      <Field user={simplifiedUser} />
     </div>
   )
 }

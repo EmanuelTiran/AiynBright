@@ -44,6 +44,21 @@ const userSchema = new Schema({
             default: Date.now()
         }
     }],
+    fieldWeaknesses: [{
+        side: {
+            type: String,
+            enum: ['right', 'left'],
+            required: true
+        },
+        distance: {
+            type: String,
+            required: true
+        },
+        date: {
+            type: Date,
+            default: Date.now()
+        }
+    }]
 
 });
 

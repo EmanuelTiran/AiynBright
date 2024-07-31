@@ -1,19 +1,24 @@
 
+import ColorChanger from '@/components/Color';
+import { authAction } from '@/server/BL/actions/login.action';
+import { readUserByFieldService } from '@/server/BL/services/user.service';
 import { connectToMongo } from '@/server/connectToMongo'
-import { unstable_noStore } from 'next/cache'
-import style from './style.module.css'
-import ColorChanger from '@/components/Color'
-import SnellenChart from '@/components/Snellen'
-import { readUserByFieldService } from '@/server/BL/services/user.service'
-import { authAction } from '@/server/BL/actions/login.action'
+import { unstable_noStore } from 'next/cache';
 import Link from 'next/link'
 
+export default async function page({ params: { detail } }) {
 
+    function extractColors(detail) {
+        const colors = detail.split('_');
 
-export default async function Color() {
-  await connectToMongo();
-
-  const authData = await authAction();
+        return {
+            background_color: colors[0],
+            font_color: colors[1]
+        };
+    }
+    let colorsUser = extractColors(detail);
+  
+    const authData = await authAction();
 
   if (!authData || !authData.userToken) {
     return (
@@ -21,7 +26,7 @@ export default async function Color() {
         <h1 className='shake text-orange-400 text-4xl text-center'>User does not exist or is not authenticated! <br />
           <Link
             className='underline'
-            href={'login'}
+            href={'/login'}
           >please login  </Link>
         </h1>
       </div>);
@@ -40,11 +45,10 @@ export default async function Color() {
     }))
   };
   unstable_noStore()
-  // await new Promise(resolve => setTimeout(resolve, 7000))
 
   return (
-    <div className={style.container}>
-      <ColorChanger user={simplifiedUser} />
+    <div >
+      <ColorChanger user={simplifiedUser} colorsUser={colorsUser} />
     </div>
   )
 }

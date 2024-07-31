@@ -2,9 +2,11 @@ import React from 'react'
 import { authAction } from '@/server/BL/actions/login.action';
 import { readUsersService } from '@/server/BL/services/user.service';
 import ArrUsers from '@/components/Arrusers';
+import { unstable_noStore } from 'next/cache';
 
 export default async function admin() {
-  // const cookieStore = cookies()
+  unstable_noStore()
+
   const { isManager } = await authAction();
   const users = await readUsersService({});
   const filteredUsers = users.map(user => ({
@@ -25,10 +27,10 @@ export default async function admin() {
 
   return (
     <>
-    {isManager ? 
-      <ArrUsers users={filteredUsers} />
-      : <h1>no exist!!!</h1>
-    }
-  </>
+      {isManager ?
+        <ArrUsers users={filteredUsers} />
+        : <h1>no exist!!!</h1>
+      }
+    </>
   )
 }

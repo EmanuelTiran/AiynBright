@@ -4,22 +4,30 @@ import { authAction } from '@/server/BL/actions/login.action';
 import { readUserByFieldService } from '@/server/BL/services/user.service';
 import ColorChanger from '@/components/Color';
 import DetailUser from '@/components/DetailUser';
+import Link from 'next/link';
 
 export default async function Page() {
    await connectToMongo();
    const authData = await authAction();
-   console.log({authData})
+   console.log({ authData })
    if (!authData || !authData.userToken) {
       return (
-         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-         <h1 className='shake text-orange-200 font-thin text-4xl'>User does not exist or is not authenticated!</h1>
-       </div>      );
+         <div className="flex  justify-center items-center  h-screen flex-col min-w-full">
+            <h1 className='shake text-green-400 text-4xl text-center'>User does not exist or is not authenticated! <br />
+               <Link
+                  className='underline'
+
+                  href={'login'}
+               >please login  </Link>
+            </h1>
+         </div>);
    }
 
    const { email } = authData.userToken;
    const { isUser } = authData;
    let currentUser = await readUserByFieldService({ email });
    const simplifiedUser = {
+      userId: currentUser._id,
       username: currentUser.username,
       password: currentUser.password,
       email: currentUser.email,
@@ -32,7 +40,12 @@ export default async function Page() {
          fontSize: weakness.fontSize,
          distance: weakness.distance,
          date: weakness.date
-      }))
+      })),
+      fieldWeaknesses: currentUser.fieldWeaknesses.map(weakness => ({
+        side: weakness.side,
+        distance: weakness.distance,
+        date: weakness.date
+      })),
    };
    return (
       <>

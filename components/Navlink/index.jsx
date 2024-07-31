@@ -4,9 +4,10 @@ import style from './style.module.css'
 import { usePathname } from 'next/navigation'
 import React from 'react'
 
-export default function Navlink({ children, href ,colorText }) {
-   const path = usePathname()
-
+export default function Navlink({ children, href, colorText }) {
+   let path = usePathname()
+   const values = path.split('/');
+   path = "/" + values[1]
    return (
       <Link
          href={href}

@@ -41,11 +41,40 @@ function ArrUsers({ users }) {
     };
 
     const filteredUsers = sortedUsers.filter(user =>
-        user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchQuery.toLowerCase())
+        user && 
+        ((user.username && user.username.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase())))
     );
 
     const usersToDisplay = filteredUsers.slice(0, visibleUsersCount);
+
+    const deleteColorWeak = async (email, field, index) => {
+        try {
+            const response = await fetch('/api/deleteWeakness', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, field, index })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const updatedUser = data.user;
+                if (updatedUser) {
+                    setSortedUsers(prevUsers =>
+                        prevUsers.map(u => (u.email === email ? updatedUser : u))
+                    );
+                }
+                alert( 'delete updated user')
+            } else {
+                const errorData = await response.json();
+                console.error('Failed to delete weakness:', errorData.error);
+            }
+        } catch (error) {
+            console.error('Failed to delete weakness:', error);
+        }
+    };
 
     return (
         <div className="container mx-auto p-4 w-2/3 border-2 border-orange-200">
@@ -76,6 +105,11 @@ function ArrUsers({ users }) {
                                         <div><span className="font-semibold">Background:</span> {weakness.background_color}</div>
                                         <div><span className="font-semibold">Font:</span> {weakness.font_color}</div>
                                         <div><span className="font-semibold">Date:</span> {new Date(weakness.date).toLocaleDateString()}</div>
+                                        <button
+                                            type="button"
+                                            onClick={() => deleteColorWeak(user.email, 'color', idx)}
+                                            className='text-red-600'
+                                        >delete</button>
                                     </div>
                                 ))}
                             </td>
@@ -85,7 +119,11 @@ function ArrUsers({ users }) {
                                         <div><span className="font-semibold">Font Size:</span> {weakness.fontSize}</div>
                                         <div><span className="font-semibold">Distance:</span> {weakness.distance}</div>
                                         <div><span className="font-semibold">Date:</span> {new Date(weakness.date).toLocaleDateString()}</div>
-                                    </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => deleteColorWeak(user.email, 'size', idx)}
+                                            className='text-red-600'
+                                        >delete</button>                                    </div>
                                 ))}
                             </td>
                         </tr>
