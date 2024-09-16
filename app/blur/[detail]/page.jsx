@@ -4,7 +4,7 @@ import { unstable_noStore } from 'next/cache'
 import Blur from '@/components/Blur'
 import { authAction } from '@/server/BL/actions/login.action'
 import { readUserByFieldService } from '@/server/BL/services/user.service'
-import Link from 'next/link'
+import ToLogin from '@/components/ToLogin'
 
 
 
@@ -25,18 +25,7 @@ export default async function page({ params: { detail } }) {
   await connectToMongo();
   const authData = await authAction();
   console.log({ authData })
-  if (!authData || !authData.userToken) {
-    return (
-      <div className=" flex  justify-center items-center  h-screen flex-col min-w-full">
-        <h1 className='shake text-yellow-400 text-4xl text-center'>User does not exist or is not authenticated! <br />
-          <Link
-            href={'login'}
-            className='underline'
-          >please login  </Link>
-        </h1>
-      </div>
-    );
-  }
+  if (!authData || !authData.userToken) return <ToLogin/>
 
   const { email } = authData.userToken;
 

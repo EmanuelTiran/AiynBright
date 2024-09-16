@@ -1,5 +1,6 @@
 
 import ColorChanger from '@/components/Color';
+import ToLogin from '@/components/ToLogin';
 import { authAction } from '@/server/BL/actions/login.action';
 import { readUserByFieldService } from '@/server/BL/services/user.service';
 import { connectToMongo } from '@/server/connectToMongo'
@@ -20,17 +21,7 @@ export default async function page({ params: { detail } }) {
   
     const authData = await authAction();
 
-  if (!authData || !authData.userToken) {
-    return (
-      <div className="flex  justify-center items-center  h-screen flex-col min-w-full">
-        <h1 className='shake text-orange-400 text-4xl text-center'>User does not exist or is not authenticated! <br />
-          <Link
-            className='underline'
-            href={'/login'}
-          >please login  </Link>
-        </h1>
-      </div>);
-  }
+  if (!authData || !authData.userToken) return <ToLogin/>
 
   const { email } = authData.userToken;
 

@@ -6,7 +6,7 @@ import ColorChanger from '@/components/Color'
 import SnellenChart from '@/components/Snellen'
 import { readUserByFieldService } from '@/server/BL/services/user.service'
 import { authAction } from '@/server/BL/actions/login.action'
-import Link from 'next/link'
+import ToLogin from '@/components/ToLogin'
 
 
 
@@ -15,17 +15,7 @@ export default async function Color() {
 
   const authData = await authAction();
 
-  if (!authData || !authData.userToken) {
-    return (
-      <div className="flex  justify-center items-center  h-screen flex-col min-w-full">
-        <h1 className='shake text-orange-400 text-4xl text-center'>User does not exist or is not authenticated! <br />
-          <Link
-            className='underline'
-            href={'login'}
-          >please login  </Link>
-        </h1>
-      </div>);
-  }
+  if (!authData || !authData.userToken) return <ToLogin/>
 
   const { email } = authData.userToken;
 

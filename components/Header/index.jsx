@@ -10,11 +10,13 @@ import style from './style.module.css';
 import Logo from '../Logo';
 import { authAction, logoutAction } from '@/server/BL/actions/login.action';
 import Link from 'next/link';
+import Providers from '../Providers';
+import SighnInButton from '../SignInButton';
 
 const linksList = [
    { href: '/', text: 'Home' },
    { href: '/about', text: 'About' },
-   { href: '/user', text: 'User Details' },
+   { href: '/user', text: 'User Status' },
    { href: '/blur', text: 'Blur Vision' },
    { href: '/color', text: 'Color Vision' },
    { href: '/field', text: 'Field Vision' },
@@ -66,6 +68,11 @@ export default function Header() {
          </form> : <Link href={"login"}
             className="text-orange-200 cursor-pointer font-thin" title='login'
          ><IoMdLogIn /></Link>}
+         {/* <Providers>
+            <Appbar/>
+            <SighnInButton />
+
+         </Providers> */}
          <Logo />
       </header>
    );

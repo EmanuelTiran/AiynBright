@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link'
 
 function ArrUsers({ users }) {
     const [sortedUsers, setSortedUsers] = useState(users);
@@ -98,7 +99,7 @@ function ArrUsers({ users }) {
                     {usersToDisplay.map((user, index) => (
                         <tr key={index} className="border-t even:bg-gray-50 hover:bg-gray-100">
                             <td className="p-4">{user.username}</td>
-                            <td className="p-4">{user.email}</td>
+                            <td className="p-4"><Link href={`mailto:${user.email}`}>{user.email}</Link> </td>
                             <td className="p-4">
                                 {user.colorWeaknesses.map((weakness, idx) => (
                                     <div key={idx} className="mb-2 text-sm text-gray-700">

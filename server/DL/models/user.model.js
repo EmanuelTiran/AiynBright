@@ -31,6 +31,10 @@ const userSchema = new Schema({
         }
     }],
     sizeWeaknesses: [{
+        eye:{
+            type: String,
+            required: false
+        },
         fontSize: {
             type: Number,
             required: true
