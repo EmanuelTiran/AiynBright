@@ -102,9 +102,8 @@ export default function Blur({ user,sizeUser }) {
   >
     Please read the details before use
   </button>
-  <Popup open={open} setOpen={setOpen} />
+  <Popup open={open} setOpen={setOpen} type={'blur'} />
 </div>
-
 
     );
 }

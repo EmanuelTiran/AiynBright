@@ -36,11 +36,10 @@ export default function Field({ user, distanceUser }) {
   }, [currentSizeIndex]);
 
   useEffect(() => {
-  console.log({currentSizeIndex})
-  console.log({distanceUser})
-  console.log({sizes})
-  console.log(sizes.indexOf(Number(distanceUser.distance)))
-  console.log(distanceUser.distance)
+  // console.log({currentSizeIndex})
+  // console.log({distanceUser})
+  // console.log({sizes})
+  // console.log(distanceUser.distance)
   }, []);
 
   const moveRight = () => {
@@ -141,7 +140,7 @@ export default function Field({ user, distanceUser }) {
       >
         Please read the details before use
       </button>
-      <Popup open={open} setOpen={setOpen} />
+      <Popup open={open} setOpen={setOpen} type={'field'}/>
     </div>
   );
 }
