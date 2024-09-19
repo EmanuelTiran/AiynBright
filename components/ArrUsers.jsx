@@ -1,7 +1,7 @@
-"use client";
-
+"use client"
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link'
+import Link from 'next/link';
+import Weaknesses from './Weaknesses';  // Import Weaknesses component
 
 function ArrUsers({ users }) {
     const [sortedUsers, setSortedUsers] = useState(users);
@@ -42,21 +42,21 @@ function ArrUsers({ users }) {
     };
 
     const filteredUsers = sortedUsers.filter(user =>
-        user && 
+        user &&
         ((user.username && user.username.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase())))
+            (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase())))
     );
 
     const usersToDisplay = filteredUsers.slice(0, visibleUsersCount);
 
-    const deleteColorWeak = async (email, field, index) => {
+    const deleteWeakness = async (email, type, index) => {
         try {
             const response = await fetch('/api/deleteWeakness', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email, field, index })
+                body: JSON.stringify({ email, field: type, index })
             });
 
             if (response.ok) {
@@ -67,7 +67,7 @@ function ArrUsers({ users }) {
                         prevUsers.map(u => (u.email === email ? updatedUser : u))
                     );
                 }
-                alert( 'delete updated user')
+                alert('Weakness deleted and updated');
             } else {
                 const errorData = await response.json();
                 console.error('Failed to delete weakness:', errorData.error);
@@ -93,39 +93,39 @@ function ArrUsers({ users }) {
                         <th onClick={() => requestSort('email')} className="cursor-pointer p-4 text-left">Email</th>
                         <th className="p-4 text-left">Color Weaknesses</th>
                         <th className="p-4 text-left">Size Weaknesses</th>
+                        <th className="p-4 text-left">Field Weaknesses</th>
                     </tr>
                 </thead>
                 <tbody>
                     {usersToDisplay.map((user, index) => (
                         <tr key={index} className="border-t even:bg-gray-50 hover:bg-gray-100">
                             <td className="p-4">{user.username}</td>
-                            <td className="p-4"><Link href={`mailto:${user.email}`}>{user.email}</Link> </td>
                             <td className="p-4">
-                                {user.colorWeaknesses.map((weakness, idx) => (
-                                    <div key={idx} className="mb-2 text-sm text-gray-700">
-                                        <div><span className="font-semibold">Background:</span> {weakness.background_color}</div>
-                                        <div><span className="font-semibold">Font:</span> {weakness.font_color}</div>
-                                        <div><span className="font-semibold">Date:</span> {new Date(weakness.date).toLocaleDateString()}</div>
-                                        <button
-                                            type="button"
-                                            onClick={() => deleteColorWeak(user.email, 'color', idx)}
-                                            className='text-red-600'
-                                        >delete</button>
-                                    </div>
-                                ))}
+                                <Link href={`mailto:${user.email}`}>{user.email}</Link>
                             </td>
                             <td className="p-4">
-                                {user.sizeWeaknesses.map((weakness, idx) => (
-                                    <div key={idx} className="mb-2 text-sm text-gray-700">
-                                        <div><span className="font-semibold">Font Size:</span> {weakness.fontSize}</div>
-                                        <div><span className="font-semibold">Distance:</span> {weakness.distance}</div>
-                                        <div><span className="font-semibold">Date:</span> {new Date(weakness.date).toLocaleDateString()}</div>
-                                        <button
-                                            type="button"
-                                            onClick={() => deleteColorWeak(user.email, 'size', idx)}
-                                            className='text-red-600'
-                                        >delete</button>                                    </div>
-                                ))}
+                                <Weaknesses
+                                    type="color"
+                                    weaknesses={user.colorWeaknesses}
+                                    email={user.email}
+                                    deleteWeakness={deleteWeakness}
+                                />
+                            </td>
+                            <td className="p-4">
+                                <Weaknesses
+                                    type="size"
+                                    weaknesses={user.sizeWeaknesses}
+                                    email={user.email}
+                                    deleteWeakness={deleteWeakness}
+                                />
+                            </td>
+                            <td className="p-4">
+                                <Weaknesses
+                                    type="field"
+                                    weaknesses={user.fieldWeaknesses}
+                                    email={user.email}
+                                    deleteWeakness={deleteWeakness}
+                                />
                             </td>
                         </tr>
                     ))}

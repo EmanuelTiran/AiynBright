@@ -22,6 +22,11 @@ export default async function admin() {
       fontSize: weakness.fontSize,
       distance: weakness.distance,
       date: weakness.date
+    })),
+    fieldWeaknesses:user.fieldWeaknesses.map(weakness => ({
+      side: weakness.side,
+      distance: weakness.distance,
+      date: weakness.date
     }))
   }));
 
