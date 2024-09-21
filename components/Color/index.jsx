@@ -12,7 +12,6 @@ const ColorChangerComp = ({ user, colorsUser }) => {
 
   useEffect(() => {
     updateData();
-    console.log(data);
   }, []);
 
   const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'lightblue'];

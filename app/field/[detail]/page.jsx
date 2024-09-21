@@ -22,7 +22,6 @@ export default async function page({ params: { detail } }) {
   // await new Promise(resolve => setTimeout(resolve, 3000))
   await connectToMongo();
   const authData = await authAction();
-  console.log({ distanceUser })
   if (!authData || !authData.userToken) return <ToLogin/>
 
   const { email } = authData.userToken;

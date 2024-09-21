@@ -5,7 +5,6 @@ import Image from 'next/image'
 
 export default function Images({ carpet }) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    console.log({ carpet });
 
     useEffect(() => {
         const interval = setTimeout(() => {

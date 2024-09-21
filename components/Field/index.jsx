@@ -33,14 +33,12 @@ export default function Field({ user, distanceUser }) {
     } else {
       setDistance(sizes[currentSizeIndex]);
     }
-  }, [currentSizeIndex]);
-
-  useEffect(() => {
-  // console.log({currentSizeIndex})
-  // console.log({distanceUser})
-  // console.log({sizes})
-  // console.log(distanceUser.distance)
-  }, []);
+    // עדכון ה-URL כאשר distance או side משתנים
+    const url = new URL(window.location);
+    url.searchParams.set('side', isLeft ? 'left' : 'right');
+    url.searchParams.set('distance', sizes[currentSizeIndex]);
+    window.history.pushState({}, '', url);
+  }, [currentSizeIndex, isLeft]);
 
   const moveRight = () => {
     if (currentSizeIndex < sizes.length - 1) setCurrentSizeIndex(currentSizeIndex + 1);

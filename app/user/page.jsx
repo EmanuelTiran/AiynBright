@@ -10,7 +10,6 @@ import ToLogin from '@/components/ToLogin';
 export default async function Page() {
    await connectToMongo();
    const authData = await authAction();
-   console.log({ authData })
    if (!authData || !authData.userToken) return <ToLogin/>
 
 
