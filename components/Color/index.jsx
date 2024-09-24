@@ -10,17 +10,21 @@ let indexB = 0, indexF = 0;
 const ColorChangerComp = ({ user, colorsUser }) => {
   const { data, updateData } = useContext(MyContext);
 
-  useEffect(() => {
-    updateData();
-  }, []);
+
 
   const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'lightblue'];
   const words = ["9", "5", "7", "1", "8", "2", "4", "6", "0", "1", "A", "S", "d", "F", "E", "e", "V", "G", "i", "m", "N", "b", "z", "W"];
 
-  const [fontColor, setFontColor] = useState(colorsUser? colorsUser.font_color :'orange'); // מגדיר state לצבע הראשון של הפונט
-  const [backgroundColor1, setBackgroundColor1] = useState(colorsUser? colorsUser.background_color : 'darkblue'); // מגדיר state לצבע הראשון של הרקע
+  const [fontColor, setFontColor] = useState(colorsUser ? colorsUser.font_color : 'orange'); // מגדיר state לצבע הראשון של הפונט
+  const [backgroundColor1, setBackgroundColor1] = useState(colorsUser ? colorsUser.background_color : 'darkblue'); // מגדיר state לצבע הראשון של הרקע
   const [backgroundColor2] = useState('transparent'); // מגדיר state לצבע השני של הרקע
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
+
+  useEffect(() => {
+    updateData();
+    const newPathname = `/color/${backgroundColor1}_${fontColor}`;
+    window.history.pushState({}, '', newPathname);
+  }, [backgroundColor1,fontColor]);
 
   const changeFontColor = () => {
     indexF = (indexF + 1) % colors.length;

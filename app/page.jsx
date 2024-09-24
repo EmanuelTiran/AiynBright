@@ -11,6 +11,7 @@ import Login from '../components/Login'
 import { authAction } from '@/server/BL/actions/login.action'
 import CurrentTime from '@/components/CurrentTime'
 import SiteDescription from '@/components/SiteDescription'
+import VisionImprovementHub from '@/components/VisionImprovementHub '
 
 export default async function Home() {
   // unstable_noStore()
@@ -27,6 +28,8 @@ export default async function Home() {
 
   return (
 <div>
+<VisionImprovementHub/>
+
   {/* <SiteDescription/> */}
     {isUser ? (
         <Login />

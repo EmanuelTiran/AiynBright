@@ -26,7 +26,7 @@ export default function Header() {
    const [isManager, setIsManager] = useState(false);
    const [isUser, setIsUser] = useState(false);
 
-   const brightColors = ["text-red-500", "text-blue-200", "text-green-400", "text-yellow-400", "text-orange-400", "text-purple-500"]; // Array of colors for each letter in "BRIGHT"
+   const brightColors = ["text-red-500","text-purple-500" , "text-green-400", "text-yellow-400", "text-orange-400", "text-blue-200"]; // Array of colors for each letter in "BRIGHT"
 
 
    useEffect(() => {

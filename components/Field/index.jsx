@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import style from './style.module.css';
 import Popup from '../Popup';
+import Button from '@mui/material/Button';
 
 export default function Field({ user, distanceUser }) {
   const words = ["9", "5", "7", "1", "8", "2", "4", "6", "0", "1", "A", "S", "d", "F", "E", "X", "V", "G", "I", "M", "N", "B", "Z", "W"];
@@ -15,7 +16,7 @@ export default function Field({ user, distanceUser }) {
     return sizes;
   }
 
-  
+
 
   const [open, setOpen] = useState(false);
   const [isLeft, setIsLeft] = useState(distanceUser?.side === 'left' ? true : false);
@@ -33,11 +34,12 @@ export default function Field({ user, distanceUser }) {
     } else {
       setDistance(sizes[currentSizeIndex]);
     }
-    // עדכון ה-URL כאשר distance או side משתנים
-    const url = new URL(window.location);
-    url.searchParams.set('side', isLeft ? 'left' : 'right');
-    url.searchParams.set('distance', sizes[currentSizeIndex]);
-    window.history.pushState({}, '', url);
+    const side = isLeft ? 'left' : 'right';
+    const distance = sizes[currentSizeIndex];
+    const newPathname = `/field/${side}_${distance}`;
+
+    // Update the URL without using search parameters
+    window.history.pushState({}, '', newPathname);
   }, [currentSizeIndex, isLeft]);
 
   const moveRight = () => {
@@ -82,10 +84,10 @@ export default function Field({ user, distanceUser }) {
 
   return (
     <div
-      className={`flex items-center justify-center flex-col w-full mx-auto h-[84vh] bg-[aliceblue] rounded-[2%] border-2 border-[#facc15] border-b border-purple-400 p-4`}
+      className={`flex items-center justify-center flex-col w-full mx-auto h-[84vh] bg-[aliceblue] rounded-[2%] border-2 border-[#bfdbfe] border-b border-purple-400 p-4`}
       style={{
-        borderLeft: isLeft ? '8px solid #facc15' : 'none',
-        borderRight: !isLeft ? '8px solid #facc15' : 'none'
+        borderLeft: isLeft ? '8px solid #bfdbfe' : 'none',
+        borderRight: !isLeft ? '8px solid #bfdbfe' : 'none'
       }}
     >
       <div className="w-full " style={{ transform: `translateX(${distance}cm)`, transition: 'transform 0.3s ease-in-out' }}>
@@ -94,51 +96,118 @@ export default function Field({ user, distanceUser }) {
         </p>
       </div>
       <div className="flex flex-wrap gap-4 mb-4">
-        <button
-          className="bg-slate-800 hover:bg-slate-700 text-yellow-400 font-bold py-2 px-4 rounded flex-1"
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: '#1e293b',
+            '&:hover': {
+              backgroundColor: '#334155',
+            },
+            color: '#bfdbfe',
+            fontWeight: 'bold',
+            py: 1,  // Reduced padding
+            px: 2,  // Reduced padding
+            borderRadius: '8px 0   0 8px', // Rounded right corners, square left corners
+            flex: 1,
+          }}
           onClick={moveLeft}
         >
           Move Left
-        </button>
-        <button
-          className="bg-slate-800 hover:bg-slate-700 text-yellow-400 font-bold py-2 px-4 rounded flex-1"
-          style={{
-            borderLeft: isLeft ? '8px solid #facc15' : 'none',
-            borderRight: !isLeft ? '8px solid #facc15' : 'none'
+        </Button>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: '#1e293b',
+            '&:hover': {
+              backgroundColor: '#334155',
+            },
+            color: '#bfdbfe',
+            fontWeight: 'bold',
+            py: 1,  // Reduced padding
+            px: 2,  // Reduced padding
+            flex: 1,
+            borderRadius: '0 0 0 0', // Rounded right corners, square left corners
+            borderLeft: isLeft ? '8px solid #bfdbfe' : 'none',
+            borderRight: !isLeft ? '8px solid #bfdbfe' : 'none',
           }}
           onClick={() => setIsLeft(!isLeft)}
         >
           Choose a Side
-        </button>
-
-        <button
-          className="bg-slate-800 hover:bg-slate-700 text-yellow-400 font-bold py-2 px-4 rounded flex-1"
+        </Button>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: '#1e293b',
+            '&:hover': {
+              backgroundColor: '#334155',
+            },
+            color: '#bfdbfe',
+            fontWeight: 'bold',
+            py: 1,  // Reduced padding
+            px: 2,  // Reduced padding
+            borderRadius: '0 8px 8px 0', // Rounded right corners, square left corners
+            flex: 1,
+          }}
           onClick={moveRight}
         >
           Move Right
-        </button>
+        </Button>
       </div>
       <div className="flex flex-wrap gap-4 mb-4">
-        <button
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex-1"
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: '#48bb78', // equivalent to bg-green-500
+            '&:hover': {
+              backgroundColor: '#2f855a', // equivalent to hover:bg-green-700
+            },
+            color: 'white', // equivalent to text-white
+            fontWeight: 'bold',
+            py: 1,  // Reduced padding for smaller size
+            px: 2,  // Reduced padding for smaller size
+            borderRadius: '8px',
+            flex: 1,
+          }}
           onClick={overWord}
         >
           Change Word
-        </button>
-        <button
-          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex-1"
+        </Button>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: '#f56565', // equivalent to bg-red-500
+            '&:hover': {
+              backgroundColor: '#c53030', // equivalent to hover:bg-red-700
+            },
+            color: 'white', // equivalent to text-white
+            fontWeight: 'bold',
+            py: 1,  // Reduced padding for smaller size
+            px: 2,  // Reduced padding for smaller size
+            borderRadius: '8px',
+            flex: 1,
+          }}
           onClick={handleMistake}
         >
           Mistake
-        </button>
+        </Button>
       </div>
-      <button
-        className="bg-yellow-400 hover:bg-yellow-700 text-slate-800 font-bold py-2 px-4 rounded w-full"
+      <Button
+        variant="contained"
+        sx={{
+          backgroundColor: '#bfdbfe',
+          color: '#1F2937',
+          fontWeight: 'bold',
+          padding: '8px 16px',
+          borderRadius: '0.375rem',
+          '&:hover': {
+            backgroundColor: '#D97706',
+          },
+        }}
         onClick={() => setOpen(!open)}
       >
         Please read the details before use
-      </button>
-      <Popup open={open} setOpen={setOpen} type={'field'}/>
+      </Button>
+      <Popup open={open} setOpen={setOpen} type={'field'} />
     </div>
   );
 }
