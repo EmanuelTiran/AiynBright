@@ -1,8 +1,8 @@
 import React from 'react'
 import { authAction } from '@/server/BL/actions/login.action';
 import { readUsersService } from '@/server/BL/services/user.service';
-import ArrUsers from '@/components/Arrusers';
 import { unstable_noStore } from 'next/cache';
+import ArrUsers from '@/components/ArrUsers';
 
 export default async function admin() {
   unstable_noStore()
