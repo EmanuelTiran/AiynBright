@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { redirect } from "next/navigation";
 import { createUserService } from "../services/user.service";
 const jwt = require('jsonwebtoken');
-const SECRET = process.env.JWT_SECRET
+const SECRET = process.env.JWT_SECRET || "AYINBRIGHT"
 const EMAIL = process.env.EMAIL_USER
 const PASSWORD = process.env.PASSWORD_USER
 const cookieStore = cookies()

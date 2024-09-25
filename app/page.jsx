@@ -12,6 +12,8 @@ import { authAction } from '@/server/BL/actions/login.action'
 import CurrentTime from '@/components/CurrentTime'
 import SiteDescription from '@/components/SiteDescription'
 import VisionImprovementHub from '@/components/VisionImprovementHub '
+import VisionWebsiteDescription from '@/components/VisionWebsiteDescription'
+import ImageCarousel from '@/components/ImageCarousel'
 
 export default async function Home() {
   // unstable_noStore()
@@ -25,11 +27,13 @@ export default async function Home() {
   // const carpets = await readCarpetsService();
 
   const isUser = await authAction();
-
+  
   return (
 <div>
+<ImageCarousel >
 <VisionImprovementHub/>
-
+</ImageCarousel >
+{/* <VisionWebsiteDescription/> */}
   {/* <SiteDescription/> */}
     {isUser ? (
         <Login />

@@ -1,0 +1,31 @@
+.carousel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .imageWrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1; /* Ensure it's below the children */
+    pointer-events: none; /* Prevent image from blocking interactions */
+  }
+  
+  .imageWrapper.active {
+    opacity: 1;
+  }
+  
+  .childrenWrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2; /* Ensure children are above images */
+    text-align: center; /* Center the children */
+  }
+  
