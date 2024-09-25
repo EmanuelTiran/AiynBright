@@ -18,6 +18,7 @@ export const loginAction = async (fd) => {
     "use server"
     let body = Object.fromEntries(fd)
     const user = { email: body.email, password: body.password }
+    connectToMongo()
     const newU = await readUserByFieldService(user)
     let token;
     try {
