@@ -17,6 +17,7 @@ export async function generate(user) {
 export const signAction = async (fd) => {
     "use server"
     let body = Object.fromEntries(fd)
+    connectToMongo()
     let user = await createUserService(body);
     user = { email: user.email, password: user.password }
     let token;

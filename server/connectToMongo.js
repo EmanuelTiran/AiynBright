@@ -7,7 +7,10 @@ export const connectToMongo = async () => {
          return;
          
       }
-   await connect(process.env.MONGO_URI)
+      const mongoUri = process.env.MONGO_URI || "mongodb+srv://test:1234@cluster0.onb7tvx.mongodb.net/AyinBright";
+
+      // Connect to MongoDB
+      await connect(mongoUri);
    console.log('connected to mongo');
 } catch (error) {
    console.log('error connect to mongo',error);
