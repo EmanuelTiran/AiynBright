@@ -33,6 +33,7 @@ const userSchema = new Schema({
     sizeWeaknesses: [{
         eye:{
             type: String,
+            enum: ['right', 'left'],
             required: false
         },
         fontSize: {
