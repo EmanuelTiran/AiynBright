@@ -1,12 +1,13 @@
 export const metadata = { title: "About" };
+import AboutPage from '@/components/AboutPage';
 import style from './style.module.scss'
+import RandomCharacterGame from '@/components/RandomCharacterGame';
 export default async function About() {
 
     return (
-        <div className={`${style.contain} `}>
-            <div className={`${style.typingEffect} text-blue-200`}>
-            זה לא אתר אמיתי - אין לנו מה לספר על עצמינו!!!
-            </div>
-        </div>
+       <div>
+        <AboutPage/>
+        {/* <RandomCharacterGame/> */}
+       </div>
     )
 }

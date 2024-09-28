@@ -45,10 +45,10 @@ const VisionImprovementHub = () => {
             <Button
               variant="contained"
               color="success"
-              className="w-full sm:w-auto bg-teal-800"
+              className="w-full sm:w-auto bg-teal-600"
               onClick={() => router.push("/field")}
             >
-              Visual Field Assessment
+              Visual Field Test
             </Button>
           </div>
         </CardContent>
