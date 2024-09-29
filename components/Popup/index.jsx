@@ -5,7 +5,7 @@ export default function Popup({ open, setOpen, type }) {
     const [text, setText] = useState('');
 
     useEffect(() => {
-        // טוען את הקובץ blur.txt בצורה דינמית
+        // טוען את הקובץ txt בצורה דינמית
         fetch(type === 'blur' ? '/blurRules.txt' : '/fieldsRules.txt')
             .then(response => response.text())
             .then(data => setText(data))

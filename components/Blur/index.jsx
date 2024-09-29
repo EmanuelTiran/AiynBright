@@ -11,11 +11,13 @@ export default function Blur({ user, sizeUser }) {
   const [open, setOpen] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [fontSize, setFontSize] = useState(sizeUser ? sizeUser.fontSize : 14.6); // Initial font size
+  const [isLeftEye, setIsLeftEye] = useState(sizeUser?.eye === "left" ? true : false); // Initial eye
 
   useEffect(() => {
-    const newPathname = `/blur/${fontSize}_1`;
+    const eye = isLeftEye ? "left" : "right";
+    const newPathname = `/blur/${fontSize}_1_${eye}`;
     window.history.pushState({}, '', newPathname);
-  }, [fontSize]);
+  }, [fontSize, isLeftEye]);
 
   const increaseFontSize = () => {
     if (indexSize > 0) indexSize = (indexSize - 1);
@@ -33,7 +35,7 @@ export default function Blur({ user, sizeUser }) {
   };
 
   const handleMistake = async () => {
-    let taut = { fontSize: fontSize, distance: 1 };
+    let taut = { fontSize: fontSize, distance: 1, eye: isLeftEye ? "left" : "right" };
     user.sizeWeaknesses.push(taut);
     // שליחת הבקשה ל-API route
     const response = await fetch('/api/updateUser', {
@@ -81,6 +83,26 @@ export default function Blur({ user, sizeUser }) {
         >
           Increase Font Size
         </button>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: '#1e293b',
+            '&:hover': {
+              backgroundColor: '#334155',
+            },
+            color: '#facc15',
+            fontWeight: 'bold',
+            py: 1,  // Reduced padding
+            px: 2,  // Reduced padding
+            flex: 1,
+            borderRadius: '0 0 0 0', // Rounded right corners, square left corners
+            borderLeft: isLeftEye ? '8px solid #facc15' : 'none',
+            borderRight: !isLeftEye ? '8px solid #facc15' : 'none',
+          }}
+          onClick={() => setIsLeftEye(!isLeftEye)}
+        >
+          Choose a Eye
+        </Button>
         <button
           className="bg-slate-800 hover:bg-slate-700 text-yellow-400 font-bold py-2 px-4 rounded flex-1"
           onClick={decreaseFontSize}
@@ -103,21 +125,21 @@ export default function Blur({ user, sizeUser }) {
         </button>
       </div>
       <Button
-      variant="contained"
-      style={{
-        backgroundColor: '#FBBF24', 
-        color: '#1F2937', 
-        fontWeight: 'bold',
-        padding: '8px 16px', 
-        borderRadius: '0.375rem', 
-        '&:hover': {
-          backgroundColor: '#D97706', 
-        },
-      }}
-      onClick={() => setOpen(!open)}
-    >
-      Please read the details before use
-    </Button>
+        variant="contained"
+        style={{
+          backgroundColor: '#FBBF24',
+          color: '#1F2937',
+          fontWeight: 'bold',
+          padding: '8px 16px',
+          borderRadius: '0.375rem',
+          '&:hover': {
+            backgroundColor: '#D97706',
+          },
+        }}
+        onClick={() => setOpen(!open)}
+      >
+        Please read the details before use
+      </Button>
       <Popup open={open} setOpen={setOpen} type={'blur'} />
     </div>
 

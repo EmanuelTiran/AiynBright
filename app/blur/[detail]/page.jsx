@@ -15,7 +15,8 @@ export default async function page({ params: { detail } }) {
 
     return {
       fontSize: size[0],
-      distance: size[1]
+      distance: size[1],
+      eye: size[2]
     };
   }
   let sizeUser = extract_size(detail);
@@ -29,6 +30,7 @@ export default async function page({ params: { detail } }) {
 
   let currentUser = await readUserByFieldService({ email });
   const simplifiedUser = {
+    eye: currentUser.eye,
     username: currentUser.username,
     password: currentUser.password,
     email: currentUser.email,

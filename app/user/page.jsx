@@ -27,6 +27,7 @@ export default async function Page() {
          date: weakness.date
       })),
       sizeWeaknesses: currentUser.sizeWeaknesses.map(weakness => ({
+         eye: weakness.eye,
          fontSize: weakness.fontSize,
          distance: weakness.distance,
          date: weakness.date

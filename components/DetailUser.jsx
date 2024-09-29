@@ -24,8 +24,6 @@ export default function DetailUser({ simplifiedUser }) {
           <Link
             href={`color/${weakness.background_color}_${weakness.font_color}`}
           >
-
-
             <li key={index} className="border p-4 rounded-lg bg-white shadow-sm">
               <div className="flex justify-between items-center py-1">
                 <span className="font-medium text-gray-600">Background:</span>
@@ -65,7 +63,7 @@ export default function DetailUser({ simplifiedUser }) {
       <ul className="space-y-4">
         {simplifiedUser.sizeWeaknesses.map((weakness, index) => (
           <Link
-            href={`blur/${weakness.fontSize}_${weakness.distance}`}
+            href={`blur/${weakness.fontSize}_${weakness.distance}_${weakness.eye}`}
           >
 
             <li key={index} className="border p-4 rounded-lg bg-white shadow-sm">
@@ -76,6 +74,10 @@ export default function DetailUser({ simplifiedUser }) {
               <div className="flex justify-between items-center py-1">
                 <span className="font-medium text-gray-600">Distance:</span>
                 <span className="text-gray-800">{weakness.distance}</span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="font-medium text-gray-600">Eye:</span>
+                <span className="text-gray-800">{weakness.eye}</span>
               </div>
               <div className="flex justify-between items-center py-1">
                 <span className="font-medium text-gray-600">Date:</span>

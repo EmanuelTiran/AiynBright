@@ -50,6 +50,7 @@ function Weaknesses({ type, weaknesses, email, deleteWeakness }) {
                                 {type === 'size' && (
                                     <>
                                         <div><span className="font-semibold">Font Size:</span> {weakness.fontSize}</div>
+                                        <div><span className="font-semibold">Eye:</span> {weakness.eye}</div>
                                         <div><span className="font-semibold">Distance:</span> {weakness.distance}</div>
                                     </>
                                 )}

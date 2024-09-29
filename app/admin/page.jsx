@@ -19,6 +19,7 @@ export default async function admin() {
       date: weakness.date
     })),
     sizeWeaknesses: user.sizeWeaknesses.map(weakness => ({
+      eye: weakness.eye,
       fontSize: weakness.fontSize,
       distance: weakness.distance,
       date: weakness.date
