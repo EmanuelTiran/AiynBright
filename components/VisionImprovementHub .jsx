@@ -28,24 +28,43 @@ const VisionImprovementHub = () => {
           <div className="flex flex-col sm:flex-row justify-between items-center">
             <Button
               variant="contained"
-              // color="primary"
-              className="w-full sm:w-auto mb-4 sm:mb-0 sm:mr-4 bg-yellow-400 "
+              sx={{
+                width: { xs: '100%', sm: 'auto' },
+                marginBottom: { xs: '16px', sm: 0 },
+                marginRight: { sm: '16px' },
+                backgroundColor: '#FBBF24', // צהוב מקביל ל-yellow-400
+                '&:hover': {
+                  backgroundColor: '#F59E0B', // גוון כהה יותר לhover
+                },
+              }}
               onClick={() => router.push("/blur")}
             >
               Blurred Vision Test
             </Button>
             <Button
               variant="contained"
-              // color="secondary"
-              className="w-full sm:w-auto mb-4 sm:mb-0 sm:mr-4 bg-orange-400"
+              sx={{
+                width: { xs: '100%', sm: 'auto' },
+                marginBottom: { xs: '16px', sm: 0 },
+                marginRight: { sm: '16px' },
+                backgroundColor: '#FB923C', // כתום מקביל ל-orange-400
+                '&:hover': {
+                  backgroundColor: '#F97316', // גוון כהה יותר לhover
+                },
+              }}
               onClick={() => router.push("/color")}
             >
               Color Blindness Test
             </Button>
             <Button
               variant="contained"
-              color="success"
-              className="w-full sm:w-auto bg-teal-600"
+              sx={{
+                width: { xs: '100%', sm: 'auto' },
+                backgroundColor: '#0D9488', // טיל מקביל ל-teal-600
+                '&:hover': {
+                  backgroundColor: '#0F766E', // גוון כהה יותר לhover
+                },
+              }}
               onClick={() => router.push("/field")}
             >
               Visual Field Test

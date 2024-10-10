@@ -7,7 +7,6 @@ export default async function About() {
     return (
        <div>
         <AboutPage/>
-        {/* <RandomCharacterGame/> */}
        </div>
     )
 }

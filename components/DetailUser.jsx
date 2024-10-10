@@ -63,7 +63,7 @@ export default function DetailUser({ simplifiedUser }) {
       <ul className="space-y-4">
         {simplifiedUser.sizeWeaknesses.map((weakness, index) => (
           <Link
-            href={`blur/${weakness.fontSize}_${weakness.distance}_${weakness.eye}`}
+            href={`blur/improve/${weakness.fontSize}_${weakness.distance}_${weakness.eye ? weakness.eye : "right"}`}
           >
 
             <li key={index} className="border p-4 rounded-lg bg-white shadow-sm">

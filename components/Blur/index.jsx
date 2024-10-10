@@ -6,7 +6,8 @@ import Button from '@mui/material/Button';
 import Popup from '../Popup';
 let indexSize = 0;
 export default function Blur({ user, sizeUser }) {
-  const words = ["9", "5", "7", "1", "8", "2", "4", "6", "0", "1", "A", "S", "d", "F", "E", "e", "V", "G", "i", "m", "N", "b", "z", "W"];
+  // const words = ["9", "5", "7", "1", "8", "2", "4", "6", "0", "1", "A", "S", "d", "F", "E", "e", "V", "G", "i", "m", "N", "b", "z", "W"];
+  const words = ['apple','banana','cherry','date','elderberry','fig','grape','honeydew','kiwi','lemon','mango','nectarine','orange','papaya','quince','raspberry','strawberry','tangerine','ugli fruit','vanilla','watermelon'];
   const sizes = [14.6, 11, 8.8, 7.3, 5.8, 4.4, 3.66, 2.9, 2.2, 1.46];
   const [open, setOpen] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
@@ -15,7 +16,7 @@ export default function Blur({ user, sizeUser }) {
 
   useEffect(() => {
     const eye = isLeftEye ? "left" : "right";
-    const newPathname = `/blur/${fontSize}_1_${eye}`;
+    const newPathname = `/blur/improve/${fontSize}_1_${eye}`;
     window.history.pushState({}, '', newPathname);
   }, [fontSize, isLeftEye]);
 
