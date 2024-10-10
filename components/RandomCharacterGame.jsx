@@ -3,6 +3,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from "@mui/material";
 import ResultTestBlur from './ResultTestBlur';
 
+
 const characters = '1234567890אבגדהוזחטיכלמנסעפצקרשת';
 const initialSize = 14.6;
 
@@ -97,6 +98,12 @@ const RandomCharacterGame = ({ user }) => {
 
     return (
         <div className="flex flex-col items-center justify-center space-y-4 p-4 bg-gray-100 rounded-lg">
+            <div className="bg-blue-50 border-2 border-blue-600 rounded-lg p-5 text-center font-sans text-gray-800 text-lg shadow-md transition-transform duration-300 hover:scale-105 cursor-pointer">
+                {` Cover your ${isLeftEye ? "right" : "left"} eye`} <br />
+                {`And examine your ${isLeftEye ? "left" : "right"} eye `} <br />
+                {`Tap the button corresponding to the character, 1 meter away`}
+            </div>
+
             <div
                 className="flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-md"
                 style={{ fontSize: `${size}mm` }}
@@ -124,7 +131,7 @@ const RandomCharacterGame = ({ user }) => {
                                     ? 'bg-green-500 hover:bg-gray-600'
                                     : 'bg-red-500 hover:bg-red-600'
                                 : 'bg-white hover:bg-gray-200'
-                            }`}
+                                }`}
                         >
                             {char}
                         </Button>

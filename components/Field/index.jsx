@@ -90,6 +90,22 @@ export default function Field({ user, distanceUser }) {
         borderRight: !isLeft ? '8px solid #bfdbfe' : 'none'
       }}
     >
+       <Button
+        variant="contained"
+        sx={{
+          backgroundColor: '#bfdbfe',
+          color: '#1F2937',
+          fontWeight: 'bold',
+          padding: '8px 16px',
+          borderRadius: '0.375rem',
+          '&:hover': {
+            backgroundColor: '#D97706',
+          },
+        }}
+        onClick={() => setOpen(!open)}
+      >
+        Please read the details before use
+      </Button>
       <div className="w-full " style={{ transform: `translateX(${distance}cm)`, transition: 'transform 0.3s ease-in-out' }}>
         <p className="text-7xl flex items-center justify-center flex-row w-[96vw] h-[42vh]">
           {words[currentWordIndex]}
@@ -191,22 +207,7 @@ export default function Field({ user, distanceUser }) {
           Mistake
         </Button>
       </div>
-      <Button
-        variant="contained"
-        sx={{
-          backgroundColor: '#bfdbfe',
-          color: '#1F2937',
-          fontWeight: 'bold',
-          padding: '8px 16px',
-          borderRadius: '0.375rem',
-          '&:hover': {
-            backgroundColor: '#D97706',
-          },
-        }}
-        onClick={() => setOpen(!open)}
-      >
-        Please read the details before use
-      </Button>
+     
       <Popup open={open} setOpen={setOpen} type={'field'} />
     </div>
   );

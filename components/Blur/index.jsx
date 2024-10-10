@@ -63,6 +63,22 @@ export default function Blur({ user, sizeUser }) {
   return (
 
     <div className={`${style.contain} border-b border-green-400 p-4`}>
+       <Button
+        variant="contained"
+        style={{
+          backgroundColor: '#FBBF24',
+          color: '#1F2937',
+          fontWeight: 'bold',
+          padding: '8px 16px',
+          borderRadius: '0.375rem',
+          '&:hover': {
+            backgroundColor: '#D97706',
+          },
+        }}
+        onClick={() => setOpen(!open)}
+      >
+        Please read the details before use
+      </Button>
       <p className={style.inContain}>Font size: {fontSize}mm</p>
       <p
         style={{ fontSize: `${fontSize}mm` }}
@@ -125,23 +141,7 @@ export default function Blur({ user, sizeUser }) {
           Mistake
         </button>
       </div>
-      <Button
-        variant="contained"
-        style={{
-          backgroundColor: '#FBBF24',
-          color: '#1F2937',
-          fontWeight: 'bold',
-          padding: '8px 16px',
-          borderRadius: '0.375rem',
-          '&:hover': {
-            backgroundColor: '#D97706',
-          },
-        }}
-        onClick={() => setOpen(!open)}
-      >
-        Please read the details before use
-      </Button>
-      <Popup open={open} setOpen={setOpen} type={'blur'} />
+           <Popup open={open} setOpen={setOpen} type={'blur'} />
     </div>
 
   );
