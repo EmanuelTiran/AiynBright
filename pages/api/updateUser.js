@@ -8,9 +8,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ message: 'Only POST method is allowed' });
     }
 
-    await connectToMongo();
-
-    console.log('Full request body:', req.body);
+    await connectToMongo(); 
 
     const { filter: { email }, updateData } = req.body;
 

@@ -38,6 +38,7 @@ export default async function Page() {
         date: weakness.date
       })),
    };
+
    return (
       <>
          {isUser ? (

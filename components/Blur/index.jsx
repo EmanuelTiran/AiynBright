@@ -36,8 +36,11 @@ export default function Blur({ user, sizeUser }) {
   };
 
   const handleMistake = async () => {
-    let taut = { fontSize: fontSize, distance: 1, eye: isLeftEye ? "left" : "right" };
+    let taut = { fontSize: fontSize, distance: 1, eye: isLeftEye ? 'left' : 'right' };
+    
     user.sizeWeaknesses.push(taut);
+    const updatedWeaknesses = [...user.sizeWeaknesses, taut];
+
     // שליחת הבקשה ל-API route
     const response = await fetch('/api/updateUser', {
       method: 'POST',
@@ -46,7 +49,7 @@ export default function Blur({ user, sizeUser }) {
       },
       body: JSON.stringify({
         filter: { email: user.email },
-        updateData: { sizeWeaknesses: user.sizeWeaknesses }
+        updateData: { sizeWeaknesses: updatedWeaknesses }
       })
     });
 
