@@ -73,12 +73,12 @@ export default function Header() {
                      setIsUser(false);
                      logoutAction();
                   }}>
-                  <RiLogoutCircleRLine />
+                  Logout
                </button>
             </form>
          ) : (
             <Link href={"login"} className="text-orange-200 cursor-pointer font-thin" title='login'>
-               <IoMdLogIn />
+               Login
             </Link>
          )}
          <Logo />

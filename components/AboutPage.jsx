@@ -51,7 +51,7 @@ const AboutPage = () => {
                     transition={{ duration: 0.5 }}
                     className="text-4xl font-bold text-white mb-8 text-center"
                 >
-                    Emanuel Tiran
+                    Emanuel Tiran And Joush Bloch
                 </motion.h1>
 
                 <Section title="My Story" color='yellow-400'>

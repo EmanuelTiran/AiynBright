@@ -40,7 +40,7 @@ export default async function Home() {
     ) : (
         <SighnIn />
     )}
-    {/* <CurrentTime/> */}
+    <CurrentTime/>
 </div>
   )
 }
