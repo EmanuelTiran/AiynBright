@@ -143,16 +143,3 @@ const RandomCharacterGame = ({ user }) => {
 };
 
 export default RandomCharacterGame;
-
-// className={`
-//     w-32 h-32 rounded-full
-//     text-yellow-400 text-8xl
-//     flex items-center justify-center
-//     transition-all duration-300 shadow-2xl
-//     ${clickedIndex === index
-//         ? isCorrect
-//             ? 'bg-green-500 hover:bg-gray-600'
-//             : 'bg-red-500 hover:bg-red-600'
-//         : 'bg-white hover:bg-gray-200'
-//     }
-// `}
