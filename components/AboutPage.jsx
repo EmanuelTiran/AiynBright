@@ -60,7 +60,7 @@ const AboutPage = () => {
                     </p>
                 </Section>
 
-                <Section title="My Mission" color='orange-400'>
+                <Section title="My Mission" color='orange-500'>
                     <p className="text-gray-800 leading-relaxed">
                         This amazing progress ignited a passion within me that I knew I had to share with the world. While it's not my clinical profession, it has become the driving force of my life. I've dedicated countless hours to research, learning, and developing techniques to help people with various vision impairments. My approach is rooted in personal experience and fueled by the joy of witnessing progress. I understand the challenges, fears, and hopes that come with vision impairments because I've lived them.
                     </p>

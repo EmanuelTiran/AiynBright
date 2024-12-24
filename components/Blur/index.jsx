@@ -7,7 +7,7 @@ import Popup from '../Popup';
 let indexSize = 0;
 export default function Blur({ user, sizeUser }) {
   // const words = ["9", "5", "7", "1", "8", "2", "4", "6", "0", "1", "A", "S", "d", "F", "E", "e", "V", "G", "i", "m", "N", "b", "z", "W"];
-  const words = ['apple','banana','cherry','date','elderberry','fig','grape','honeydew','kiwi','lemon','mango','nectarine','orange','papaya','quince','raspberry','strawberry','tangerine','ugli fruit','vanilla','watermelon'];
+  const words = ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape', 'honeydew', 'kiwi', 'lemon', 'mango', 'nectarine', 'orange', 'papaya', 'quince', 'raspberry', 'strawberry', 'tangerine', 'ugli fruit', 'vanilla', 'watermelon'];
   const sizes = [14.6, 11, 8.8, 7.3, 5.8, 4.4, 3.66, 2.9, 2.2, 1.46];
   const [open, setOpen] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
@@ -36,37 +36,43 @@ export default function Blur({ user, sizeUser }) {
   };
 
   const handleMistake = async () => {
-    let taut = { fontSize: fontSize, distance: 1, eye: isLeftEye ? 'left' : 'right' };
-    
-    user.sizeWeaknesses.push(taut);
-    const updatedWeaknesses = [...user.sizeWeaknesses, taut];
+    try {
+      const taut = {
+        fontSize: fontSize,
+        distance: 1,
+        eye: isLeftEye ? 'left' : 'right'
+      };
 
-    // שליחת הבקשה ל-API route
-    const response = await fetch('/api/updateUser', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        filter: { email: user.email },
-        updateData: { sizeWeaknesses: updatedWeaknesses }
-      })
-    });
+      const updatedWeaknesses = [...user.sizeWeaknesses, taut];
 
-    if (response.ok) {
+      const response = await fetch('/api/updateUser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          filter: { email: user.email },
+          updateData: { sizeWeaknesses: updatedWeaknesses }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user');
+      }
+
       const updatedUser = await response.json();
+      user.sizeWeaknesses = updatedWeaknesses;
       console.log('User updated successfully:', updatedUser);
-    } else {
-      console.error('Failed to update user');
+      overWord();
+    } catch (error) {
+      console.error('Error updating user:', error);
     }
-
-    overWord();
   };
 
   return (
 
     <div className={`${style.contain} border-b border-green-400 p-4`}>
-       <Button
+      <Button
         variant="contained"
         style={{
           backgroundColor: '#FBBF24',
@@ -95,6 +101,8 @@ export default function Blur({ user, sizeUser }) {
         onChange={changeFontSize}
         className="border border-gray-300 rounded px-2 p-1 mb-4  text-center w-96"
         placeholder="Enter font size"
+        min="1"
+        max="25"
       />
       <div className="flex flex-wrap gap-4 mb-4">
         <button
@@ -144,7 +152,7 @@ export default function Blur({ user, sizeUser }) {
           Mistake
         </button>
       </div>
-           <Popup open={open} setOpen={setOpen} type={'blur'} />
+      <Popup open={open} setOpen={setOpen} type={'blur'} />
     </div>
 
   );

@@ -30,9 +30,29 @@
 .scrollContent {
   max-height: calc(80vh - 40px); /* Subtract padding from max height */
   overflow-y: auto; /* Enable vertical scrolling */
-  padding-right: 15px; /* Add some padding for the scrollbar */
+  padding-right: 15px; 
+  /* Add some padding for the scrollbar */
 }
 
+.scrollContent::-webkit-scrollbar {
+  width: 5px; /* Width of the scrollbar */
+  background-color: #f1f1f1; /* Background color of the scrollbar */
+}
+/* Style the scrollbar thumb */
+.scrollContent::-webkit-scrollbar-thumb {
+  background-color: #888; /* Color of the scrollbar thumb */
+  border-radius: 10px; /* Rounded corners for the thumb */
+}
+
+/* Style the scrollbar thumb on hover */
+.scrollContent::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* Darker color on hover */
+}
+
+/* Style the scrollbar track */
+.scrollContent::-webkit-scrollbar-track {
+  background-color: #f1f1f1; /* Background color of the track */
+}
 @keyframes scale-in {
   from {
       transform: translate(-50%, -50%) scale(0.1);
