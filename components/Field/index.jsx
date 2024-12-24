@@ -84,10 +84,11 @@ export default function Field({ user, distanceUser }) {
 
   return (
     <div
-      className={`flex items-center justify-center flex-col w-full mx-auto h-[84vh] bg-[aliceblue] rounded-[2%] border-2 border-[#bfdbfe] border-b border-purple-400 p-4`}
+      className={`flex items-center justify-center flex-col w-full mx-auto h-[84vh] bg-[aliceblue]  border-2 border-[#bfdbfe] border-b border-purple-400 p-4`}
       style={{
-        borderLeft: isLeft ? '8px solid #bfdbfe' : 'none',
-        borderRight: !isLeft ? '8px solid #bfdbfe' : 'none'
+        borderLeft: isLeft ? '32px solid #bfdbfe' : 'none',
+        borderRight: !isLeft ? '32px solid #bfdbfe' : 'none',
+        transition: 'border 1s ease'
       }}
     >
        <Button
