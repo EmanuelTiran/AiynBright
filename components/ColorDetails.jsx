@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import Link from 'next/link';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -71,7 +71,7 @@ export default function ColorDetails({ simplifiedUser }) {
                 transition={{ duration: 0.5 }}
                 className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
               >
-                <div className="overflow-x-auto">
+                <div className="overflow-y-auto max-h-64">
                   <table className="w-full border-collapse border border-gray-200">
                     <thead>
                       <tr className="bg-gray-50">
