@@ -2,7 +2,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from "@mui/material";
 import ResultTestBlur from './ResultTestBlur';
-
+import EyeExaminationPrompt from './EyeExaminationPrompt';
+import ProgressBar from './ProgressBar';
 
 const characters = '1234567890אבגדהוזחטיכלמנסעפצקרשת';
 const initialSize = 14.6;
@@ -19,6 +20,8 @@ const getRandomButtons = (correctChar) => {
     }
     return buttons.sort(() => Math.random() - 0.5);
 };
+
+
 
 const RandomCharacterGame = ({ user }) => {
     const [character, setCharacter] = useState('');
@@ -50,10 +53,9 @@ const RandomCharacterGame = ({ user }) => {
         }
         if (correct && countTrue === 1) {
             setCountTrue(0);
-            setSize((prevSize) => Math.max(prevSize - 1.5, 4));
+            setSize((prevSize) => Math.max(prevSize - 1.5, 2));
         }
 
-        // Set a timeout to reset the game state
         setTimeout(() => {
             const newChar = getRandomCharacter();
             setCharacter(newChar);
@@ -61,7 +63,7 @@ const RandomCharacterGame = ({ user }) => {
             setClickedIndex(null);
             setIsCorrect(null);
         }, 500);
-    }, [character]);
+    }, [character, countTrue]);
 
     useEffect(() => {
         const updateUser = async () => {
@@ -94,15 +96,14 @@ const RandomCharacterGame = ({ user }) => {
         };
 
         updateUser();
-    }, [countFalse]);
+    }, [countFalse, size, isLeftEye, user]);
 
     return (
         <div className="flex flex-col items-center justify-center space-y-4 p-4 bg-gray-100 rounded-lg">
-            <div className="bg-blue-50 border-2 border-blue-600 rounded-lg p-5 text-center font-sans text-gray-800 text-lg shadow-md transition-transform duration-300 hover:scale-105 cursor-pointer">
-                {` Cover your ${isLeftEye ? "right" : "left"} eye`} <br />
-                {`And examine your ${isLeftEye ? "left" : "right"} eye `} <br />
-                {`Tap the button corresponding to the character, 1 meter away`}
-            </div>
+
+            <EyeExaminationPrompt isLeftEye={isLeftEye} />
+            
+            <ProgressBar size={size} />
 
             <div
                 className="flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-md"
@@ -111,7 +112,7 @@ const RandomCharacterGame = ({ user }) => {
                 {character}
             </div>
             <div className="grid grid-cols-2 gap-2">
-                {!(countFalse === 3) ?
+                {!(countFalse === 3 || (size === 2)) ?
                     buttons.map((char, index) => (
                         <Button
                             key={index}
@@ -119,10 +120,10 @@ const RandomCharacterGame = ({ user }) => {
                             variant="outlined"
                             sx={{
                                 border: '2px solid #facc15',
-                                color: 'black', // Set text color to black
-                                fontSize: '14.6mm', // Adjust font size as needed
+                                color: 'black',
+                                fontSize: '14.6mm',
                                 padding: '10px 20px',
-                                width: '100px', // Width for square shape
+                                width: '100px',
                                 height: '100px',
                             }}
                             disabled={clickedIndex !== null}

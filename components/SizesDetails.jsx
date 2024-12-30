@@ -69,37 +69,45 @@ export default function SizesDetails({ simplifiedUser }) {
               <Line data={generateChartData('left')} />
             </div>
 
-            <ul className="space-y-4">
-              {sizeWeaknesses.map((weakness, index) => (
-                <Link
-                  key={index}
-                  href={`blur/improve/${weakness.fontSize}_${weakness.distance}_${
-                    weakness.eye || 'right'
-                  }`}
-                >
-                  <li className="border p-4 rounded-lg bg-white shadow-sm">
-                    <div className="flex justify-between items-center py-1">
-                      <span className="font-medium text-gray-600">Font Size:</span>
-                      <span className="text-gray-800">{weakness.fontSize}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-1">
-                      <span className="font-medium text-gray-600">Distance:</span>
-                      <span className="text-gray-800">{weakness.distance}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-1">
-                      <span className="font-medium text-gray-600">Eye:</span>
-                      <span className="text-gray-800">{weakness.eye}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-1">
-                      <span className="font-medium text-gray-600">Date:</span>
-                      <span className="text-gray-800">
-                        {new Date(weakness.date).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </li>
-                </Link>
-              ))}
-            </ul>
+            <table className="table-auto w-full border-collapse border border-gray-200">
+              <thead>
+                <tr>
+                  <th className="border border-gray-300 px-4 py-2">Font Size</th>
+                  <th className="border border-gray-300 px-4 py-2">Distance</th>
+                  <th className="border border-gray-300 px-4 py-2">Eye</th>
+                  <th className="border border-gray-300 px-4 py-2">Date</th>
+                  <th className="border border-gray-300 px-4 py-2">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sizeWeaknesses.map((weakness, index) => (
+                  <tr key={index} className="odd:bg-gray-50 even:bg-white">
+                    <td className="border border-gray-300 px-4 py-2 text-center">
+                      {weakness.fontSize}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2 text-center">
+                      {weakness.distance}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2 text-center">
+                      {weakness.eye || 'right'}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2 text-center">
+                      {new Date(weakness.date).toLocaleDateString()}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2 text-center">
+                      <Link
+                        href={`blur/improve/${weakness.fontSize}_${weakness.distance}_${weakness.eye || 'right'
+                          }`}
+                        className="text-blue-500 hover:underline"
+                      >
+                        Improve
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
           </>
         )}
       </ul>

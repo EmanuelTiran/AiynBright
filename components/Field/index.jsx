@@ -88,10 +88,11 @@ export default function Field({ user, distanceUser }) {
       style={{
         borderLeft: isLeft ? '32px solid #bfdbfe' : 'none',
         borderRight: !isLeft ? '32px solid #bfdbfe' : 'none',
-        transition: 'border 1s ease'
+        transition: 'border 0.3s ease'
+
       }}
     >
-       <Button
+      <Button
         variant="contained"
         sx={{
           backgroundColor: '#bfdbfe',
@@ -122,14 +123,15 @@ export default function Field({ user, distanceUser }) {
             },
             color: '#bfdbfe',
             fontWeight: 'bold',
-            py: 1,  // Reduced padding
-            px: 2,  // Reduced padding
-            borderRadius: '8px 0   0 8px', // Rounded right corners, square left corners
+            py: 1,
+            px: 2,
+            clipPath: 'polygon(20% 0, 100% 0, 80% 50%, 100% 100%, 20% 100%, 0 50%)',
+            borderRadius: 0,
             flex: 1,
           }}
           onClick={moveLeft}
         >
-          Move Left
+           Left
         </Button>
         <Button
           variant="contained"
@@ -160,14 +162,15 @@ export default function Field({ user, distanceUser }) {
             },
             color: '#bfdbfe',
             fontWeight: 'bold',
-            py: 1,  // Reduced padding
-            px: 2,  // Reduced padding
-            borderRadius: '0 8px 8px 0', // Rounded right corners, square left corners
+            py: 1,
+            px: 2,
+            clipPath: 'polygon(0 0, 80% 0, 100% 50%, 80% 100%, 0 100%, 20% 50%)',
+            borderRadius: 0,
             flex: 1,
           }}
           onClick={moveRight}
         >
-          Move Right
+           Right
         </Button>
       </div>
       <div className="flex flex-wrap gap-4 mb-4">
@@ -208,7 +211,7 @@ export default function Field({ user, distanceUser }) {
           Mistake
         </Button>
       </div>
-     
+
       <Popup open={open} setOpen={setOpen} type={'field'} />
     </div>
   );
