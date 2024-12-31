@@ -70,15 +70,15 @@ export default function FieldDetails({ simplifiedUser }) {
                                 exit={{ opacity: 0, height: 0 }}
                                 transition={{ duration: 0.3 }}
                             >
-                                <div className="overflow-y-auto max-h-64"> {/* תכונת גלילה לגובה מוגדר */}
+                                <div className="overflow-y-auto max-h-64 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-blue-400 [&::-webkit-scrollbar-track]:bg-gray-100"> {/* תכונת גלילה לגובה מוגדר */}
                                     <table className="min-w-full divide-y divide-gray-200">
-                                        <thead>
+                                        <thead className="sticky top-0">
                                             <tr className="bg-gray-50">
-                                                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Side</th>
-                                                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
+                                                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600 px-6 py-3 text-sm font-semibold  tracking-wider">Side</th>
+                                                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600 px-6 py-3 text-sm font-semibold  tracking-wider">
                                                     Distance
                                                 </th>
-                                                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Date</th>
+                                                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600 px-6 py-3 text-sm font-semibold  tracking-wider">Date</th>
                                             </tr>
                                         </thead>
                                         <tbody>

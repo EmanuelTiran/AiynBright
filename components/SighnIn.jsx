@@ -10,6 +10,24 @@ export default function SignIn() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
+    const [emailError, setEmailError] = useState('');
+
+    // פונקציה לבדיקת תקינות אימייל
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    // אירוע לשינוי אימייל
+    const handleEmailChange = (e) => {
+        const value = e.target.value;
+        setEmail(value);
+        if (!validateEmail(value)) {
+            setEmailError('Invalid email address');
+        } else {
+            setEmailError('');
+        }
+    };
 
     return (
         <div className="flex justify-center items-center min-h-screen p-4">
@@ -46,19 +64,23 @@ export default function SignIn() {
                         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">Email</label>
                         <input
                             name='email'
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                                emailError ? 'border-red-500' : ''
+                            }`}
                             id="email"
                             type="email"
                             placeholder="Email"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={handleEmailChange}
                             required
                         />
+                        {emailError && <p className="text-red-500 text-xs italic mt-2">{emailError}</p>}
                     </div>
                     <div className="flex items-center justify-center">
                         <button
                             className="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full sm:w-auto"
-                            type="submit">
+                            type="submit"
+                            disabled={!!emailError}>
                             Sign In
                         </button>
                     </div>

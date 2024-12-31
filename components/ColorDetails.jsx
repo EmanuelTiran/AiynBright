@@ -71,17 +71,17 @@ export default function ColorDetails({ simplifiedUser }) {
                 transition={{ duration: 0.5 }}
                 className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
               >
-                <div className="overflow-y-auto max-h-64">
+                <div className="overflow-y-auto max-h-64 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-orange-400 [&::-webkit-scrollbar-track]:bg-gray-100">
                   <table className="w-full border-collapse border border-gray-200">
-                    <thead>
-                      <tr className="bg-gray-50">
-                        <th className="border border-gray-300 px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider">
+                    <thead > 
+                      <tr className="text-center text-sm font-semibold text-gray-900">
+                        <th className="border border-gray-200 px-6 py-3 text-sm font-semibold  tracking-wider">
                           Background
                         </th>
-                        <th className="border border-gray-300 px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider">
+                        <th className="border border-gray-200 px-6 py-3 text-sm font-semibold  tracking-wider">
                           Text Color
                         </th>
-                        <th className="border border-gray-300 px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider">
+                        <th className="border border-gray-200 px-6 py-3 text-sm font-semibold  tracking-wider">
                           Test Date
                         </th>
                       </tr>
@@ -92,7 +92,7 @@ export default function ColorDetails({ simplifiedUser }) {
                           key={index}
                           className="transition-colors hover:bg-gray-50 odd:bg-gray-50 even:bg-white"
                         >
-                          <td className="border border-gray-300 px-6 py-4 text-center">
+                          <td className="border border-gray-200 px-6 py-4 text-center">
                             <Link
                               href={`color/${weakness.background_color}_${weakness.font_color}`}
                             >
@@ -102,7 +102,7 @@ export default function ColorDetails({ simplifiedUser }) {
                               />
                             </Link>
                           </td>
-                          <td className="border border-gray-300 px-6 py-4 text-center">
+                          <td className="border border-gray-200 px-6 py-4 text-center">
                             <Link
                               href={`color/${weakness.background_color}_${weakness.font_color}`}
                             >
@@ -112,7 +112,7 @@ export default function ColorDetails({ simplifiedUser }) {
                               />
                             </Link>
                           </td>
-                          <td className="border border-gray-300 px-6 py-4 text-center">
+                          <td className="border border-gray-200 px-6 py-4 text-center">
                             <Link
                               href={`color/${weakness.background_color}_${weakness.font_color}`}
                             >

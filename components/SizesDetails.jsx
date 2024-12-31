@@ -53,32 +53,66 @@ export default function SizesDetails({ simplifiedUser }) {
       <h3 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">
         Blur Vision Profile
       </h3>
-      <div className="mb-4">
-        <button
-          onClick={() => setShowCharts(!showCharts)}
-          className="mr-4 px-6 py-2 bg-yellow-400 text-white rounded-lg shadow hover:bg-yellow-500 transition-colors"
-        >
-          {showCharts ? "Hide Charts" : "Show Charts"}
-        </button>
-        <button
-          onClick={() => setShowTable(!showTable)}
-          className="px-6 py-2 bg-yellow-400 text-white rounded-lg shadow hover:bg-yellow-500 transition-colors"
-        >
-          {showTable ? "Hide Table" : "Show Table"}
-        </button>
-      </div>
+
       <ul className="space-y-4">
         {sizeWeaknesses.length === 0 ? (
-          <li className="border p-4 rounded-lg bg-white shadow-sm">
-            <a
-              href="blur"
-              className="text-red-500 underline"
-            >
-              You don't have any diagnosis about your vision blur, Click here to explore blur options
-            </a>
-          </li>
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-blue-100">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-blue-100 rounded-full">
+                <svg
+                  className="w-6 h-6 text-blue-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p className="text-gray-700 mb-2">No Color Vision Data Available</p>
+                <a
+                  href="blur"
+                  className="inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors"
+                >
+                  Take Blur Vision Test
+                  <svg
+                    className="w-4 h-4 ml-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
         ) : (
           <>
+            <div className="mb-4">
+              <button
+                onClick={() => setShowCharts(!showCharts)}
+                className="mr-4 px-6 py-2 bg-yellow-400 text-white rounded-lg shadow hover:bg-yellow-500 transition-colors"
+              >
+                {showCharts ? "Hide Charts" : "Show Charts"}
+              </button>
+              <button
+                onClick={() => setShowTable(!showTable)}
+                className="px-6 py-2 bg-yellow-400 text-white rounded-lg shadow hover:bg-yellow-500 transition-colors"
+              >
+                {showTable ? "Hide Table" : "Show Table"}
+              </button>
+            </div>
             <AnimatePresence>
               {showCharts && (
                 <motion.div
@@ -107,15 +141,15 @@ export default function SizesDetails({ simplifiedUser }) {
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <div className="overflow-y-auto max-h-64">
+                  <div className="overflow-y-auto max-h-64 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-yellow-400 [&::-webkit-scrollbar-track]:bg-gray-100">
                     <table className="table-auto w-full border-collapse border border-gray-200">
-                      <thead>
-                        <tr className="bg-gray-50">
-                          <th className="border border-gray-300 px-4 py-2">Font Size</th>
-                          <th className="border border-gray-300 px-4 py-2">Distance</th>
-                          <th className="border border-gray-300 px-4 py-2">Eye</th>
-                          <th className="border border-gray-300 px-4 py-2">Date</th>
-                          <th className="border border-gray-300 px-4 py-2">Action</th>
+                      <thead >
+                        <tr className="text-center text-sm font-semibold text-gray-900   tracking-wider">
+                          <th className="border border-gray-300 px-4 py-2  text-sm font-semibold  tracking-wider">Font Size</th>
+                          <th className="border border-gray-300 px-4 py-2 text-sm font-semibold  tracking-wider">Distance</th>
+                          <th className="border border-gray-300 px-4 py-2  text-sm font-semibold  tracking-wider">Eye</th>
+                          <th className="border border-gray-300 px-4 py-2  text-sm font-semibold  tracking-wider">Date</th>
+                          <th className="border border-gray-300 px-4 py-2  text-sm font-semibold  tracking-wider">Action</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -136,7 +170,7 @@ export default function SizesDetails({ simplifiedUser }) {
                             <td className="border border-gray-300 px-4 py-2 text-center">
                               <Link
                                 href={`blur/improve/${weakness.fontSize}_${weakness.distance}_${weakness.eye || "right"}`}
-                                className="text-blue-500 hover:underline"
+                                className="text-yellow-400 underline"
                               >
                                 Improve
                               </Link>
