@@ -50,7 +50,7 @@ export default function SizesDetails({ simplifiedUser }) {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <h3 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">
+      <h3 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2 text-center">
         Blur Vision Profile
       </h3>
 
@@ -99,7 +99,7 @@ export default function SizesDetails({ simplifiedUser }) {
           </div>
         ) : (
           <>
-            <div className="mb-4">
+            <div className="mb-4  flex justify-center">
               <button
                 onClick={() => setShowCharts(!showCharts)}
                 className="mr-4 px-6 py-2 bg-yellow-400 text-white rounded-lg shadow hover:bg-yellow-500 transition-colors"

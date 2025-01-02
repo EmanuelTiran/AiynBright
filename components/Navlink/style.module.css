@@ -1,17 +1,20 @@
-.current{
-    /* color: var(--orange-yellow); */
+.current {
     font-weight: 900;
+    color: var(--orange-yellow);
+    transition: transform 0.8s ease, color 0.3s ease;  
+    transform: scale(1.2); /* הגדר שינוי גודל עבור האלמנט המודגש */
 }
-.notCurrent{
-    color: var(--gray);
+
+.notCurrent {
+    transform: scale(1); /* מבטיח שהמצב ההתחלתי הוא בגודל רגיל */
+    transition: transform 0.3s ease; /* הוספת מעבר עבור scale */
 }
 
 .myHover {
-    transition:  text-shadow 0.3s;
+    transition: text-shadow 0.3s, transform 0.3s ease; /* מעבר גם לטקסט וגם לגודל */
 }
 
-
-.myHover:hover{
-    text-shadow: 2px 2px 20px rgba(255, 140, 0);
+.myHover:hover {
+    text-shadow: 2px 2px 20px rgb(255, 255, 255); 
+    text-shadow: 2px 2px 20px rgb(255, 255, 255); 
 }
-

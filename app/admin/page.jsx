@@ -24,7 +24,7 @@ export default async function admin() {
       distance: weakness.distance,
       date: weakness.date
     })),
-    fieldWeaknesses:user.fieldWeaknesses.map(weakness => ({
+    fieldWeaknesses: user.fieldWeaknesses.map(weakness => ({
       side: weakness.side,
       distance: weakness.distance,
       date: weakness.date
@@ -35,7 +35,18 @@ export default async function admin() {
     <>
       {isManager ?
         <ArrUsers users={filteredUsers} />
-        : <h1>no exist!!!</h1>
+        : <div className="flex flex-col items-center justify-center min-h-[300px]">
+          <div className="relative">
+            <h1 className="text-4xl font-bold text-yellow-100 animate-bounce">
+              Access Denied
+            </h1>
+            <div className="mt-4 flex justify-center space-x-1">
+              <div className="w-2 h-2 bg-yellow-100 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-yellow-100 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+              <div className="w-2 h-2 bg-yellow-100 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+            </div>
+          </div>
+        </div>
       }
     </>
   )

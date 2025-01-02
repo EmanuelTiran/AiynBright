@@ -1,13 +1,14 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Weaknesses from './Weaknesses';  // Import Weaknesses component
+import Weaknesses from './Weaknesses';
 
 function ArrUsers({ users }) {
     const [sortedUsers, setSortedUsers] = useState(users);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
     const [searchQuery, setSearchQuery] = useState('');
     const [visibleUsersCount, setVisibleUsersCount] = useState(5);
+    const [expandedSection, setExpandedSection] = useState({ userId: null, type: null });
 
     useEffect(() => {
         let sortedArray = [...users];
@@ -77,8 +78,12 @@ function ArrUsers({ users }) {
         }
     };
 
+    const handleExpand = (userId, type, isExpanded) => {
+        setExpandedSection(isExpanded ? { userId, type } : { userId: null, type: null });
+    };
+
     return (
-        <div className="container mx-auto p-4 w-2/3 border-2 border-orange-200">
+        <div className="container mx-auto p-4 w-auto border-2 border-orange-200">
             <input
                 type="text"
                 placeholder="Search by username or email"
@@ -89,45 +94,50 @@ function ArrUsers({ users }) {
             <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
                 <thead className="bg-gray-200">
                     <tr>
-                        <th onClick={() => requestSort('username')} className="cursor-pointer p-4 text-left">Username</th>
-                        <th onClick={() => requestSort('email')} className="cursor-pointer p-4 text-left">Email</th>
-                        <th className="p-4 text-left">Color Weaknesses</th>
-                        <th className="p-4 text-left">Size Weaknesses</th>
-                        <th className="p-4 text-left">Field Weaknesses</th>
+                        <th onClick={() => requestSort('username')} className="cursor-pointer p-4 text-left text-center">Username</th>
+                        <th onClick={() => requestSort('email')} className="cursor-pointer p-4 text-left text-center">Email</th>
                     </tr>
                 </thead>
                 <tbody>
                     {usersToDisplay.map((user, index) => (
-                        <tr key={index} className="border-t even:bg-gray-50 hover:bg-gray-100">
-                            <td className="p-4">{user.username}</td>
-                            <td className="p-4">
-                                <Link href={`mailto:${user.email}`}>{user.email}</Link>
-                            </td>
-                            <td className="p-4">
-                                <Weaknesses
-                                    type="color"
-                                    weaknesses={user.colorWeaknesses}
-                                    email={user.email}
-                                    deleteWeakness={deleteWeakness}
-                                />
-                            </td>
-                            <td className="p-4">
-                                <Weaknesses
-                                    type="size"
-                                    weaknesses={user.sizeWeaknesses}
-                                    email={user.email}
-                                    deleteWeakness={deleteWeakness}
-                                />
-                            </td>
-                            <td className="p-4">
-                                <Weaknesses
-                                    type="field"
-                                    weaknesses={user.fieldWeaknesses}
-                                    email={user.email}
-                                    deleteWeakness={deleteWeakness}
-                                />
-                            </td>
-                        </tr>
+                        <React.Fragment key={index}>
+                            <tr className="border-t even:bg-gray-50 hover:bg-gray-100 text-center">
+                                <td className="p-4">{user.username}</td>
+                                <td className="p-4">
+                                    <Link href={`mailto:${user.email}`}>{user.email}</Link>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colSpan="2" className="p-4">
+                                    <div className="flex gap-4 justify-center">
+                                        <Weaknesses
+                                            type="color"
+                                            weaknesses={user.colorWeaknesses}
+                                            email={user.email}
+                                            deleteWeakness={deleteWeakness}
+                                            expanded={expandedSection.userId === user.email && expandedSection.type === 'color'}
+                                            onChange={(isExpanded) => handleExpand(user.email, 'color', isExpanded)}
+                                        />
+                                        <Weaknesses
+                                            type="size"
+                                            weaknesses={user.sizeWeaknesses}
+                                            email={user.email}
+                                            deleteWeakness={deleteWeakness}
+                                            expanded={expandedSection.userId === user.email && expandedSection.type === 'size'}
+                                            onChange={(isExpanded) => handleExpand(user.email, 'size', isExpanded)}
+                                        />
+                                        <Weaknesses
+                                            type="field"
+                                            weaknesses={user.fieldWeaknesses}
+                                            email={user.email}
+                                            deleteWeakness={deleteWeakness}
+                                            expanded={expandedSection.userId === user.email && expandedSection.type === 'field'}
+                                            onChange={(isExpanded) => handleExpand(user.email, 'field', isExpanded)}
+                                        />
+                                    </div>
+                                </td>
+                            </tr>
+                        </React.Fragment>
                     ))}
                 </tbody>
             </table>

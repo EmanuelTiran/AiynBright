@@ -8,7 +8,7 @@ export default function FieldDetails({ simplifiedUser }) {
 
     return (
         <div className="max-w-4xl mx-auto p-6">
-            <h3 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Field Weaknesses</h3>
+            <h3 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2 text-center">Field Weaknesses</h3>
 
             {simplifiedUser.fieldWeaknesses.length === 0 ? (
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-blue-100">
@@ -54,12 +54,15 @@ export default function FieldDetails({ simplifiedUser }) {
                 </div>
             ) : (
                 <>
+                <div className='flex justify-center'>
+
                     <button
                         onClick={() => setShowDetails(!showDetails)}
                         className="mb-4 px-6 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition-colors"
                     >
                         {showDetails ? "Hide Details" : "Show Details"}
                     </button>
+                </div>
 
                     <AnimatePresence>
                         {showDetails && (

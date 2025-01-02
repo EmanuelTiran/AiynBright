@@ -4,6 +4,7 @@ import style from './style.module.css'
 import { usePathname } from 'next/navigation'
 import React from 'react'
 
+
 export default function Navlink({ children, href, colorText }) {
    let path = usePathname()
    const values = path.split('/');
@@ -11,7 +12,7 @@ export default function Navlink({ children, href, colorText }) {
    return (
       <Link
          href={href}
-         className={`${path === href ? style.current : " font-light"} ${colorText} ${style.myHover}`}
-      >{children}</Link>
+         className={`${path === href ? style.current : style.notCurrent} ${colorText} ${style.myHover}`}
+         >{children}</Link>
    )
 }

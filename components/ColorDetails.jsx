@@ -8,7 +8,7 @@ export default function ColorDetails({ simplifiedUser }) {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <h3 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">
+      <h3 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2 text-center">
         Color Vision Profile
       </h3>
 
@@ -55,13 +55,16 @@ export default function ColorDetails({ simplifiedUser }) {
           </div>
         </div>
       ) : (
-        <div>
+        <div >
+          <div className='flex justify-center'>
+
           <button
             onClick={() => setShowTable(!showTable)}
-            className="mb-4 px-6 py-2 bg-orange-400 text-white rounded-lg shadow hover:bg-orange-500 transition-colors"
+            className="mb-4 px-6 py-2 bg-orange-400 text-white rounded-lg shadow hover:bg-orange-500 transition-colors "
           >
             {showTable ? 'Hide Details' : 'Show Details'}
           </button>
+          </div>
           <AnimatePresence>
             {showTable && (
               <motion.div
@@ -71,64 +74,73 @@ export default function ColorDetails({ simplifiedUser }) {
                 transition={{ duration: 0.5 }}
                 className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
               >
-                <div className="overflow-y-auto max-h-64 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-orange-400 [&::-webkit-scrollbar-track]:bg-gray-100">
-                  <table className="w-full border-collapse border border-gray-200">
-                    <thead > 
-                      <tr className="text-center text-sm font-semibold text-gray-900">
-                        <th className="border border-gray-200 px-6 py-3 text-sm font-semibold  tracking-wider">
-                          Background
-                        </th>
-                        <th className="border border-gray-200 px-6 py-3 text-sm font-semibold  tracking-wider">
-                          Text Color
-                        </th>
-                        <th className="border border-gray-200 px-6 py-3 text-sm font-semibold  tracking-wider">
-                          Test Date
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {simplifiedUser.colorWeaknesses.map((weakness, index) => (
-                        <tr
-                          key={index}
-                          className="transition-colors hover:bg-gray-50 odd:bg-gray-50 even:bg-white"
-                        >
-                          <td className="border border-gray-200 px-6 py-4 text-center">
-                            <Link
-                              href={`color/${weakness.background_color}_${weakness.font_color}`}
+                <div className="overflow-x-auto overflow-y-auto max-h-64 md:max-h-64 
+                [&::-webkit-scrollbar]:w-2 
+                [&::-webkit-scrollbar]:h-2
+                [&::-webkit-scrollbar-thumb]:bg-orange-400 
+                [&::-webkit-scrollbar-thumb]:rounded-full
+                [&::-webkit-scrollbar-track]:bg-gray-100">
+                  <div className="min-w-full inline-block align-middle">
+                    <div className="overflow-hidden">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead>
+                          <tr className="text-center text-xs md:text-sm font-semibold text-gray-900">
+                            <th className="border border-gray-200 px-2 md:px-6 py-2 md:py-3 text-xs md:text-sm font-semibold tracking-wider whitespace-nowrap">
+                              Background
+                            </th>
+                            <th className="border border-gray-200 px-2 md:px-6 py-2 md:py-3 text-xs md:text-sm font-semibold tracking-wider whitespace-nowrap">
+                              Text Color
+                            </th>
+                            <th className="border border-gray-200 px-2 md:px-6 py-2 md:py-3 text-xs md:text-sm font-semibold tracking-wider whitespace-nowrap">
+                              Test date
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {simplifiedUser.colorWeaknesses.map((weakness, index) => (
+                            <tr
+                              key={index}
+                              className="transition-colors hover:bg-gray-50 odd:bg-gray-50 even:bg-white"
                             >
-                              <div
-                                className="w-16 h-8 mx-auto rounded-md shadow-inner"
-                                style={{ backgroundColor: weakness.background_color }}
-                              />
-                            </Link>
-                          </td>
-                          <td className="border border-gray-200 px-6 py-4 text-center">
-                            <Link
-                              href={`color/${weakness.background_color}_${weakness.font_color}`}
-                            >
-                              <div
-                                className="w-16 h-8 mx-auto rounded-md shadow-inner"
-                                style={{ backgroundColor: weakness.font_color }}
-                              />
-                            </Link>
-                          </td>
-                          <td className="border border-gray-200 px-6 py-4 text-center">
-                            <Link
-                              href={`color/${weakness.background_color}_${weakness.font_color}`}
-                            >
-                              <span className="text-sm text-gray-600">
-                                {new Date(weakness.date).toLocaleDateString(undefined, {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                })}
-                              </span>
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                              <td className="border border-gray-200 px-2 md:px-6 py-2 md:py-4 text-center">
+                                <Link
+                                  href={`color/${weakness.background_color}_${weakness.font_color}`}
+                                >
+                                  <div
+                                    className="w-12 md:w-16 h-6 md:h-8 mx-auto rounded-md shadow-inner"
+                                    style={{ backgroundColor: weakness.background_color }}
+                                  />
+                                </Link>
+                              </td>
+                              <td className="border border-gray-200 px-2 md:px-6 py-2 md:py-4 text-center">
+                                <Link
+                                  href={`color/${weakness.background_color}_${weakness.font_color}`}
+                                >
+                                  <div
+                                    className="w-12 md:w-16 h-6 md:h-8 mx-auto rounded-md shadow-inner"
+                                    style={{ backgroundColor: weakness.font_color }}
+                                  />
+                                </Link>
+                              </td>
+                              <td className="border border-gray-200 px-2 md:px-6 py-2 md:py-4 text-center">
+                                <Link
+                                  href={`color/${weakness.background_color}_${weakness.font_color}`}
+                                >
+                                  <span className="text-xs md:text-sm text-gray-600 whitespace-nowrap">
+                                    {new Date(weakness.date).toLocaleDateString(undefined, {
+                                      year: 'numeric',
+                                      month: 'long',
+                                      day: 'numeric',
+                                    })}
+                                  </span>
+                                </Link>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             )}
