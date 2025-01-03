@@ -16,7 +16,7 @@ export default async function BlurPage() {
   let currentUser = await readUserByFieldService({ email });
 
   const simplifiedUser = {
-    userId: currentUser.userId?.toString() || '', // המרת ObjectId למחרוזת
+    userId: currentUser.userId?.toString() || '',
     username: currentUser.username,
     password: currentUser.password,
     email: currentUser.email,

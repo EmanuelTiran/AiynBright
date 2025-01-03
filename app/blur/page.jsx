@@ -48,14 +48,14 @@ export default async function BlurPage() {
   unstable_noStore();
   
   return (
-    <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen bg-gray-100">
-    <div className="bg-white p-8 rounded-xl shadow-2xl space-y-6 max-w-md w-full transform transition-all duration-500 ease-in-out hover:scale-105">
-      <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Blur Options</h1>
-      {simplifiedUser.sizeWeaknesses.length > 0 && (
-        <AnimatedLink href="/blur/improve">Improve Blur</AnimatedLink>
-      )}
-      <AnimatedLink href="/blur/diagnosis">Blur Diagnosis</AnimatedLink>
+  <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-xl shadow-2xl space-y-6 max-w-md w-full transform transition-all duration-500 ease-in-out hover:scale-105">
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Blur Options</h1>
+        {simplifiedUser.sizeWeaknesses.length > 0 && (
+          <AnimatedLink href="blur/improve/14.6_1_left">Improve Blur</AnimatedLink>
+        )}
+        <AnimatedLink href="/blur/diagnosis">Blur Diagnosis</AnimatedLink>
+      </div>
     </div>
-  </div>
   );
 }
