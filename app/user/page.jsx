@@ -17,7 +17,7 @@ export default async function Page() {
    const { isUser } = authData;
    let currentUser = await readUserByFieldService({ email });
    const simplifiedUser = {
-      userId: currentUser._id,
+      // userId: currentUser._id,
       username: currentUser.username,
       password: currentUser.password,
       email: currentUser.email,

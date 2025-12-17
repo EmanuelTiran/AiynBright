@@ -2,25 +2,25 @@ import React from 'react';
 import Link from 'next/link';
 import Weaknesses from './Weaknesses';
 
-const UsersTable = ({ 
-    usersToDisplay, 
-    requestSort, 
-    expandedSection, 
-    handleExpand, 
-    deleteWeakness 
+const UsersTable = ({
+    usersToDisplay,
+    requestSort,
+    expandedSection,
+    handleExpand,
+    deleteWeakness
 }) => {
     return (
         <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
             <thead className="bg-gray-200">
                 <tr>
-                    <th 
-                        onClick={() => requestSort('username')} 
+                    <th
+                        onClick={() => requestSort('username')}
                         className="cursor-pointer p-4 text-left text-center"
                     >
                         Username
                     </th>
-                    <th 
-                        onClick={() => requestSort('email')} 
+                    <th
+                        onClick={() => requestSort('email')}
                         className="cursor-pointer p-4 text-left text-center"
                     >
                         Email
@@ -33,7 +33,14 @@ const UsersTable = ({
                         <tr className="border-t even:bg-gray-50 hover:bg-gray-100 text-center">
                             <td className="p-4">{user.username}</td>
                             <td className="p-4">
-                                <Link href={`mailto:${user.email}`}>{user.email}</Link>
+                                <a
+                                    href={`https://mail.google.com/mail/?view=cm&fs=1&to=${user.email}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline"
+                                >
+                                    {user.email}
+                                </a>
                             </td>
                         </tr>
                         <tr>
