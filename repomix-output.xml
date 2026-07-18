@@ -1,0 +1,4997 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.gitignore
+~$inBright - עמנואל ויהשוע.docx
+אישור מהט - עמנואל טירן.pdf
+מצגת_מהט.pdf
+ספר פרוייקט _ פתוח לעריכה.docx
+ספר פרוייקט_AyinBright.pdf
+app/about/page.jsx
+app/about/style.module.css
+app/admin/layout.jsx
+app/admin/page.jsx
+app/api/auth/[...nextauth]/route.js
+app/api/revalidate/route.js
+app/blur/diagnosis/page.jsx
+app/blur/improve/[detail]/page.jsx
+app/blur/improve/page.jsx
+app/blur/loading.jsx
+app/blur/page.jsx
+app/blur/style.module.css
+app/color/[detail]/page.jsx
+app/color/loading.jsx
+app/color/page.jsx
+app/color/style.module.css
+app/field/[detail]/loading.jsx
+app/field/[detail]/page.jsx
+app/field/page.jsx
+app/field/style.module.css
+app/globals.css
+app/helper.js
+app/layout.jsx
+app/login/page.jsx
+app/page.jsx
+app/signin/page.jsx
+app/signin/style.module.css
+app/style.module.css
+app/user/layout.jsx
+app/user/page.jsx
+app/user/style.module.css
+AyinBright - עמנואל ויהשוע -הצעת פרוייקט.docx
+components/AboutPage.jsx
+components/AnimatedLinks.jsx
+components/Appbar.jsx
+components/ArrUsers.jsx
+components/Blur/index.jsx
+components/Blur/style.module.css
+components/Color/index.jsx
+components/Color/style.module.css
+components/ColorDetails.jsx
+components/context/DataContext.jsx
+components/CurrentTime.jsx
+components/dataContext.jsx
+components/DetailUser.jsx
+components/EyeExaminationPrompt.jsx
+components/Field/index.jsx
+components/Field/style.module.css
+components/FieldDetails.jsx
+components/Header/index.jsx
+components/Header/style.module.css
+components/ImageCarousel.jsx
+components/ImageCarousel.module.css
+components/Images/index.jsx
+components/Images/style.module.css
+components/Login.jsx
+components/Logo/index.jsx
+components/Logo/style.module.css
+components/Navlink/index.jsx
+components/Navlink/style.module.css
+components/Popup/index.jsx
+components/Popup/style.module.css
+components/ProgressBar.jsx
+components/Providers.jsx
+components/RandomCharacterGame.jsx
+components/ResultTestBlur.jsx
+components/SighnIn.jsx
+components/SignInButton.jsx
+components/SiteDescription.jsx
+components/SizesDetails.jsx
+components/Snellen/index.jsx
+components/Snellen/SnellenChart.css
+components/TNTScene.jsx
+components/ToLogin.jsx
+components/UsersTable.jsx
+components/VisionImprovementHub .jsx
+components/VisionWebsiteDescription.jsx
+components/Weaknesses.jsx
+jsconfig.json
+next.config.mjs
+package.json
+pages/_document.js
+pages/api/deleteWeakness.js
+pages/api/get-time.js
+pages/api/updateUser.js
+postcss.config.mjs
+public/blurRules.txt
+public/favicon.ico
+public/fieldsRules.txt
+public/images/image1.jpg
+public/images/image2.jpg
+public/images/image3.jpg
+public/next.svg
+public/productData.js
+public/vercel.svg
+README.md
+server/auth.js
+server/BL/actions/login.action.js
+server/BL/actions/sighnin.action.js
+server/BL/services/user.service.js
+server/connectToMongo.js
+server/DL/controllers/user.controller.js
+server/DL/models/user.model.js
+tailwind.config.js
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+</file>
+
+<file path="app/about/style.module.css">
+.contain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 95vw;
+    height: 50vw;
+    direction: rtl;
+    ;
+}
+
+.typingEffect {
+    font-size: 30px;
+    border-left: 2px solid rgba(255, 255, 255, 0.75);
+    white-space: nowrap;
+    overflow: hidden;
+    width: 90vw;
+    animation: typing 5s steps(35) infinite, border 1s infinite ease-in-out;
+}
+
+@keyframes border {
+    0% {
+        border-left-color: rgba(255, 255, 255, 0.75);
+
+    }
+
+    100% {
+        border-left-color: transparent;
+
+    }
+}
+
+@keyframes typing {
+
+    0%,
+    100% {
+        width: 0;
+    }
+
+    50%,
+    90% {
+        width: 600px;
+    }
+}
+</file>
+
+<file path="app/admin/layout.jsx">
+import React from 'react'
+
+export default function Layout({children}) {
+  return (
+     <div >
+        {children}
+     </div>
+  )
+}
+</file>
+
+<file path="app/api/revalidate/route.js">
+export async function GET(request) {
+    const url = new URL(request.url);
+    const secret = url.searchParams.get('secret');  // סוד לאימות הבקשה
+  
+    if (secret !== process.env.REVALIDATE_SECRET) {
+      return new Response('Invalid secret', { status: 401 });
+    }
+  
+    try {
+      await revalidatePath('/');  // לדוגמה: ריענון עמוד הבית
+      return new Response('Revalidated!', { status: 200 });
+    } catch (error) {
+      return new Response('Error revalidating', { status: 500 });
+    }
+  }
+</file>
+
+<file path="app/blur/diagnosis/page.jsx">
+import React from 'react';
+import { connectToMongo } from '@/server/connectToMongo';
+import { unstable_noStore } from 'next/cache';
+import { authAction } from '@/server/BL/actions/login.action';
+import { readUserByFieldService } from '@/server/BL/services/user.service';
+import Blur from '@/components/Blur';
+import ToLogin from '@/components/ToLogin';
+import Link from 'next/link';
+import RandomCharacterGame from '@/components/RandomCharacterGame';
+
+const AnimatedLink = ({ href, children }) => (
+    <Link
+        href={href}
+        className="
+      block mb-4 bg-gradient-to-r from-yellow-200 to-yellow-800 
+      text-white font-bold py-2 px-4 rounded-full shadow-lg 
+      transition-all duration-300 ease-in-out
+      hover:shadow-xl hover:from-yellow-200 hover:to-yellow-800
+      hover:scale-105 active:scale-95
+      transform hover:-translate-y-1 active:translate-y-0
+      flex items-center justify-center
+    "
+    >
+        {children}
+    </Link>
+);
+
+export default async function BlurPage() {
+    await connectToMongo();
+    const authData = await authAction();
+
+    if (!authData || !authData.userToken) return <ToLogin />;
+
+    const { email } = authData.userToken;
+    let currentUser = await readUserByFieldService({ email });
+
+    const simplifiedUser = {
+        username: currentUser.username,
+        password: currentUser.password,
+        email: currentUser.email,
+        sizeWeaknesses: currentUser.sizeWeaknesses.map(weakness => ({
+            eye: weakness.eye,
+            fontSize: weakness.fontSize,
+            distance: weakness.distance,
+            date: weakness.date
+        })),
+    };
+
+    unstable_noStore();
+
+    return (
+        <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen bg-gray-100">
+            <RandomCharacterGame user={simplifiedUser} />
+        </div>
+    );
+}
+</file>
+
+<file path="app/blur/improve/[detail]/page.jsx">
+import { connectToMongo } from '@/server/connectToMongo'
+import { unstable_noStore } from 'next/cache'
+import Blur from '@/components/Blur'
+import { authAction } from '@/server/BL/actions/login.action'
+import { readUserByFieldService } from '@/server/BL/services/user.service'
+import ToLogin from '@/components/ToLogin'
+
+
+
+
+export default async function page({ params: { detail } }) {
+  function extract_size(detail) {
+    const size = detail.split('_');
+
+    return {
+      fontSize: size[0],
+      distance: size[1],
+      eye: size[2]
+    };
+  }
+  let sizeUser = extract_size(detail);
+
+  // await new Promise(resolve => setTimeout(resolve, 3000))
+  await connectToMongo();
+  const authData = await authAction();
+  if (!authData || !authData.userToken) return <ToLogin/>
+
+  const { email } = authData.userToken;
+
+  let currentUser = await readUserByFieldService({ email });
+  const simplifiedUser = {
+    eye: currentUser.eye,
+    username: currentUser.username,
+    password: currentUser.password,
+    email: currentUser.email,
+    sizeWeaknesses: currentUser.sizeWeaknesses.map(weakness => ({
+      fontSize: weakness.fontSize,
+      distance: weakness.distance,
+      date: weakness.date
+    }))
+  };
+  unstable_noStore()
+  return (
+    <div >
+      <Blur user={simplifiedUser} sizeUser={sizeUser} />
+    </div>
+  )
+}
+</file>
+
+<file path="app/blur/loading.jsx">
+import Logo from '@/components/Logo'
+import React from 'react'
+
+export default function loading() {
+
+    return (
+        <div className="flex  justify-center items-center  h-screen flex-col min-w-full bg-slate-800">
+            <Logo  />
+        </div>
+    )
+}
+</file>
+
+<file path="app/color/loading.jsx">
+import Logo from '@/components/Logo'
+import React from 'react'
+
+export default function loading() {
+
+    return (
+        <div className="flex  justify-center items-center  h-screen flex-col min-w-full bg-slate-800">
+            <Logo  />
+        </div>
+    )
+}
+</file>
+
+<file path="app/field/[detail]/loading.jsx">
+import Logo from '@/components/Logo'
+import React from 'react'
+
+export default function loading() {
+
+    return (
+        <div className="flex  justify-center items-center  h-screen flex-col min-w-full bg-slate-800">
+            <Logo  />
+        </div>
+    )
+}
+</file>
+
+<file path="app/field/style.module.css">
+.container{
+    padding: 1rem;
+    display: flex;
+    
+    justify-content: start;
+    align-items: center;
+}
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+        .shake {
+            animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+        }
+</file>
+
+<file path="app/helper.js">
+export default function extract_param(detail){
+    
+}
+</file>
+
+<file path="app/login/page.jsx">
+"use server"
+
+import Login from '@/components/Login';
+
+export default async function LoginPage() {
+
+
+  return (<>
+    <Login />
+  </>
+  )
+}
+</file>
+
+<file path="app/signin/style.module.css">
+.current{
+    color: rgb(255, 196, 0);
+}
+.notCurrent{
+    color: gray;
+}
+</file>
+
+<file path="app/user/layout.jsx">
+import React from 'react'
+
+export default function Layout({children}) {
+  return (
+     <div >
+      
+        {children}
+     </div>
+  )
+}
+</file>
+
+<file path="app/user/style.module.css">
+.container {
+    padding: 4vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--orange-yellow);
+}
+.bgGradientCustom {
+  background: linear-gradient(
+    to bottom right,
+    #FF0000,  /* Red */
+    #0000FF,  /* Blue */
+    #90EE90,  /* Light Green */
+    #FFFF00,  /* Yellow */
+    #FFA500,  /* Orange */
+    #800080   /* Purple */
+  );
+}
+
+.detailCarpet {
+    /* padding: 4vh; */
+    /* border: 2px red solid; */
+    display: flex;
+    flex-direction: row;
+    width: 75vw;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.img {
+    clip-path: inset(15% 0 15% 0);
+}
+
+.details {
+    color: var(--orange-yellow);
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: space-around;
+    height: 50%;
+    gap: 10px;
+    /* border: 2px rgba(255, 0, 195, 0.591) solid; */
+}
+
+.details h2 {
+    font-size: 30px;
+    
+}
+
+.description{
+    font-size: 20px;
+    font-weight: 100;
+   
+}
+.price{
+    font-size: 20px;
+    font-weight: 400;
+   
+}
+
+.button{
+    border: 3px solid var(--orange-yellow);
+    border-radius: 5px;
+    padding: 13px;
+}
+</file>
+
+<file path="components/AnimatedLinks.jsx">
+// AnimatedLinks.js
+"use client"; // This ensures Framer Motion is used on the client
+
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+
+export default function AnimatedLinks() {
+  return (
+    <div className="mt-8 space-y-4">
+      <motion.div
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg transition transform hover:bg-blue-600"
+      >
+        <Link href="/blur/improve" passHref>
+          Improve Blur
+        </Link>
+      </motion.div>
+
+      <motion.div
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        className="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transition transform hover:bg-green-600"
+      >
+        <Link href="/blur/diagnosis" passHref>
+          Diagnosis Blur
+        </Link>
+      </motion.div>
+    </div>
+  );
+}
+</file>
+
+<file path="components/Appbar.jsx">
+import React from 'react';
+import SigninButton from './SignInButton';
+
+const Appbar = () => {
+  return (
+    <header className='flex gap-4 p-4 bg-gradient-to-b from-white to-gray-200 shadow'>
+      <SigninButton />
+    </header>
+  );
+};
+
+export default Appbar;
+</file>
+
+<file path="components/dataContext.jsx">
+import { createContext } from "react";
+
+const DataContext =    createContext();
+
+ 
+export default DataContext;
+</file>
+
+<file path="components/EyeExaminationPrompt.jsx">
+import React from 'react';
+
+const EyeExaminationPrompt = ({ isLeftEye }) => {
+    const instructions = [
+        `Cover your ${isLeftEye ? "right" : "left"} eye`,
+        `examine your ${isLeftEye ? "left" : "right"} eye`,
+        `Tap the button corresponding to the character, 1 meter away`
+    ];
+
+    return (
+        <div className="w-full border-2 border-yellow-400 rounded-lg p-5 text-left font-sans text-gray-800 text-lg shadow-md transition-transform duration-300 ">
+        <ol className="list-decimal list-outside space-y-2 ml-6">
+            {instructions.map((instruction, index) => (
+                <li key={index} className="leading-relaxed">
+                    {instruction}
+                </li>
+            ))}
+        </ol>
+    </div>
+    );
+};
+
+export default EyeExaminationPrompt;
+</file>
+
+<file path="components/Field/style.module.css">
+.contain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+    margin: auto;
+    height: 84vh;
+    background-color: aliceblue;
+    border-radius: 2%;
+    border: 2px solid #facc15;
+}
+
+.inContain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    width: 96vw;
+    height: 42vh;
+}
+</file>
+
+<file path="components/ImageCarousel.jsx">
+"use client";
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import styles from './ImageCarousel.module.css'; // Import your CSS file
+
+export default function ImageCarousel({ children }) {
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const images = [
+        '/images/image1.jpg',
+        '/images/image2.jpg',
+        '/images/image3.jpg',
+    ];
+
+    useEffect(() => {
+        const interval = setTimeout(() => {
+            setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+        }, 3000); // Change image every 3 seconds
+        return () => clearTimeout(interval);
+    }, [currentImageIndex]);
+
+    return (
+        <div className="relative w-full h-screen overflow-hidden">
+            <div className={styles.carousel}>
+                {images.map((imageSrc, index) => (
+                    <div
+                        key={index}
+                        className={`${styles.imageWrapper} ${index === currentImageIndex ? styles.active : ''
+                            }`}
+                    >
+                        <Image
+                            src={imageSrc}
+                            alt={`image-${index}`}
+                            layout="fill"
+                            objectFit="cover"
+                            priority={index === currentImageIndex}
+                            style={{ zIndex: 1 }} // Ensure image has a low z-index
+                        />
+                    </div>
+                ))}
+                {/* Center the children */}
+                <div className={styles.childrenWrapper}>
+                    {children}
+                </div>
+            </div>
+        </div>
+    );
+}
+</file>
+
+<file path="components/Images/style.module.css">
+.container {
+        display: flex;
+        flex-direction: row;
+        /* width: 50vw; */
+        align-items: start;
+}
+
+.container * {
+        color: var(--orange-yellow);
+}
+.img {
+        clip-path: inset(15% 0 15% 0);
+}
+</file>
+
+<file path="components/ProgressBar.jsx">
+import React from 'react';
+
+
+const ProgressBar = ({ size }) => {
+    const calculateProgress = () => {
+        const totalRange = 14.6 - 2;
+        const currentProgress = 14.6 - size;
+        const percentage = (currentProgress / totalRange) * 100;
+        return Math.min(Math.max(percentage, 0), 100);
+    };
+
+    return (
+        <div className="w-full max-w-md mx-auto mt-4 mb-4">
+            <div className="bg-gray-200 rounded-full h-4">
+                <div
+                    className="bg-yellow-400 h-4 rounded-full transition-all duration-300 ease-out"
+                    style={{ width: `${calculateProgress()}%` }}
+                />
+            </div>
+            <div className="flex justify-between mt-1 text-sm text-gray-600">
+                <span>14.6mm</span>
+                <span>2mm</span>
+            </div>
+        </div>
+    );
+};
+
+export default ProgressBar;
+</file>
+
+<file path="components/Providers.jsx">
+"use client"
+import React ,{ReactNode} from 'react';
+import { SessionProvider } from 'next-auth/react'; 
+
+
+const Providers = (props ) => {
+return <SessionProvider >{props.children}</SessionProvider>
+}
+
+export default Providers
+</file>
+
+<file path="components/ResultTestBlur.jsx">
+const ResultTestBlur = ({ size, setSize, isLeftEye, setIsLeftEye, setCountFalse }) => {
+    const handleButton = () => {
+        if (!isLeftEye) {
+            setCountFalse(0)
+            setIsLeftEye(!isLeftEye)
+            setSize(14.6)
+        } else {
+            // window.history.pushState({}, '', `/blur/improve/${size}_1_right`);
+            window.location.href = `/blur/improve/${size}_1_right`;
+        }
+
+    };
+
+    return (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 z-50">
+            <div className="bg-white rounded-lg p-8 max-w-md w-full transform transition-all duration-500 ease-in-out hover:scale-105">
+                <h2 className="text-3xl font-bold mb-4 text-center text-yellow-400">{`The result of the test of the ${isLeftEye ? 'left' : 'right'} eye`} </h2>
+                <p className="text-xl mb-6 text-center">
+                    הגודל המינימלי שבו הצלחת לראות הוא:
+                    <span className="font-bold text-2xl text-yellow-400 block mt-2 animate-pulse">
+                        {size}mm
+                    </span>
+                </p>
+                <div className="text-center">
+                    <button
+                        onClick={() => handleButton()}
+                        // onClick={() => window.location.reload()}
+                        className="bg-yellow-400 text-white px-6 py-2 rounded-full hover:bg-yellow-500 transition-colors duration-300 transform hover:scale-105"
+                    >
+                        {!isLeftEye ? "Try left eye" : "Go to improve vision"}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+export default ResultTestBlur;
+</file>
+
+<file path="components/SignInButton.jsx">
+"use client"
+import React from 'react'
+import { signIn, signOut, useSession } from 'next-auth/react'
+export default function SighnInButton() {
+    const { data: session } = useSession()
+    const isUserLoggedIn = session && session.user;
+    return (
+        <div className="flex gap-4 ml-auto">
+            {isUserLoggedIn ? (
+                <>
+                    <p className="text-sky-600">{session.user.name}</p>
+                    <button onClick={signOut} className="text-red-600">
+                        Sign Out
+                    </button>
+                </>
+            ) : (
+                <button onClick={signIn} className="text-green-600">
+                    Sign In
+                </button>
+            )}
+        </div>
+    )
+}
+</file>
+
+<file path="components/SiteDescription.jsx">
+import Link from 'next/link';
+import React from 'react';
+
+function SiteDescription() {
+    return (
+        <div class="max-w-3xl mx-auto m-10 p-6 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg shadow-lg">
+            <p class="text-lg text-gray-800 leading-relaxed mb-6">
+                An exciting journey began the moment our son was born, blind from birth. Dark and light, that was his world until recently. After years of searching and experimenting, we managed to open a window to the visual world. The amazing progress that has taken place led us to establish this website, with the aim of sharing the knowledge and tools we have developed, and helping other families facing similar challenges. Our story is proof that even in an uncertain future, there is hope.
+            </p>
+            <p class="text-base font-sans text-gray-700 border-l-4 border-red-500 pl-4 mb-6">
+                This structure provides a comprehensive platform for education, training.
+            </p>
+            <div class="flex items-center justify-center space-x-4">
+                <Link
+                    href={'/signin'}
+                    replace
+                    class="px-4 py-2 bg-purple-300 text-white font-semibold rounded-lg transition duration-300 ease-in-out hover:bg-purple-600 hover:shadow-md "
+                >
+                    Signin
+                </Link>
+                <span class="text-gray-500">||</span>
+                <Link
+                    href={'/login'}
+                    replace
+                    class="px-4 py-2 bg-blue-300 text-white font-semibold rounded-lg transition duration-300 ease-in-out hover:bg-blue-600 hover:shadow-md "
+                >
+                    Login
+                </Link>
+            </div>
+        </div>
+    );
+}
+
+export default SiteDescription;
+</file>
+
+<file path="components/TNTScene.jsx">
+"use client"
+import React, { useRef, useState } from 'react'
+import { Canvas, useFrame, extend } from '@react-three/fiber'
+import { OrbitControls, PerspectiveCamera, Sphere, Cylinder } from '@react-three/drei'
+import { Physics, useSphere } from '@react-three/cannon'
+import * as THREE from 'three'
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
+import helvetikerFont from 'three/examples/fonts/helvetiker_regular.typeface.json'
+
+// הרחבת R3F כדי לתמוך בטקסט
+extend({ TextGeometry })
+const font = new FontLoader().parse(helvetikerFont)
+
+function AnimatedBomb(props) {
+  const [ref] = useSphere(() => ({ mass: 2, position: [0, 1, 0], ...props }))
+  const lightRef = useRef()
+  const [intensity, setIntensity] = useState(1)
+
+  // אנימציה של אור שמתפשט ומתעמעם
+  useFrame(({ clock }) => {
+    const pulse = Math.sin(clock.getElapsedTime() * 5) * 0.5 + 1
+    setIntensity(pulse)
+    if (lightRef.current) lightRef.current.intensity = pulse * 2
+  })
+
+  return (
+    <group ref={ref}>
+      {/* גוף הפצצה */}
+      <Sphere args={[1, 32, 32]}>
+        <meshStandardMaterial color="black" metalness={0.3} roughness={0.5} />
+      </Sphere>
+      
+      {/* פתיל */}
+      <Cylinder args={[0.1, 0.1, 0.5, 16]} position={[0, 1.2, 0]}>
+        <meshStandardMaterial color="gray" />
+      </Cylinder>
+      
+      {/* להבה בקצה הפתיל */}
+      <pointLight ref={lightRef} color="red" position={[0, 1.5, 0]} intensity={intensity} />
+      
+      {/* טקסט TNT */}
+      <mesh position={[-0.4, 0, 1]}>
+        <textGeometry args={["TNT", { font: font, size: 0.3, height: 0.1 }]} />
+        <meshStandardMaterial color="red" />
+      </mesh>
+    </group>
+  )
+}
+
+export default function BombScene() {
+  return (
+    <Canvas shadows>
+      <PerspectiveCamera makeDefault position={[0, 3, 5]} />
+      <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, 10]} />
+      <Physics>
+        <AnimatedBomb />
+      </Physics>
+    </Canvas>
+  )
+}
+</file>
+
+<file path="components/ToLogin.jsx">
+import Link from 'next/link'
+import React from 'react'
+
+export default function ToLogin() {
+  return (
+    <div className="flex  justify-center items-center  h-screen flex-col min-w-full">
+    <h1 className='shake text-yellow-400 text-4xl text-center'>User does not exist or is not authenticated! <br />
+      <Link
+        href={'/login'}
+        replace 
+        className='underline'
+      >please login  </Link>
+    </h1>
+  </div>
+  )
+}
+</file>
+
+<file path="components/VisionWebsiteDescription.jsx">
+import React from 'react';
+import { Card, CardContent, Typography, Button } from '@mui/material';
+
+const VisionWebsiteDescription = () => {
+  return (
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-6">
+      <Card className="w-full max-w-4xl shadow-xl rounded-lg bg-white">
+        <CardContent>
+          <Typography variant="h4" component="h1" className="text-center text-orange-500 font-bold mb-4">
+            Vision Diagnosis & Improvement
+          </Typography>
+          <Typography variant="body1" className="text-gray-700 leading-relaxed mb-6">
+            Our website offers comprehensive tools for individuals with vision-related issues, helping diagnose and improve their sight.
+          </Typography>
+          
+          {/* Needs Section */}
+          <div className="mb-6">
+            <Typography variant="h5" component="h2" className="text-orange-500 font-semibold mb-2">
+              Needs of People Using Our Website
+            </Typography>
+            <ul className="list-disc list-inside text-gray-600 space-y-2">
+              <li>Assess and improve blurred vision with tailored exercises.</li>
+              <li>Diagnose color blindness and improve color recognition.</li>
+              <li>Evaluate and enhance the visual field for better peripheral vision.</li>
+            </ul>
+          </div>
+
+          {/* Special Features Section */}
+          <div>
+            <Typography variant="h5" component="h2" className="text-orange-500 font-semibold mb-2">
+              Special Features of Our Website
+            </Typography>
+            <ul className="list-disc list-inside text-gray-600 space-y-2">
+              <li>Interactive vision tests for clarity, color blindness, and visual field assessment.</li>
+              <li>Customizable exercises for personalized vision improvement.</li>
+              <li>Modern and consistent design with Material-UI integration.</li>
+              <li>Dynamically adjustable elements for accurate field of vision tests.</li>
+              <li>Progress tracking to monitor vision health over time.</li>
+            </ul>
+          </div>
+
+          <div className="flex justify-center mt-6">
+            <Button variant="contained" color="primary" className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-full shadow-md transition duration-300">
+              Learn More
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default VisionWebsiteDescription;
+</file>
+
+<file path="jsconfig.json">
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
+}
+</file>
+
+<file path="next.config.mjs">
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+   images: {
+      remotePatterns: [
+         {
+            hostname: 'www.carpetim.co.il',
+           },
+         {
+            hostname: 'tzemer.co.il',
+         },
+      ],
+   },
+};
+
+export default nextConfig;
+</file>
+
+<file path="pages/_document.js">
+import Document, { Html, Head, Main, NextScript } from 'next/document';
+
+class MyDocument extends Document {
+  render() {
+    return (
+      <Html>
+        <Head>
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <body>
+          <Main />
+          <NextScript />
+        </body>
+      </Html>
+    );
+  }
+}
+
+export default MyDocument;
+</file>
+
+<file path="pages/api/deleteWeakness.js">
+// pages/api/deleteWeakness.js
+
+import { deleteUserByFieldService } from "@/server/BL/services/user.service";
+
+export default async function handler(req, res) {
+    if (req.method === 'POST') {
+        const { email, field, index } = req.body;
+
+        try {
+            const response = await deleteUserByFieldService(email, field, index);
+            if (response.error) {
+                res.status(400).json({ error: response.error });
+                return;
+            }
+            res.status(200).json({ message: 'Weakness deleted successfully', user: response.user });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    } else {
+        res.status(405).json({ error: 'Method not allowed' });
+    }
+}
+</file>
+
+<file path="postcss.config.mjs">
+/** @type {import('postcss-load-config').Config} */
+const config = {
+  plugins: {
+    tailwindcss: {},
+  },
+};
+
+export default config;
+</file>
+
+<file path="public/next.svg">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
+</file>
+
+<file path="public/productData.js">
+const carpetsJson = [
+  {
+    name: 'Faux Fur Area Rug',
+    slug: 'faux-fur-area-rug',
+    size: "3' x 5'",
+    color: 'White',
+    price: 70,
+    discount: 0,
+inStock: 35, 
+category: "carpet",
+
+    description: 'Soft and plush faux fur area rug',
+    images: ["https://www.carpetim.co.il/wp-content/uploads/2020/03/%D7%91%D7%9E%D7%91%D7%95-2153-300x300.jpg.webp",
+      'https://www.carpetim.co.il/wp-content/uploads/2020/03/%D7%93%D7%92%D7%9D-%D7%A1%D7%A0%D7%98%D7%99%D7%99%D7%92%D7%95-300x300.jpg.webp',
+      'https://www.carpetim.co.il/wp-content/uploads/2020/03/WhatsApp-Image-2023-04-30-at-22.08.41-300x300.jpeg.webp'
+    ],
+    __v: 0
+  },
+  {
+    name: 'Vintage Oriental Carpet',
+    slug: 'vintage-oriental-carpet',
+    size: "8' x 10'",
+    color: 'Blue',
+    price: 280,
+    discount: 0,
+inStock: 35, 
+category: "carpet",
+
+    description: 'Elegant vintage oriental carpet with intricate patterns',
+    images: ['https://www.carpetim.co.il/wp-content/uploads/2020/02/%D7%90%D7%95%D7%98%D7%A0%D7%98%D7%99%D7%A7-1911-300x300.jpg.webp',
+      'https://www.carpetim.co.il/wp-content/uploads/2020/01/%D7%90%D7%95%D7%98%D7%A0%D7%98%D7%99%D7%A7-1911-150x150.jpg.webp',
+      'https://www.carpetim.co.il/wp-content/uploads/2020/02/1911_optimized-600x600.jpg.webp'],
+    __v: 0
+  },
+  {
+    name: 'Soft Shaggy Rug',
+    slug: 'soft-shaggy-rug',
+    size: "5' x 7'",
+    color: 'Black',
+    price: 120,
+    discount: 0,
+inStock: 35, 
+category: "carpet",
+
+    description: 'Luxurious shaggy rug for a cozy feel',
+    images: ['https://www.carpetim.co.il/wp-content/uploads/2021/02/2210-300x300.jpg',
+      'https://www.carpetim.co.il/wp-content/uploads/2021/02/WhatsApp-Image-2022-07-14-at-15.59.18-1-300x300.jpeg.webp',
+      'https://www.carpetim.co.il/wp-content/uploads/2021/02/WhatsApp-Image-2022-09-18-at-13.53.48-Copy-300x300.jpeg.webp'
+    ],
+    __v: 0
+  },
+  {
+    name: 'Moroccan Diamond Rug',
+    slug: 'moroccan-diamond-rug',
+    size: "5' x 8'",
+    color: 'Ping&LightBlue',
+    price: 110,
+    discount: 0,
+inStock: 35, 
+category: "carpet",
+
+    description: 'Moroccan-inspired diamond pattern rug',
+    images: ['https://www.carpetim.co.il/wp-content/uploads/2020/02/%D7%90%D7%95%D7%98%D7%A0%D7%98%D7%99%D7%A7-990-300x300.jpg.webp',
+      'https://www.carpetim.co.il/wp-content/uploads/2020/02/92579631_10157318439648727_5132630281160753152_o-300x300.jpg.webp',
+      'https://www.carpetim.co.il/wp-content/uploads/2020/02/whatsapp-image-2022-06-13-at-10_optimized.29.59-300x300.jpeg.webp'
+    ],
+    __v: 0
+  },
+  {
+    name: 'Modern Geometric Rug',
+    slug: 'modern-geometric-rug',
+    size: "6' x 9'",
+    color: 'Gray&Beige',
+    price: 150,
+    discount: 0,
+inStock: 35, 
+category: "carpet",
+
+    description: 'Contemporary geometric rug for a stylish look',
+    images:
+ ['https://www.carpetim.co.il/wp-content/uploads/2020/03/%D7%A4%D7%99%D7%A8%D7%99%D7%9C%D7%98%D7%99-2025-300x300.jpg.webp',
+      'https://www.carpetim.co.il/wp-content/uploads/2020/03/whatsapp-image-2023-06-15-at-10_optimized.59.35-300x300.jpeg.webp',
+      'https://www.carpetim.co.il/wp-content/uploads/2020/03/whatsapp-image-2023-06-15-at-10_optimized.59.35-300x300.jpeg.webp'
+    ],
+    __v: 0
+  },
+  {
+    name: 'Striped Flatweave Rug',
+    slug: 'striped-flatweave-rug',
+    size: "9' x 12'",
+    color: 'Fire',
+    price: 200,
+    discount: 0,
+    inStock: 35, 
+    category: "carpet",
+    description: 'Classic striped flatweave rug for a timeless look',
+    images: ['https://www.carpetim.co.il/wp-content/uploads/2020/02/%D7%90%D7%95%D7%98%D7%A0%D7%98%D7%99%D7%A7-1922-300x300.jpg.webp',
+      'https://www.carpetim.co.il/wp-content/uploads/2020/02/%D7%A1%D7%95%D7%9C-1-300x300.jpeg.webp',
+      'https://www.carpetim.co.il/wp-content/uploads/2020/02/%D7%A1%D7%95%D7%9C-2-300x300.jpeg.webp'
+    ],
+    __v: 0
+  },
+  {
+    name: 'Bohemian Tassel Rug',
+    slug: 'bohemian-tassel-rug',
+    size: "4' x 6'",
+    color: 'Multi-color',
+    price: 90,
+    discount: 0,
+    inStock: 35, 
+    category: "carpet",
+
+    description: 'Bohemian style rug with tassel details',
+    images: ['https://www.carpetim.co.il/wp-content/uploads/2022/07/2-1858-2-300x300.jpg',
+      'https://www.carpetim.co.il/wp-content/uploads/2022/07/%D7%A8%D7%99%D7%A3-1-600x600.jpeg.webp',
+      'https://www.carpetim.co.il/wp-content/uploads/2022/07/%D7%A8%D7%99%D7%A3-2-600x600.jpeg.webp'
+    ],
+    __v: 0
+  }
+]
+</file>
+
+<file path="public/vercel.svg">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 283 64"><path fill="black" d="M141 16c-11 0-19 7-19 18s9 18 20 18c7 0 13-3 16-7l-7-5c-2 3-6 4-9 4-5 0-9-3-10-7h28v-3c0-11-8-18-19-18zm-9 15c1-4 4-7 9-7s8 3 9 7h-18zm117-15c-11 0-19 7-19 18s9 18 20 18c6 0 12-3 16-7l-8-5c-2 3-5 4-8 4-5 0-9-3-11-7h28l1-3c0-11-8-18-19-18zm-10 15c2-4 5-7 10-7s8 3 9 7h-19zm-39 3c0 6 4 10 10 10 4 0 7-2 9-5l8 5c-3 5-9 8-17 8-11 0-19-7-19-18s8-18 19-18c8 0 14 3 17 8l-8 5c-2-3-5-5-9-5-6 0-10 4-10 10zm83-29v46h-9V5h9zM37 0l37 64H0L37 0zm92 5-27 48L74 5h10l18 30 17-30h10zm59 12v10l-3-1c-6 0-10 4-10 10v15h-9V17h9v9c0-5 6-9 13-9z"/></svg>
+</file>
+
+<file path="tailwind.config.js">
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+        "gradient-conic":
+          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      },
+    },
+  },
+  plugins: [],
+};
+</file>
+
+<file path="app/api/auth/[...nextauth]/route.js">
+// import NextAuth from "next-auth/next";
+// import GoogleProvider from "next-auth/providers/google";
+
+// const handler = NextAuth({
+//   providers: [
+//     GoogleProvider({
+//       clientId: process.env.GOOGLE_CLIENT_ID,
+//       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+//     }),
+//   ],
+//   adapter: SupabaseAdapter({
+//     url: process.env.SUPABASE_URL,
+//     secret: process.env.SUPABASE_SERVICE_ROLE_KEY,
+//   }),
+// });
+
+// export { handler as GET, handler as POST };
+</file>
+
+<file path="app/blur/style.module.css">
+.container{
+    padding: 1rem;
+    display: flex;
+    
+    justify-content: start;
+    align-items: center;
+}
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+        .shake {
+            animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+        }
+</file>
+
+<file path="app/color/[detail]/page.jsx">
+import ColorChanger from '@/components/Color';
+import ToLogin from '@/components/ToLogin';
+import { authAction } from '@/server/BL/actions/login.action';
+import { readUserByFieldService } from '@/server/BL/services/user.service';
+import { connectToMongo } from '@/server/connectToMongo'
+import { unstable_noStore } from 'next/cache';
+import Link from 'next/link'
+
+export default async function page({ params: { detail } }) {
+
+    function extractColors(detail) {
+        const colors = detail.split('_');
+
+        return {
+            background_color: colors[0],
+            font_color: colors[1]
+        };
+    }
+    let colorsUser = extractColors(detail);
+  
+    const authData = await authAction();
+
+  if (!authData || !authData.userToken) return <ToLogin/>
+
+  const { email } = authData.userToken;
+
+  let currentUser = await readUserByFieldService({ email });
+  const simplifiedUser = {
+    username: currentUser.username,
+    password: currentUser.password,
+    email: currentUser.email,
+    colorWeaknesses: currentUser.colorWeaknesses.map(weakness => ({
+      background_color: weakness.background_color,
+      font_color: weakness.font_color
+    }))
+  };
+  unstable_noStore()
+
+  return (
+    <div >
+      <ColorChanger user={simplifiedUser} colorsUser={colorsUser} />
+    </div>
+  )
+}
+</file>
+
+<file path="app/color/style.module.css">
+.container{
+    padding: 1rem;
+    display: flex;
+    
+    justify-content: start;
+    align-items: center;
+    }
+</file>
+
+<file path="app/globals.css">
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    background-color: var(--blue);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
+
+* {
+    /* color: var(--orange-yellow); */
+    padding: 0;
+    margin: 0%;
+    box-sizing: border-box;
+    font-weight: 400;
+    font-style: normal;
+}
+
+button {
+    border: none;
+}
+
+a,
+input,
+select,
+button {
+    font: inherit;
+    text-decoration: none;
+}
+
+a {
+    text-emphasis: none;
+    color: inherit;
+}
+
+:root {
+    --title-color: #071232;
+    --gray: #9da1a2;
+    --dark-blue: #374151;
+    --blue2: #444d5c5b;
+    --blue: #444d5c;
+    --orange-yellow: #f7aa05;
+    --orange-yellow-lite: #f7aa0574;
+}
+
+.scroll-element {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  
+  .scroll-element.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</file>
+
+<file path="app/signin/page.jsx">
+"use server"
+const jwt = require('jsonwebtoken');
+
+import { loginAction } from '@/server/BL/actions/login.action';
+import { cookies } from 'next/headers'
+import Login from '@/components/Login';
+import SighnIn from '@/components/SighnIn';
+
+export default async function Signin() {
+  const cookieStore = cookies()
+
+
+  return (<>
+    <SighnIn />
+  </>
+  )
+}
+</file>
+
+<file path="app/style.module.css">
+.bckPi {
+    /* position: fixed; */
+    animation: enlargeImage 5s 2 alternate;
+    position: relative;
+    top: 4rem;
+    z-index: -2;
+}
+
+.section {
+    position: relative;
+    top: 4rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    padding-right: 10vw;
+    padding-left: 10vw;
+    gap: 0rem 4rem;
+    white-space: nowrap;
+    text-overflow: ellipsis; 
+}
+
+.section img {
+    clip-path: inset(10% 0 10% 0);
+    height: 300px;
+    object-fit: cover;
+}
+
+.name {
+    font-weight: 700;
+    color: #9da1a2;
+    font-size: 25px;
+}
+
+
+.link {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: start;
+    padding: 5px;
+    transition: transform 0.6s ease;
+    width:100% ;
+}
+
+.link:hover {
+    transform: scale(1.1);
+
+}
+
+.link:hover .name {
+    color: #f7aa05;
+}
+
+@keyframes enlargeImage {
+    0% {
+        transform: scale(1);
+        /* Start at original size */
+    }
+
+    50% {
+        transform: scale(1.1);
+        /* Enlarge the image by 10% */
+    }
+
+    100% {
+        transform: scale(1);
+        /* Return to original size */
+    }
+}
+
+@media (width > 1600px) {
+    .section img {
+        height: 367px;
+    }
+}
+</file>
+
+<file path="components/Blur/style.module.css">
+.contain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 66%;
+    margin: auto;
+    height: 84vh;
+    background-color: aliceblue;
+    border-radius: 2%;
+    border: 2px solid #facc15;
+}
+
+.inContain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 96vw;
+    height: 42vh;
+}
+</file>
+
+<file path="components/Color/style.module.css">
+.contain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 66%;
+    margin: auto;
+    height: 100vh;
+    background-color: aliceblue;
+    border-radius: 2%;
+    border: 2px solid orange;
+}
+
+.inContain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 96vw;
+    height: 50vh;
+}
+
+
+.rekaBackground {
+    border-radius: 100%;
+    text-align: center;
+    min-width: 24rem;
+    display: inline-block;
+    padding: 50px;
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+}
+
+.font {
+    font-size: 200px;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+}
+</file>
+
+<file path="components/context/DataContext.jsx">
+import React, { createContext, useState } from 'react';
+
+const MyContext = createContext();
+
+const MyProvider = ({ children }) => {
+    const [data, setData] = useState('');
+
+    const updateData = async () => {
+        setData('gnb');
+    };
+
+    return (
+        <MyContext.Provider value={{ data, updateData }}>
+            {children}
+        </MyContext.Provider>
+    );
+};
+
+export { MyContext, MyProvider };
+</file>
+
+<file path="components/ImageCarousel.module.css">
+.carousel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Prevents overflow issues */
+  }
+  
+  .imageWrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1; /* Ensure it's below the children */
+    pointer-events: none; /* Allows interactions with children */
+  }
+  
+  .imageWrapper.active {
+    opacity: 1;
+  }
+  
+  .childrenWrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2; /* Ensure children are above images */
+    text-align: center; /* Center the children */
+    padding: 1rem; /* Add padding to prevent children from being too close to the edges */
+  }
+  
+  @media (max-width: 768px) {
+    .carousel {
+      height: 100vh; /* Make the carousel take full viewport height on smaller screens */
+    }
+  
+    .childrenWrapper {
+      width: 90%; /* Make sure children fit better on smaller screens */
+      padding: 0.5rem; /* Adjust padding for smaller screens */
+    }
+  }
+</file>
+
+<file path="components/Images/index.jsx">
+"use client"
+import React, { useState, useEffect } from 'react';
+import style from './style.module.css'
+import Image from 'next/image'
+
+export default function Images({ carpet }) {
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    useEffect(() => {
+        const interval = setTimeout(() => {
+            setCurrentImageIndex(prevIndex => (prevIndex + 1) % carpet.images.length)
+        }, 2000)
+        return () => clearTimeout(interval)
+    }, [currentImageIndex])
+
+    // const interval = setInterval(() => {
+    //     setCurrentImageIndex(prevIndex => (prevIndex + 1) % carpet.images.length);
+    // }, 3000);
+    return (
+     
+            <div className={style.container}>
+                <Image src={carpet.images[currentImageIndex]} alt={carpet.title} width={600} height={400} className={style.img} />
+            </div>
+           
+
+
+    )
+}
+</file>
+
+<file path="components/Logo/style.module.css">
+.blur {
+    filter: blur(1px); /* Adjust the blur amount as needed */
+}
+@keyframes blink-vertical {
+  0%, 20%, 50%, 80%, 100% {
+    height: 0;
+  }
+  40%, 60% {
+    height: 100%;
+  }
+}
+
+.blinking-eye {
+  position: relative;
+  width: 50px; /* תוודא שהתמונה נמצאת בגודל המתאים */
+  height: 50px;
+}
+
+.blinking-eye::before,
+.blinking-eye::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  background-color: #1f2937;
+  animation: blink-vertical 3s infinite;
+  z-index: 1; /* above the image but below the text */
+}
+
+.blinking-eye::before {
+  top: 0;
+  transform-origin: top;
+}
+
+.blinking-eye::after {
+  bottom: 0;
+  transform-origin: bottom;
+}
+</file>
+
+<file path="components/Snellen/index.jsx">
+import React from 'react';
+import './SnellenChart.css';
+
+const SnellenChart = () => {
+    const chartData = [
+        { line: "E", size: 14.6 }, // 200 / 12
+        { line: "F P", size: 11 }, // 150 / 12
+        { line: "T O Z", size: 8.8 }, // 120 / 12
+        { line: "L P E D", size: 7.3 }, // 100 / 12
+        { line: "P E C F D", size: 5.8 }, // 85 / 12
+        { line: "E D F C Z P", size: 4.4 }, // 70 / 12
+        { line: "F E L O P Z D", size: 3.66 }, // 60 / 12
+        { line: "D E F P O T E C", size: 2.9 }, // 50 / 12
+        { line: "L E F O D P C T", size: 2.2 }, // 40 / 12
+        { line: "F D P L T C E O", size: 1.46 } // 30 / 12
+    ];
+
+    return (
+        <div className="snellen-chart">
+            <h1>לוח סנלן</h1>
+            <div className="gg"></div>
+            {chartData.map((data, index) => (
+                <div key={index} className="chart-line" style={{ fontSize: `${data.size}mm` }}>
+                    {data.line}
+                </div>
+            ))}
+        </div>
+    );
+};
+
+export default SnellenChart;
+</file>
+
+<file path="components/Snellen/SnellenChart.css">
+.snellen-chart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    margin-top: 50px;
+}
+
+.chart-line {
+    margin: 10px 0;
+}
+</file>
+
+<file path="components/UsersTable.jsx">
+import React from 'react';
+import Link from 'next/link';
+import Weaknesses from './Weaknesses';
+
+const UsersTable = ({
+    usersToDisplay,
+    requestSort,
+    expandedSection,
+    handleExpand,
+    deleteWeakness
+}) => {
+    return (
+        <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+            <thead className="bg-gray-200">
+                <tr>
+                    <th
+                        onClick={() => requestSort('username')}
+                        className="cursor-pointer p-4 text-left text-center"
+                    >
+                        Username
+                    </th>
+                    <th
+                        onClick={() => requestSort('email')}
+                        className="cursor-pointer p-4 text-left text-center"
+                    >
+                        Email
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {usersToDisplay.map((user, index) => (
+                    <React.Fragment key={index}>
+                        <tr className="border-t even:bg-gray-50 hover:bg-gray-100 text-center">
+                            <td className="p-4">{user.username}</td>
+                            <td className="p-4">
+                                <a
+                                    href={`https://mail.google.com/mail/?view=cm&fs=1&to=${user.email}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline"
+                                >
+                                    {user.email}
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colSpan="2" className="p-4">
+                                <div className="flex gap-4 justify-center">
+                                    <Weaknesses
+                                        type="color"
+                                        weaknesses={user.colorWeaknesses}
+                                        email={user.email}
+                                        deleteWeakness={deleteWeakness}
+                                        expanded={expandedSection.userId === user.email && expandedSection.type === 'color'}
+                                        onChange={(isExpanded) => handleExpand(user.email, 'color', isExpanded)}
+                                    />
+                                    <Weaknesses
+                                        type="size"
+                                        weaknesses={user.sizeWeaknesses}
+                                        email={user.email}
+                                        deleteWeakness={deleteWeakness}
+                                        expanded={expandedSection.userId === user.email && expandedSection.type === 'size'}
+                                        onChange={(isExpanded) => handleExpand(user.email, 'size', isExpanded)}
+                                    />
+                                    <Weaknesses
+                                        type="field"
+                                        weaknesses={user.fieldWeaknesses}
+                                        email={user.email}
+                                        deleteWeakness={deleteWeakness}
+                                        expanded={expandedSection.userId === user.email && expandedSection.type === 'field'}
+                                        onChange={(isExpanded) => handleExpand(user.email, 'field', isExpanded)}
+                                    />
+                                </div>
+                            </td>
+                        </tr>
+                    </React.Fragment>
+                ))}
+            </tbody>
+        </table>
+    );
+};
+
+export default UsersTable;
+</file>
+
+<file path="pages/api/updateUser.js">
+import { connectToMongo } from '@/server/connectToMongo';
+import { updateUserByFieldService } from '@/server/BL/services/user.service';
+
+export default async function handler(req, res) {
+    console.log('Handler called with method:', req.method);
+
+    if (req.method !== 'POST') {
+        return res.status(405).json({ message: 'Only POST method is allowed' });
+    }
+
+    await connectToMongo(); 
+
+    const { filter: { email }, updateData } = req.body;
+
+    console.log('Email:', email);
+    console.log('UpdateData:', JSON.stringify(updateData, null, 2));
+
+    if (email === undefined || email === null || email === '') {
+        return res.status(406).json({ message: 'Email is required and cannot be empty' });
+    }
+
+    if (updateData === undefined || updateData === null || Object.keys(updateData).length === 0) {
+        return res.status(400).json({ message: 'Update data is required and cannot be empty' });
+    }
+
+    if (updateData.colorWeaknesses && Array.isArray(updateData.colorWeaknesses)) {
+        console.log('Color Weakness:', updateData.colorWeaknesses[0]);
+    }
+
+    try {
+        const result = await updateUserByFieldService({email}, updateData);
+        res.status(200).json({ message: 'User updated successfully', result });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ message: 'Error updating user', error: error.message });
+    }
+}
+</file>
+
+<file path="public/blurRules.txt">
+כללים לבדיקת ראייה  באורך 1 מטר:
+
+                        הגדרה:
+                        - הקפידו על תאורה טובה ועקבית בחדר.
+                        - התקן את התרשים בגובה העיניים עבור האדם הנבדק.
+                        - מדוד וסמן בדיוק מטר אחד מהתרשים כדי שהנבדק יעמוד.
+                        נוהל בדיקה:
+                        - בדוק כל עין בנפרד. כסה את העין שאינה בודקת עם אטם או מדבקה.
+                        - התחל עם עין ימין, ולאחר מכן בדוק את עין שמאל.
+                        - בקשו מהנבדק לקרוא את הקו הקטן ביותר שהוא יכול לראות בבירור.
+                        ניקוד:
+                        - רשמו את השורה הקטנה ביותר שהנבדק יכול לקרוא במדויק (לפחות 3 מתוך 5 אותיות נכונות).
+                        - שימו לב לציון חדות הראייה המשויך לקו זה.
+                        פרשנות:
+                        - ראייה "רגילה" בגובה 1 מטר תהיה היכולת לקרוא את הקו השקול ל-6/6 (20/20) ראייה ב-6 מטרים.
+                        - אם אדם יכול לקרוא רק קווים גדולים יותר, הראייה שלו נמוכה מהנורמלי למרחק זה.
+                        הקלטת תוצאות:
+                        - רשמו את התוצאות כשבר, כאשר המונה הוא 1 (מרחק הבדיקה) והמכנה הוא המרחק שבו יכול אדם עם ראייה תקינה לקרוא את הקו הזה.
+                        שיקולים נוספים:
+                        - אם הנבדק מרכיב עדשות מתקנות, בדוק גם איתם וגם בלעדיהם.
+                        - עבור ילדים צעירים מאוד או אנשים לא מילוליים, שקול להשתמש במשחק התאמה עם האותיות או הסמלים במקום לבקש מהם לקרוא בקול.
+                        קריטריוני הפניה:
+                        - אם הנבדק אינו יכול לקרוא את הקו המקביל לראייה 6/12 (20/40) או טוב יותר, שקול להפנות אותו לבדיקת עיניים מקיפה.
+                        מגבלות:
+                        - זכרו, בדיקה זו מהווה כלי מיון ואינה תחליף לבדיקת עיניים מלאה.
+                        - בדיקה זו בודקת בעיקר את חדות הראייה ואינה מעריכה היבטים אחרים של ראייה או בריאות העין.
+                        היגיינה:
+                        - נקה את החסימה או התיקון בין משתמשים.
+                        - אם אתה משתמש בתרשים פיזי, נקה אותו באופן קבוע.
+                        תיעוד:
+                        - רשום את תאריך הבדיקה, תוצאות לכל עין, האם נעשה שימוש בעדשות מתקנות וכל תצפיות או קשיים במהלך הבדיקה.
+</file>
+
+<file path="README.md">
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+#   C a r p e t  
+ #   A i y n B r i g h t  
+ #   A i y n B r i g h t  
+ 
+</file>
+
+<file path="server/auth.js">
+const jwt = require('jsonwebtoken');
+const SECRET = process.env.JWT_SECRET || "AYINBRIGHT"
+
+export async function generate(user) {
+    let token = jwt.sign(user, SECRET, { expiresIn: "200m" });
+    return `Bearer ${token}`
+}
+
+async function validate(req, res, next) {
+    try {
+        let token = req.headers.authorization?.split('Bearer ')[1] || "null";
+        // let userFromToken = jwt.verify(token, SECRET)
+        // req.body.from = userFromToken._id;
+        req.body.from = { "id": token };
+        // console.log(req.body)
+        next();
+    } catch (err) {
+        console.error(err);
+        // res.sendStatus(401);
+        res.status(401).json({ error: 'Token expired' });
+    }
+}
+
+async function auth(req, res, next) {
+    try {
+        let token = req.headers.authorization?.split('Bearer ')[1] || "null";
+        if(!token) throw "no token provided"
+        let userIdFromToken = jwt.verify(token, SECRET);
+        if(!userIdFromToken) throw "not correct"
+        req.user = userIdFromToken
+        next()
+    }
+    catch(e) {
+        console.log(e);
+        res.sendStatus(401)
+    }
+}
+module.exports = {
+    validate,
+    generate,
+    auth
+}
+</file>
+
+<file path="app/blur/improve/page.jsx">
+import { connectToMongo } from '@/server/connectToMongo'
+import { unstable_noStore } from 'next/cache'
+import { authAction } from '@/server/BL/actions/login.action'
+import { readUserByFieldService } from '@/server/BL/services/user.service'
+import Blur from '@/components/Blur'
+import ToLogin from '@/components/ToLogin'
+
+export default async function BlurPage() {
+  await new Promise(resolve => setTimeout(resolve, 3000))
+  await connectToMongo();
+  const authData = await authAction();
+  if (!authData || !authData.userToken) return <ToLogin />
+
+  const { email } = authData.userToken;
+
+  let currentUser = await readUserByFieldService({ email });
+
+  const simplifiedUser = {
+    userId: currentUser.userId?.toString() || '',
+    username: currentUser.username,
+    password: currentUser.password,
+    email: currentUser.email,
+    colorWeaknesses: currentUser.colorWeaknesses || [],
+    sizeWeaknesses: currentUser.sizeWeaknesses?.map(weakness => ({
+      fontSize: weakness.fontSize,
+      distance: weakness.distance,
+      date: weakness.date instanceof Date ? weakness.date.toISOString() : weakness.date, // המרת Date למחרוזת
+    })) || [],
+    fieldWeaknesses: currentUser.fieldWeaknesses || [],
+  };
+
+  unstable_noStore();
+  return (
+    <div>
+      <Blur user={simplifiedUser} />
+    </div>
+  );
+}
+</file>
+
+<file path="app/field/[detail]/page.jsx">
+import { connectToMongo } from '@/server/connectToMongo'
+import { unstable_noStore } from 'next/cache'
+import Field from '@/components/Field'
+import { authAction } from '@/server/BL/actions/login.action'
+import { readUserByFieldService } from '@/server/BL/services/user.service'
+import ToLogin from '@/components/ToLogin'
+
+
+
+
+export default async function page({ params: { detail } }) {
+  function extract_size(detail) {
+    const size = detail.split('_');
+
+    return {
+      side: size[0],
+      distance: size[1]
+    };
+  }
+  let distanceUser = extract_size(detail);
+  // await new Promise(resolve => setTimeout(resolve, 3000))
+  await connectToMongo();
+  const authData = await authAction();
+  if (!authData || !authData.userToken) return <ToLogin/>
+
+  const { email } = authData.userToken;
+
+  let currentUser = await readUserByFieldService({ email });
+  const simplifiedUser = {
+    username: currentUser.username,
+    password: currentUser.password,
+    email: currentUser.email,
+    fieldWeaknesses: currentUser.fieldWeaknesses.map(weakness => ({
+      side: weakness.side,
+      distance: weakness.distance,
+      date: weakness.date
+    })),
+  };
+  unstable_noStore()
+  return (
+    <div >
+      <Field user={simplifiedUser} distanceUser={distanceUser} />
+    </div>
+  )
+}
+</file>
+
+<file path="app/layout.jsx">
+import { Poppins } from "next/font/google";
+import "./globals.css";
+import Header from "@/components/Header";
+import Providers from "@/components/Providers";
+import Appbar from "@/components/Appbar";
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"]
+});
+
+export const metadata = {
+  title: "Create Emanuel & Josh",
+  description: "Generated for optimitries",
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body className={poppins.className}>
+        <Header />
+        {children}
+        {/* <Providers>
+          <SighnInButton />
+
+          {children}</Providers> */}
+          {/* <Appbar/> */}
+      </body>
+    </html>
+  );
+}
+</file>
+
+<file path="components/AboutPage.jsx">
+"use client"
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+
+const Section = ({ title, children, color }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-8 bg-white rounded-lg shadow-lg overflow-hidden"
+        >
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                // className={`w-full text-left bg-teal-600 text-white p-4 font-bold text-xl flex justify-between items-center`}
+                className={`w-full text-left bg-${color} text-white p-4 font-bold text-xl flex justify-between items-center`}
+            >
+                {title}
+                <svg
+                    className={`w-6 h-6 transform transition-transform ${isOpen ? 'rotate-180' : ''
+                        }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+            <motion.div
+                initial={false}
+                animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+            >
+                <div className="p-4">{children}</div>
+            </motion.div>
+        </motion.div>
+    );
+};
+
+const AboutPage = () => {
+    return (
+        <div className="min-h-screen  p-8">
+            <div className="max-w-4xl mx-auto">
+                <motion.h1
+                    initial={{ opacity: 0, y: -50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="text-4xl font-bold text-white mb-8 text-center"
+                >
+                    Emanuel Tiran And Joush Bloch
+                </motion.h1>
+
+                <Section title="My Story" color='yellow-400'>
+                    <p className="text-gray-800 leading-relaxed">
+                        My journey into the world of vision diagnosis and improvement is deeply personal. It all began when my child was born with cortical blindness. This life-changing event led me down a path that would not only transform my child's life but also become my life's mission. When faced with my child's diagnosis, I dove headfirst into understanding everything I could about vision disorders and potential treatments. Through intensive work and unwavering determination, we achieved what once seemed impossible - my child gained the ability to see objects and identify shapes.
+                    </p>
+                </Section>
+
+                <Section title="My Mission" color='orange-500'>
+                    <p className="text-gray-800 leading-relaxed">
+                        This amazing progress ignited a passion within me that I knew I had to share with the world. While it's not my clinical profession, it has become the driving force of my life. I've dedicated countless hours to research, learning, and developing techniques to help people with various vision impairments. My approach is rooted in personal experience and fueled by the joy of witnessing progress. I understand the challenges, fears, and hopes that come with vision impairments because I've lived them.
+                    </p>
+                </Section>
+
+                <Section title="Our Services" color='gray-800'>
+                    <p className="text-gray-800 leading-relaxed mb-4">
+                        Through this website, I aim to share knowledge, offer support, and provide hope to those facing similar challenges. Whether you're a parent of a child with vision impairments, an individual struggling with your own vision issues, or simply someone interested in vision health, you'll find resources here to assist you on your journey.
+                    </p>
+                    <ul className="list-disc list-inside text-gray-800 space-y-2">
+                        <li>Diagnosis and treatment of blurred vision</li>
+                        <li>Understanding and managing color blindness</li>
+                        <li>Techniques for improving visual field</li>
+                    </ul>
+                </Section>
+
+                <Section title="Join the Journey" color='teal-600'>
+                    <p className="text-gray-800 leading-relaxed mb-4">
+                        Remember, progress is possible. My child's journey is a testament to that. While every case is unique, and results may vary, I believe in the power of dedication, knowledge, and never giving up hope. I'm not here just to share information - I'm here to share a vision of possibility. Let's work together to harness the potential of your vision or that of your loved ones. Your journey towards clearer sight begins here, and I'm honored to be a part of it.
+                    </p>
+                    <Link className="bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 transition duration-300"
+                        href={`mailto:eatiran39@gmail.com?subject=אני מעוניין להצטרף למסע&body=שלום,%20"`}> Contact Us Now</Link>
+                </Section>
+            </div>
+        </div>
+    );
+};
+
+export default AboutPage;
+</file>
+
+<file path="components/Navlink/style.module.css">
+.current {
+    font-weight: 900;
+    color: var(--orange-yellow);
+    transition: transform 0.8s ease, color 0.3s ease;  
+    transform: scale(1.2); /* הגדר שינוי גודל עבור האלמנט המודגש */
+}
+
+.notCurrent {
+    transform: scale(1); /* מבטיח שהמצב ההתחלתי הוא בגודל רגיל */
+    transition: transform 0.3s ease; /* הוספת מעבר עבור scale */
+}
+
+.myHover {
+    transition: text-shadow 0.3s, transform 0.3s ease; /* מעבר גם לטקסט וגם לגודל */
+}
+
+.myHover:hover {
+    text-shadow: 2px 2px 20px rgb(255, 255, 255); 
+    text-shadow: 2px 2px 20px rgb(255, 255, 255); 
+}
+</file>
+
+<file path="components/Popup/index.jsx">
+import React, { useEffect, useState } from 'react';
+import style from "./style.module.css"
+export default function Popup({ open, setOpen, type }) {
+    const [text, setText] = useState('');
+
+    useEffect(() => {
+        // טוען את הקובץ txt בצורה דינמית
+        fetch(type === 'blur' ? '/blurRules.txt' : '/fieldsRules.txt')
+            .then(response => response.text())
+            .then(data => setText(data))
+            .catch(error => console.error('Error loading blur.txt:', error));
+    }, []);
+
+    const handleOutsideClick = () => {
+        setOpen(!open);
+    };
+
+    const handleInsideClick = (e) => {
+        e.stopPropagation();
+    };
+
+    return (
+        open && (
+            <div className={style.outside} onClick={handleOutsideClick}>
+                <div className={style.inside} onClick={handleInsideClick}>
+                    <div className={style.scrollContent}>
+                        {text}
+                    </div>
+                </div>
+            </div>
+        )
+    )
+}
+</file>
+
+<file path="components/Popup/style.module.css">
+.outside {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgb(255, 252, 204);
+  opacity: 1;
+  display: grid;
+  place-items: center;
+}
+ 
+.inside {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  max-height: 80vh; /* Limit the height to 80% of the viewport height */
+  background-color: #053f6f;
+  padding: 20px;
+  text-align: right;
+  outline: 5000px solid rgba(0, 0, 0, 0.8);
+  color: antiquewhite;
+  font-size: 25px;
+  overflow: hidden; /* Hide overflow */
+  animation: scale-in 1.5s ease-in-out;
+}
+
+.scrollContent {
+  max-height: calc(80vh - 40px); /* Subtract padding from max height */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding-right: 15px; 
+  /* Add some padding for the scrollbar */
+}
+
+.scrollContent::-webkit-scrollbar {
+  width: 5px; /* Width of the scrollbar */
+  background-color: #f1f1f1; /* Background color of the scrollbar */
+}
+/* Style the scrollbar thumb */
+.scrollContent::-webkit-scrollbar-thumb {
+  background-color: #888; /* Color of the scrollbar thumb */
+  border-radius: 10px; /* Rounded corners for the thumb */
+}
+
+/* Style the scrollbar thumb on hover */
+.scrollContent::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* Darker color on hover */
+}
+
+/* Style the scrollbar track */
+.scrollContent::-webkit-scrollbar-track {
+  background-color: #f1f1f1; /* Background color of the track */
+}
+@keyframes scale-in {
+  from {
+      transform: translate(-50%, -50%) scale(0.1);
+      opacity: 0.5;
+  }
+  to {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+  }
+}
+</file>
+
+<file path="pages/api/get-time.js">
+import { NextResponse } from 'next/server';
+export default async function handler(req, res) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  try {
+    const response = await fetch(
+      'https://timeapi.io/api/Time/current/zone?timeZone=Asia/Jerusalem'
+    );
+    const data = await response.json();
+    return res.status(200).json({
+      time: data.dateTime || new Date().toISOString()
+    });
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to fetch time' });
+  }
+}
+</file>
+
+<file path="public/fieldsRules.txt">
+כללי בדיקת שדה חזותי :
+
+הגדרה 1 -:
+-נצרך בשני אנשים, המטופל והמטפל
+- שבו 1 מטר מהמסך
+- המסך אמור להיות בגודל של 22 אינצ'
+- ודא שלחדר יש תאורה מתונה
+- שמור על ראשך בשקט ועיניים בגובה עם מרכז המסך
+המבחן 2- :
+- התמקד במטרה בצד שמאל או ימין של המסך
+- אותיות יופיעו בצידי המסך
+- נסו לזהות את האותיות הללו מבלי להביט ישירות בהן
+המשימה שלך:
+- שים לב למטרה בצד
+- אמור את האות שאתה רואה (או "אף אחד" אם אינך רואה אותה)
+- זה בסדר לנחש אם לא בטוחים
+נקודות חשובות:
+- בדוק עין אחת בכל פעם (השתמש במדבקה המצורפת)
+- הרכיבו משקפיים/מגעים אם אתם עושים זאת בדרך כלל
+- קח הפסקות במידת הצורך
+- הבדיקה נמשכת כ-10-15 דקות
+זכור:
+- אל תזיז את העיניים מהמטרה הצדדית
+- מהבהב כרגיל
+- ענה בכנות לקבלת תוצאות מדויקות
+לאחר המבחן:
+- הנח את עיניך
+- שתף כל משוב על החוויה שלך
+</file>
+
+<file path="server/BL/services/user.service.js">
+import { createUser, readUserById, readUsers, readUser, updateUser,deleteColorWeaknessAtIndex } from "@/server/DL/controllers/user.controller";
+
+
+export const createUserService = (data) => createUser(data)
+export const readUsersService = (filter) => readUsers(filter)
+export const readUserByIdService = (id) => readUserById(id)
+export const readUserByFieldService = (filter) => readUser(filter)
+export const updateUserByFieldService = (filter, updateData) => updateUser(filter, updateData)
+export const deleteUserByFieldService = (email, field, index) => {
+    return deleteColorWeaknessAtIndex(email, field, index);
+}
+</file>
+
+<file path="app/field/page.jsx">
+import { connectToMongo } from '@/server/connectToMongo'
+import { unstable_noStore } from 'next/cache'
+import style from './style.module.css'
+import Field from '@/components/Field'
+import { authAction } from '@/server/BL/actions/login.action'
+import { readUserByFieldService } from '@/server/BL/services/user.service'
+import Login from '@/components/Login'
+import Link from 'next/link'
+import ToLogin from '@/components/ToLogin'
+
+
+
+
+export default async function FieldPage() {
+  await new Promise(resolve => setTimeout(resolve, 3000))
+  await connectToMongo();
+  const authData = await authAction();
+  // console.log({ authData })
+  if (!authData || !authData.userToken) return <ToLogin/>
+
+
+  const { email } = authData.userToken;
+
+  let currentUser = await readUserByFieldService({ email });
+  const simplifiedUser = {
+    username: currentUser.username,
+    password: currentUser.password,
+    email: currentUser.email,
+    fieldWeaknesses: currentUser.fieldWeaknesses.map(weakness => ({
+      side: weakness.side,
+      distance: weakness.distance,
+      date: weakness.date
+    })),
+  };
+  unstable_noStore()
+  return (
+    <div className={style.container}>
+      <Field user={simplifiedUser} />
+    </div>
+  )
+}
+</file>
+
+<file path="components/CurrentTime.jsx">
+"use client"
+import React, { useState, useEffect } from 'react';
+
+const CurrentTime = () => {
+  const [time, setTime] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setTime(new Date());
+    
+    const interval = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // אם הקומפוננטה עוד לא מותקנת, נחזיר div ריק כדי למנוע הבדלים בין השרת ללקוח
+  if (!mounted) {
+    return <div className="flex justify-center items-center">
+      <div className="bg-slate-800 p-4 rounded-lg shadow-lg">
+        <div className="text-yellow-400 text-xl font-semibold">
+          <span className="ml-2">שעה נוכחית:</span>
+          <span className="font-mono">--:--:--</span>
+        </div>
+      </div>
+    </div>;
+  }
+
+  return (
+    <div className="flex justify-center items-center">
+      <div className="bg-slate-800 p-4 rounded-lg shadow-lg">
+        <div className="text-yellow-400 text-xl font-semibold">
+          <span className="ml-2">שעה נוכחית:</span>
+          <span className="font-mono">
+            {time?.toLocaleString('he-IL', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false
+            })}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CurrentTime;
+</file>
+
+<file path="components/Header/style.module.css">
+.header {
+    height: auto;
+    width: 100%;
+    padding: 0.5rem;
+    position: sticky;
+    top: 0px;
+    z-index: 10;
+    border-bottom: 1px solid transparent;
+    background-clip: padding-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: large;
+}
+
+.refs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .header {
+        padding: 1rem;
+        font-size: medium;
+        justify-content: space-between;
+    }
+    
+    .refs {
+        flex-direction: column;
+        width: 100%;
+        text-align: center;
+    }
+}
+</file>
+
+<file path="components/Navlink/index.jsx">
+"use client"
+import Link from 'next/link'
+import style from './style.module.css'
+import { usePathname } from 'next/navigation'
+import React from 'react'
+
+
+export default function Navlink({ children, href, colorText }) {
+   let path = usePathname()
+   const values = path.split('/');
+   path = "/" + values[1]
+   return (
+      <Link
+         href={href}
+         className={`${path === href ? style.current : style.notCurrent} ${colorText} ${style.myHover}`}
+         >{children}</Link>
+   )
+}
+</file>
+
+<file path="components/VisionImprovementHub .jsx">
+"use client";
+
+import React from "react";
+import { Button, Card, CardContent, Typography } from "@mui/material";
+import { useRouter } from "next/navigation";
+
+const VisionImprovementHub = () => {
+  const router = useRouter();
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <Card
+        className="w-full max-w-4xl shadow-lg backdrop-blur-sm bg-white/50" // Added backdrop-blur and semi-transparent background
+        style={{
+          backdropFilter: "blur(10px)", // Applies the blur effect
+          backgroundColor: "rgba(255, 255, 255, 0.5)", // Semi-transparent white
+        }}
+      >
+        <CardContent>
+          <Typography variant="h4" className="text-center text-gray-800 mb-4">
+            Vision Diagnosis and Improvement
+          </Typography>
+          <Typography variant="body1" className="text-center text-gray-600 mb-8">
+            Our platform offers various options to test and improve your vision,
+            focusing on blurred vision, color blindness, and visual field
+            assessment.
+          </Typography>
+          <div className="flex flex-col sm:flex-row justify-between items-center">
+            <Button
+              variant="contained"
+              sx={{
+                width: { xs: '100%', sm: 'auto' },
+                marginBottom: { xs: '16px', sm: 0 },
+                marginRight: { sm: '16px' },
+                backgroundColor: '#FBBF24', // צהוב מקביל ל-yellow-400
+                '&:hover': {
+                  backgroundColor: '#F59E0B', // גוון כהה יותר לhover
+                },
+              }}
+              onClick={() => router.push("/blur")}
+            >
+              Blurred Vision Test
+            </Button>
+            <Button
+              variant="contained"
+              sx={{
+                width: { xs: '100%', sm: 'auto' },
+                marginBottom: { xs: '16px', sm: 0 },
+                marginRight: { sm: '16px' },
+                backgroundColor: '#FB923C', // כתום מקביל ל-orange-400
+                '&:hover': {
+                  backgroundColor: '#F97316', // גוון כהה יותר לhover
+                },
+              }}
+              onClick={() => router.push("/color")}
+            >
+              Color Blindness Test
+            </Button>
+            <Button
+              variant="contained"
+              sx={{
+                width: { xs: '100%', sm: 'auto' },
+                backgroundColor: '#0D9488', // טיל מקביל ל-teal-600
+                '&:hover': {
+                  backgroundColor: '#0F766E', // גוון כהה יותר לhover
+                },
+              }}
+              onClick={() => router.push("/field")}
+            >
+              Visual Field Test
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default VisionImprovementHub;
+</file>
+
+<file path="components/Weaknesses.jsx">
+import React from 'react';
+import Button from '@mui/material/Button';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
+function Weaknesses({ type, weaknesses, email, deleteWeakness, expanded, onChange }) {
+    const isPresent = () => weaknesses && weaknesses.length > 0;
+
+    const handleAccordionChange = (event, isExpanded) => {
+        onChange && onChange(isExpanded);
+    };
+
+    return (
+        <Accordion
+            className="shadow-md rounded-lg w-full"
+            disableGutters
+            TransitionProps={{ unmountOnExit: true }}
+            expanded={expanded}
+            onChange={handleAccordionChange}
+        >
+            <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                className="bg-gray-100"
+            >
+                <Button
+                    variant="contained"
+                    style={{
+                        backgroundColor: '#1F2937',
+                        color: isPresent() ? '#fed7aa' : 'red',
+                        marginBottom: '0.5rem',
+                        padding: '0.5rem 1rem',
+                        textTransform: 'none',
+                    }}
+                    disabled={!isPresent()}
+                >
+                    {isPresent()
+                        ? `${type.charAt(0).toUpperCase() + type.slice(1)} Weaknesses`
+                        : `No ${type} Weaknesses`}
+                </Button>
+            </AccordionSummary>
+            <AccordionDetails>
+                {isPresent() && (
+                    <div
+                        className="overflow-x-auto overflow-y-auto max-h-64 
+                        [&::-webkit-scrollbar]:w-2 
+                        [&::-webkit-scrollbar]:h-2
+                        [&::-webkit-scrollbar-thumb]:bg-orange-400 
+                        [&::-webkit-scrollbar-thumb]:rounded-full
+                        [&::-webkit-scrollbar-track]:bg-gray-100"
+                    >
+                        <table className="min-w-full bg-white">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        {type.charAt(0).toUpperCase() + type.slice(1)} Weakness
+                                    </th>
+                                    {type === 'color' && (
+                                        <>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Background
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Font
+                                            </th>
+                                        </>
+                                    )}
+                                    {type === 'size' && (
+                                        <>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Font Size
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Eye
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Distance
+                                            </th>
+                                        </>
+                                    )}
+                                    {type === 'field' && (
+                                        <>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Side
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Distance
+                                            </th>
+                                        </>
+                                    )}
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Date
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {weaknesses.map((weakness, idx) => (
+                                    <tr key={idx}>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {type.charAt(0).toUpperCase() + type.slice(1)} Weakness {idx + 1}
+                                        </td>
+                                        {type === 'color' && (
+                                            <>
+                                                <td className="px-6 py-4 whitespace-nowrap">{weakness.background_color}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap">{weakness.font_color}</td>
+                                            </>
+                                        )}
+                                        {type === 'size' && (
+                                            <>
+                                                <td className="px-6 py-4 whitespace-nowrap">{weakness.fontSize}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap">{weakness.eye}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap">{weakness.distance}</td>
+                                            </>
+                                        )}
+                                        {type === 'field' && (
+                                            <>
+                                                <td className="px-6 py-4 whitespace-nowrap">{weakness.side}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap">{weakness.distance}</td>
+                                            </>
+                                        )}
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {new Date(weakness.date).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <Button
+                                                variant="contained"
+                                                color="error"
+                                                onClick={() => deleteWeakness(email, type, idx)}
+                                                size="small"
+                                            >
+                                                Delete
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </AccordionDetails>
+        </Accordion>
+    );
+}
+
+export default Weaknesses;
+</file>
+
+<file path="app/about/page.jsx">
+export const metadata = { title: "About" };
+import AboutPage from '@/components/AboutPage';
+import style from './style.module.css'
+import RandomCharacterGame from '@/components/RandomCharacterGame';
+export default async function About() {
+
+    return (
+       <div>
+        <AboutPage/>
+       </div>
+    )
+}
+</file>
+
+<file path="components/ColorDetails.jsx">
+"use client";
+import Link from 'next/link';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+export default function ColorDetails({ simplifiedUser }) {
+  const [showTable, setShowTable] = useState(false);
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <h3 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2 text-center">
+        Color Vision Profile
+      </h3>
+
+      {simplifiedUser.colorWeaknesses.length === 0 ? (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-blue-100">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-blue-100 rounded-full">
+              <svg
+                className="w-6 h-6 text-blue-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div>
+              <p className="text-gray-700 mb-2">No Color Vision Data Available</p>
+              <a
+                href="color"
+                className="inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors"
+              >
+                Take Color Vision Test
+                <svg
+                  className="w-4 h-4 ml-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div >
+          <div className='flex justify-center'>
+
+          <button
+            onClick={() => setShowTable(!showTable)}
+            className="mb-4 px-6 py-2 bg-orange-400 text-white rounded-lg shadow hover:bg-orange-500 transition-colors "
+          >
+            {showTable ? 'Hide Details' : 'Show Details'}
+          </button>
+          </div>
+          <AnimatePresence>
+            {showTable && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.5 }}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+              >
+                <div className="overflow-x-auto overflow-y-auto max-h-64 md:max-h-64 
+                [&::-webkit-scrollbar]:w-2 
+                [&::-webkit-scrollbar]:h-2
+                [&::-webkit-scrollbar-thumb]:bg-orange-400 
+                [&::-webkit-scrollbar-thumb]:rounded-full
+                [&::-webkit-scrollbar-track]:bg-gray-100">
+                  <div className="min-w-full inline-block align-middle">
+                    <div className="overflow-hidden">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead>
+                          <tr className="text-center text-xs md:text-sm font-semibold text-gray-900">
+                            <th className="border border-gray-200 px-2 md:px-6 py-2 md:py-3 text-xs md:text-sm font-semibold tracking-wider whitespace-nowrap">
+                              Background
+                            </th>
+                            <th className="border border-gray-200 px-2 md:px-6 py-2 md:py-3 text-xs md:text-sm font-semibold tracking-wider whitespace-nowrap">
+                              Text Color
+                            </th>
+                            <th className="border border-gray-200 px-2 md:px-6 py-2 md:py-3 text-xs md:text-sm font-semibold tracking-wider whitespace-nowrap">
+                              Test date
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {simplifiedUser.colorWeaknesses.map((weakness, index) => (
+                            <tr
+                              key={index}
+                              className="transition-colors hover:bg-gray-50 odd:bg-gray-50 even:bg-white"
+                            >
+                              <td className="border border-gray-200 px-2 md:px-6 py-2 md:py-4 text-center">
+                                <Link
+                                  href={`color/${weakness.background_color}_${weakness.font_color}`}
+                                >
+                                  <div
+                                    className="w-12 md:w-16 h-6 md:h-8 mx-auto rounded-md shadow-inner"
+                                    style={{ backgroundColor: weakness.background_color }}
+                                  />
+                                </Link>
+                              </td>
+                              <td className="border border-gray-200 px-2 md:px-6 py-2 md:py-4 text-center">
+                                <Link
+                                  href={`color/${weakness.background_color}_${weakness.font_color}`}
+                                >
+                                  <div
+                                    className="w-12 md:w-16 h-6 md:h-8 mx-auto rounded-md shadow-inner"
+                                    style={{ backgroundColor: weakness.font_color }}
+                                  />
+                                </Link>
+                              </td>
+                              <td className="border border-gray-200 px-2 md:px-6 py-2 md:py-4 text-center">
+                                <Link
+                                  href={`color/${weakness.background_color}_${weakness.font_color}`}
+                                >
+                                  <span className="text-xs md:text-sm text-gray-600 whitespace-nowrap">
+                                    {new Date(weakness.date).toLocaleDateString(undefined, {
+                                      year: 'numeric',
+                                      month: 'long',
+                                      day: 'numeric',
+                                    })}
+                                  </span>
+                                </Link>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+    </div>
+  );
+}
+</file>
+
+<file path="components/FieldDetails.jsx">
+"use client"
+import React, { useState } from "react";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function FieldDetails({ simplifiedUser }) {
+    const [showDetails, setShowDetails] = useState(false); // מצב להצגת הפרטים
+
+    return (
+        <div className="max-w-4xl mx-auto p-6">
+            <h3 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2 text-center">Field Weaknesses</h3>
+
+            {simplifiedUser.fieldWeaknesses.length === 0 ? (
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-blue-100">
+                    <div className="flex items-center space-x-4">
+                        <div className="p-3 bg-blue-100 rounded-full">
+                            <svg
+                                className="w-6 h-6 text-blue-500"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                            </svg>
+                        </div>
+                        <div>
+                            <p className="text-gray-700 mb-2">No Field Vision Data Available</p>
+                            <a
+                                href="field"
+                                className="inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors"
+                            >
+                                Take Field Vision Test
+                                <svg
+                                    className="w-4 h-4 ml-1"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 5l7 7-7 7"
+                                    />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <>
+                <div className='flex justify-center'>
+
+                    <button
+                        onClick={() => setShowDetails(!showDetails)}
+                        className="mb-4 px-6 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition-colors"
+                    >
+                        {showDetails ? "Hide Details" : "Show Details"}
+                    </button>
+                </div>
+
+                    <AnimatePresence>
+                        {showDetails && (
+                            <motion.div
+                                className="overflow-hidden border rounded-lg bg-white shadow-sm"
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                <div className="overflow-y-auto max-h-64 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-blue-400 [&::-webkit-scrollbar-track]:bg-gray-100"> {/* תכונת גלילה לגובה מוגדר */}
+                                    <table className="min-w-full divide-y divide-gray-200">
+                                        <thead className="sticky top-0">
+                                            <tr className="bg-gray-50">
+                                                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600 px-6 py-3 text-sm font-semibold  tracking-wider">Side</th>
+                                                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600 px-6 py-3 text-sm font-semibold  tracking-wider">
+                                                    Distance
+                                                </th>
+                                                <th className="px-6 py-3 text-left text-sm font-medium text-gray-600 px-6 py-3 text-sm font-semibold  tracking-wider">Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {simplifiedUser.fieldWeaknesses.map((weakness, index) => (
+                                                <tr key={index} className="hover:bg-gray-50 cursor-pointer">
+                                                    <td className="px-6 py-4">
+                                                        <Link href={`field/${weakness.side}_${weakness.distance}`}>
+                                                            <span className="text-gray-800">{weakness.side}</span>
+                                                        </Link>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <Link href={`field/${weakness.side}_${weakness.distance}`}>
+                                                            <span className="text-gray-800">{weakness.distance}</span>
+                                                        </Link>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <Link href={`field/${weakness.side}_${weakness.distance}`}>
+                                                            <span className="text-gray-800">
+                                                                {new Date(weakness.date).toLocaleDateString()}
+                                                            </span>
+                                                        </Link>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </>
+            )}
+        </div>
+    );
+}
+</file>
+
+<file path="components/Logo/index.jsx">
+import React from 'react';
+import style from './style.module.css';
+import Link from 'next/link';
+
+export default function Logo() {
+  const brightColors = ["text-red-500", "text-blue-500", "text-green-500", "text-yellow-500", "text-purple-500", "text-orange-400"]; // Array of colors for each letter in "BRIGHT"
+  const CharBright = ["B", "r", "i", "g", "h", "t"]
+  return (
+<Link href="/" title='home'>
+  <div className="flex justify-center items-center">
+    <div className={`${style['blinking-eye']}`}>
+      <img src="favicon.ico" alt="favicon" width={50} />
+    </div>
+    <div className="text-center relative">
+      <span className="text-2xl relative z-10">
+        <span className="font-thin text-orange-200">AYIN</span>
+        {brightColors.map((color, index) => (
+          <span key={index} className={`font-bold text-orange-200 ${style.blur}`}>
+            {CharBright[index]}
+          </span>
+        ))}
+      </span>
+    </div>
+  </div>
+</Link>
+
+  );
+}
+</file>
+
+<file path="components/RandomCharacterGame.jsx">
+"use client";
+import React, { useState, useCallback, useEffect } from 'react';
+import { Button } from "@mui/material";
+import ResultTestBlur from './ResultTestBlur';
+import EyeExaminationPrompt from './EyeExaminationPrompt';
+import ProgressBar from './ProgressBar';
+
+const characters = '1234567890אבגדהוזחטיכלמנסעפצקרשת';
+const initialSize = 14.6;
+
+const getRandomCharacter = () => characters[Math.floor(Math.random() * characters.length)];
+
+const getRandomButtons = (correctChar) => {
+    const buttons = [correctChar];
+    while (buttons.length < 4) {
+        const char = getRandomCharacter();
+        if (!buttons.includes(char)) {
+            buttons.push(char);
+        }
+    }
+    return buttons.sort(() => Math.random() - 0.5);
+};
+
+
+
+const RandomCharacterGame = ({ user }) => {
+    const [character, setCharacter] = useState('');
+    const [buttons, setButtons] = useState([]);
+    const [size, setSize] = useState(initialSize);
+    const [clickedIndex, setClickedIndex] = useState(null);
+    const [isCorrect, setIsCorrect] = useState(null);
+    const [countTrue, setCountTrue] = useState(0);
+    const [countFalse, setCountFalse] = useState(0);
+    const [isLeftEye, setIsLeftEye] = useState(false);
+
+    useEffect(() => {
+        const initialChar = getRandomCharacter();
+        setCharacter(initialChar);
+        setButtons(getRandomButtons(initialChar));
+    }, []);
+
+    const handleButtonClick = useCallback((clickedChar, index) => {
+        console.log({ size });
+        const correct = clickedChar === character;
+        setIsCorrect(correct);
+        setClickedIndex(index);
+        if (correct) {
+            setCountTrue(prev => prev + 1);
+            setCountFalse(0);
+        } else {
+            setCountTrue(0);
+            setCountFalse(prev => prev + 1);
+        }
+        if (correct && countTrue === 1) {
+            setCountTrue(0);
+            setSize((prevSize) => Math.max(prevSize - 1.5, 2));
+        }
+
+        setTimeout(() => {
+            const newChar = getRandomCharacter();
+            setCharacter(newChar);
+            setButtons(getRandomButtons(newChar));
+            setClickedIndex(null);
+            setIsCorrect(null);
+        }, 500);
+    }, [character, countTrue]);
+
+    useEffect(() => {
+        const updateUser = async () => {
+            if (countFalse === 3) {
+                let taut = { fontSize: size, distance: 1, eye: isLeftEye ? "left" : "right" };
+                user.sizeWeaknesses.push(taut);
+
+                try {
+                    const response = await fetch('/api/updateUser', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            filter: { email: user.email },
+                            updateData: { sizeWeaknesses: user.sizeWeaknesses }
+                        })
+                    });
+
+                    if (response.ok) {
+                        const updatedUser = await response.json();
+                        console.log('User updated successfully:', updatedUser);
+                    } else {
+                        console.error('Failed to update user');
+                    }
+                } catch (error) {
+                    console.error('Error updating user:', error);
+                }
+            }
+        };
+
+        updateUser();
+    }, [countFalse, size, isLeftEye, user]);
+
+    return (
+        <div className="flex flex-col items-center justify-center space-y-4 p-4 bg-gray-100 rounded-lg">
+
+            <EyeExaminationPrompt isLeftEye={isLeftEye} />
+            
+            <ProgressBar size={size} />
+
+            <div
+                className="flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-md"
+                style={{ fontSize: `${size}mm` }}
+            >
+                {character}
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+                {!(countFalse === 3 || (size === 2)) ?
+                    buttons.map((char, index) => (
+                        <Button
+                            key={index}
+                            onClick={() => handleButtonClick(char, index)}
+                            variant="outlined"
+                            sx={{
+                                border: '2px solid #facc15',
+                                color: 'black',
+                                fontSize: '14.6mm',
+                                padding: '10px 20px',
+                                width: '100px',
+                                height: '100px',
+                            }}
+                            disabled={clickedIndex !== null}
+                            className={`${clickedIndex === index
+                                ? isCorrect
+                                    ? 'bg-green-500 hover:bg-gray-600'
+                                    : 'bg-red-500 hover:bg-red-600'
+                                : 'bg-white hover:bg-gray-200'
+                                }`}
+                        >
+                            {char}
+                        </Button>
+                    )) : <ResultTestBlur size={size} setSize={setSize} isLeftEye={isLeftEye} setIsLeftEye={setIsLeftEye} setCountFalse={setCountFalse} />
+                }
+            </div>
+        </div>
+    );
+};
+
+export default RandomCharacterGame;
+</file>
+
+<file path="components/SighnIn.jsx">
+"use client";
+import { signAction } from '@/server/BL/actions/sighnin.action';
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+export default function SignIn() {
+    const path = usePathname();
+
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('');
+    const [emailError, setEmailError] = useState('');
+
+    // פונקציה לבדיקת תקינות אימייל
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    // אירוע לשינוי אימייל
+    const handleEmailChange = (e) => {
+        const value = e.target.value;
+        setEmail(value);
+        if (!validateEmail(value)) {
+            setEmailError('Invalid email address');
+        } else {
+            setEmailError('');
+        }
+    };
+
+    return (
+        <div className="flex justify-center items-center min-h-screen p-4">
+            <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 w-full max-w-md">
+                <h2 className="text-2xl font-bold mb-4 text-center">Sign In</h2>
+                <form action={signAction} className="space-y-4">
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">Username</label>
+                        <input
+                            name='username'
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            id="username"
+                            type="text"
+                            placeholder="Username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">Password</label>
+                        <input
+                            name='password'
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            id="password"
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="mb-6">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">Email</label>
+                        <input
+                            name='email'
+                            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                                emailError ? 'border-red-500' : ''
+                            }`}
+                            id="email"
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={handleEmailChange}
+                            required
+                        />
+                        {emailError && <p className="text-red-500 text-xs italic mt-2">{emailError}</p>}
+                    </div>
+                    <div className="flex items-center justify-center">
+                        <button
+                            className="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full sm:w-auto"
+                            type="submit"
+                            disabled={!!emailError}>
+                            Sign In
+                        </button>
+                    </div>
+                </form>
+                <div className="text-center mt-4">
+                    <Link
+                        href={'login'}
+                        className={path === 'signin' ? 'text-amber-500' : 'text-gray-500 hover:text-gray-700'}>
+                        Login
+                    </Link>
+                </div>
+            </div>
+        </div>
+    );
+}
+</file>
+
+<file path="server/BL/actions/sighnin.action.js">
+"use server"
+import { connectToMongo } from "@/server/connectToMongo"
+import { cookies } from 'next/headers'
+import { redirect } from "next/navigation";
+import { createUserService } from "../services/user.service";
+const jwt = require('jsonwebtoken');
+const SECRET = process.env.JWT_SECRET || "AYINBRIGHT"
+const EMAIL = process.env.EMAIL_USER
+const PASSWORD = process.env.PASSWORD_USER
+const cookieStore = cookies()
+
+export async function generate(user) {
+    let token = jwt.sign(user, SECRET, { expiresIn: "200m" });
+    return `Bearer ${token}`
+}
+
+export const signAction = async (fd) => {
+    "use server"
+    let body = Object.fromEntries(fd)
+    connectToMongo()
+    let user = await createUserService(body);
+    user = { email: user.email, password: user.password }
+    let token;
+    token = await generate(user);
+    cookies().set('token', token)
+    redirect('/user');
+}
+
+
+export async function authAction() {
+    "use server"
+    try {
+        let token = cookies().get('token');
+        if (!token) throw "no token provided"
+        if (!token.value) return false;
+        token = token.value.split('Bearer ')[1] || "null";
+        const userFromToken = jwt.verify(token, SECRET);
+        if (!userFromToken) throw "not correct"
+        if (userFromToken.email == EMAIL && userFromToken.password == PASSWORD) {
+            return true;
+        }
+        else {
+            cookies().delete('token')
+            // redirect('/admin/');
+            return false;
+        }
+    }
+    catch (e) {
+        console.log(e);
+
+    }
+}
+</file>
+
+<file path="server/DL/controllers/user.controller.js">
+import { User } from "../models/user.model"
+
+export const readUsers = (filter) => User.find(filter)
+export const readUserById = (id) => User.findById(id)
+export const createUser = (data) => User.create(data)
+export const readUser = (filter) => User.findOne(filter)
+
+export const updateUser = async (filter, updateData) => {
+    try {
+        const result = await User.findOneAndUpdate(filter, updateData, { new: true });
+        if (!result) {
+            throw new Error('User not found');
+        }
+        return result;
+    } catch (error) {
+        throw new Error(`Error updating user: ${error.message}`);
+    }
+}
+
+export const deleteColorWeaknessAtIndex = async (email, field, index) => {
+    try {
+       // Find the user by email using the custom static method
+       console.log("*******************************8")
+       const user = await User.findOne({email});
+
+        // Check if the user exists
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        // Check if the index is within the array bounds
+        if (index < 0 || (field === 'color' && index >= user.colorWeaknesses.length) || (field === 'size' && index >= user.sizeWeaknesses.length)) {
+            throw new Error('Invalid index');
+        }
+        field === 'color' && user.colorWeaknesses.splice(index, 1);
+        field === 'size' && user.sizeWeaknesses.splice(index, 1);
+
+        // Save the updated user
+        await user.save();
+
+        return { message: 'Color weakness deleted successfully' };
+    } catch (error) {
+        return { error: error.message };
+    }
+};
+</file>
+
+<file path="server/DL/models/user.model.js">
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+// Define the schema for the USER collection
+const userSchema = new Schema({
+    username: {
+        type: String,
+        required: true
+    },
+    password: {
+        type: String,
+        required: true,
+        default: '123'
+    },
+    email: {
+        type: String,
+        required: true
+    },
+    colorWeaknesses: [{
+        background_color: {
+            type: String,
+            required: true
+        },
+        font_color: {
+            type: String,
+            required: true
+        },
+        date: {
+            type: Date,
+            default: Date.now()
+        }
+    }],
+    sizeWeaknesses: [{
+        eye:{
+            type: String,
+            enum: ['right', 'left'],
+            required: false
+        },
+        fontSize: {
+            type: Number,
+            required: true
+        },
+        distance: {
+            type: Number,
+            required: true
+        },
+        date: {
+            type: Date,
+            default: Date.now()
+        }
+    }],
+    fieldWeaknesses: [{
+        side: {
+            type: String,
+            enum: ['right', 'left'],
+            required: true
+        },
+        distance: {
+            type: String,
+            required: true
+        },
+        date: {
+            type: Date,
+            default: Date.now()
+        }
+    }]
+
+});
+
+export const User = mongoose.models?.User || mongoose.model('User', userSchema);
+</file>
+
+<file path="app/admin/page.jsx">
+import React from 'react'
+import { authAction } from '@/server/BL/actions/login.action';
+import { readUsersService } from '@/server/BL/services/user.service';
+import { unstable_noStore } from 'next/cache';
+import ArrUsers from '@/components/ArrUsers';
+
+export default async function admin() {
+  unstable_noStore()
+
+  const { isManager } = await authAction();
+  const users = await readUsersService({});
+  const filteredUsers = users.map(user => ({
+    username: user.username,
+    password: user.password,
+    email: user.email,
+    colorWeaknesses: user.colorWeaknesses.map(weakness => ({
+      background_color: weakness.background_color,
+      font_color: weakness.font_color,
+      date: weakness.date
+    })),
+    sizeWeaknesses: user.sizeWeaknesses.map(weakness => ({
+      eye: weakness.eye,
+      fontSize: weakness.fontSize,
+      distance: weakness.distance,
+      date: weakness.date
+    })),
+    fieldWeaknesses: user.fieldWeaknesses.map(weakness => ({
+      side: weakness.side,
+      distance: weakness.distance,
+      date: weakness.date
+    }))
+  }));
+
+  return (
+    <>
+      {isManager ?
+        <ArrUsers users={filteredUsers} />
+        : <div className="flex flex-col items-center justify-center min-h-[300px]">
+          <div className="relative">
+            <h1 className="text-4xl font-bold text-yellow-100 animate-bounce">
+              Access Denied
+            </h1>
+            <div className="mt-4 flex justify-center space-x-1">
+              <div className="w-2 h-2 bg-yellow-100 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-yellow-100 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+              <div className="w-2 h-2 bg-yellow-100 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+            </div>
+          </div>
+        </div>
+      }
+    </>
+  )
+}
+</file>
+
+<file path="components/ArrUsers.jsx">
+"use client"
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Weaknesses from './Weaknesses';
+import UsersTable from './UsersTable';
+
+function ArrUsers({ users }) {
+    const [sortedUsers, setSortedUsers] = useState(users);
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
+    const [searchQuery, setSearchQuery] = useState('');
+    const [visibleUsersCount, setVisibleUsersCount] = useState(5);
+    const [expandedSection, setExpandedSection] = useState({ userId: null, type: null });
+
+    useEffect(() => {
+        let sortedArray = [...users];
+        if (sortConfig.key !== null) {
+            sortedArray.sort((a, b) => {
+                if (a[sortConfig.key] < b[sortConfig.key]) {
+                    return sortConfig.direction === 'ascending' ? -1 : 1;
+                }
+                if (a[sortConfig.key] > b[sortConfig.key]) {
+                    return sortConfig.direction === 'ascending' ? 1 : -1;
+                }
+                return 0;
+            });
+        }
+        setSortedUsers(sortedArray);
+    }, [users, sortConfig]);
+
+    const requestSort = (key) => {
+        let direction = 'ascending';
+        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+            direction = 'descending';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const handleSearch = (event) => {
+        setSearchQuery(event.target.value);
+    };
+
+    const handleShowMore = () => {
+        setVisibleUsersCount(prevCount => prevCount + 5);
+    };
+
+    const filteredUsers = sortedUsers.filter(user =>
+        user &&
+        ((user.username && user.username.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase())))
+    );
+
+    const usersToDisplay = filteredUsers.slice(0, visibleUsersCount);
+
+    const deleteWeakness = async (email, type, index) => {
+        try {
+            const response = await fetch('/api/deleteWeakness', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, field: type, index })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const updatedUser = data.user;
+                if (updatedUser) {
+                    setSortedUsers(prevUsers =>
+                        prevUsers.map(u => (u.email === email ? updatedUser : u))
+                    );
+                }
+                alert('Weakness deleted and updated');
+            } else {
+                const errorData = await response.json();
+                console.error('Failed to delete weakness:', errorData.error);
+            }
+        } catch (error) {
+            console.error('Failed to delete weakness:', error);
+        }
+    };
+
+    const handleExpand = (userId, type, isExpanded) => {
+        setExpandedSection(isExpanded ? { userId, type } : { userId: null, type: null });
+    };
+
+    return (
+        <div className="container mx-auto p-4 w-auto border-2 border-orange-200">
+            <input
+                type="text"
+                placeholder="Search by username or email"
+                value={searchQuery}
+                onChange={handleSearch}
+                className="mb-4 p-2 border border-gray-300 rounded w-full"
+            />
+           <UsersTable
+                usersToDisplay={usersToDisplay}
+                requestSort={requestSort}
+                expandedSection={expandedSection}
+                handleExpand={handleExpand}
+                deleteWeakness={deleteWeakness}
+            />
+            {visibleUsersCount < filteredUsers.length && (
+                <button
+                    onClick={handleShowMore}
+                    className="mt-4 px-4 py-2 bg-orange-200 text-white rounded"
+                >
+                    Show More
+                </button>
+            )}
+        </div>
+    );
+}
+
+export default ArrUsers;
+</file>
+
+<file path="components/Login.jsx">
+"use client";
+import { authAction, loginAction } from '@/server/BL/actions/login.action';
+import Cookies from 'js-cookie';
+import React, { useEffect, useState } from 'react';
+import jwt from 'jsonwebtoken';
+import Link from 'next/link';
+const SECRET = process.env.JWT_SECRET;
+
+export default function Login() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const response = await loginAction(formData);
+
+        if (response.success) {
+            setError('');
+            let user = "Emanuel tiran";
+            window.location.href = `/user`;
+        } else {
+            setError(response.message);
+            alert(response.message);
+        }
+    };
+
+    return (
+        <div className="flex justify-center items-center min-h-screen p-4">
+            <form className="w-full max-w-md" onSubmit={handleSubmit}>
+                <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 space-y-4">
+                    <h1 className="text-2xl font-bold mb-4 text-center">Login</h1>
+                    <div>
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">Email</label>
+                        <input
+                            name='email'
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            id="email"
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">Password</label>
+                        <input
+                            name='password'
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            id="password"
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="flex items-center justify-center">
+                        <button className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full sm:w-auto" type="submit">
+                            Login
+                        </button>
+                    </div>
+                    <div className="text-center mt-4">
+                        <Link href={'signin'} className="text-blue-500 hover:underline">Sign In</Link>
+                    </div>
+                </div>
+            </form>
+        </div>
+    );
+}
+</file>
+
+<file path="components/SizesDetails.jsx">
+"use client";
+import Link from "next/link";
+import React, { useState } from "react";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { motion, AnimatePresence } from "framer-motion";
+
+// רישום כל רכיבי ה-Chart
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+
+export default function SizesDetails({ simplifiedUser }) {
+  const { sizeWeaknesses } = simplifiedUser;
+  const [showCharts, setShowCharts] = useState(false);
+  const [showTable, setShowTable] = useState(false);
+
+  const getDataByEye = (eye) =>
+    sizeWeaknesses.filter((weakness) => weakness.eye === eye);
+
+  const generateChartData = (eye) => {
+    const data = getDataByEye(eye);
+    return {
+      labels: data.map((w) => new Date(w.date).toLocaleDateString()),
+      datasets: [
+        {
+          label: `Font Size - ${eye} eye`,
+          data: data.map((w) => w.fontSize),
+          borderColor: "rgba(75, 192, 192, 1)",
+          backgroundColor: "rgba(75, 192, 192, 0.2)",
+          tension: 0.3,
+        },
+        {
+          label: `Distance - ${eye} eye`,
+          data: data.map((w) => w.distance),
+          borderColor: "rgba(255, 99, 132, 1)",
+          backgroundColor: "rgba(255, 99, 132, 0.2)",
+          tension: 0.3,
+        },
+      ],
+    };
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <h3 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2 text-center">
+        Blur Vision Profile
+      </h3>
+
+      <ul className="space-y-4">
+        {sizeWeaknesses.length === 0 ? (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-blue-100">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-blue-100 rounded-full">
+                <svg
+                  className="w-6 h-6 text-blue-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p className="text-gray-700 mb-2">No Color Vision Data Available</p>
+                <a
+                  href="blur"
+                  className="inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors"
+                >
+                  Take Blur Vision Test
+                  <svg
+                    className="w-4 h-4 ml-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="mb-4  flex justify-center">
+              <button
+                onClick={() => setShowCharts(!showCharts)}
+                className="mr-4 px-6 py-2 bg-yellow-400 text-white rounded-lg shadow hover:bg-yellow-500 transition-colors"
+              >
+                {showCharts ? "Hide Charts" : "Show Charts"}
+              </button>
+              <button
+                onClick={() => setShowTable(!showTable)}
+                className="px-6 py-2 bg-yellow-400 text-white rounded-lg shadow hover:bg-yellow-500 transition-colors"
+              >
+                {showTable ? "Hide Table" : "Show Table"}
+              </button>
+            </div>
+            <AnimatePresence>
+              {showCharts && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="mb-8">
+                    <h4 className="text-lg font-semibold mb-2">Right Eye</h4>
+                    <Line data={generateChartData("right")} />
+                  </div>
+                  <div className="mb-8">
+                    <h4 className="text-lg font-semibold mb-2">Left Eye</h4>
+                    <Line data={generateChartData("left")} />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <AnimatePresence>
+              {showTable && (
+                <motion.div
+                  className="overflow-hidden border rounded-lg bg-white shadow-sm"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="overflow-y-auto max-h-64 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-yellow-400 [&::-webkit-scrollbar-track]:bg-gray-100">
+                    <table className="table-auto w-full border-collapse border border-gray-200">
+                      <thead >
+                        <tr className="text-center text-sm font-semibold text-gray-900   tracking-wider">
+                          <th className="border border-gray-300 px-4 py-2  text-sm font-semibold  tracking-wider">Font Size</th>
+                          <th className="border border-gray-300 px-4 py-2 text-sm font-semibold  tracking-wider">Distance</th>
+                          <th className="border border-gray-300 px-4 py-2  text-sm font-semibold  tracking-wider">Eye</th>
+                          <th className="border border-gray-300 px-4 py-2  text-sm font-semibold  tracking-wider">Date</th>
+                          <th className="border border-gray-300 px-4 py-2  text-sm font-semibold  tracking-wider">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sizeWeaknesses.map((weakness, index) => (
+                          <tr key={index} className="odd:bg-gray-50 even:bg-white">
+                            <td className="border border-gray-300 px-4 py-2 text-center">
+                              {weakness.fontSize}
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2 text-center">
+                              {weakness.distance}
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2 text-center">
+                              {weakness.eye || "right"}
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2 text-center">
+                              {new Date(weakness.date).toLocaleDateString()}
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2 text-center">
+                              <Link
+                                href={`blur/improve/${weakness.fontSize}_${weakness.distance}_${weakness.eye || "right"}`}
+                                className="text-yellow-400 underline"
+                              >
+                                Improve
+                              </Link>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
+        )}
+      </ul>
+    </div>
+  );
+}
+</file>
+
+<file path="app/color/page.jsx">
+import { connectToMongo } from '@/server/connectToMongo'
+import { unstable_noStore } from 'next/cache'
+import style from './style.module.css'
+import ColorChanger from '@/components/Color'
+import SnellenChart from '@/components/Snellen'
+import { readUserByFieldService } from '@/server/BL/services/user.service'
+import { authAction } from '@/server/BL/actions/login.action'
+import ToLogin from '@/components/ToLogin'
+
+
+
+export default async function Color() {
+  await connectToMongo();
+
+  const authData = await authAction();
+
+  if (!authData || !authData.userToken) return <ToLogin/>
+
+  const { email } = authData.userToken;
+
+  let currentUser = await readUserByFieldService({ email });
+  const simplifiedUser = {
+    username: currentUser.username,
+    password: currentUser.password,
+    email: currentUser.email,
+    colorWeaknesses: currentUser.colorWeaknesses.map(weakness => ({
+      background_color: weakness.background_color,
+      font_color: weakness.font_color
+    }))
+  };
+  unstable_noStore()
+  // await new Promise(resolve => setTimeout(resolve, 7000))
+
+  return (
+    <div className={style.container}>
+      <ColorChanger user={simplifiedUser} />
+    </div>
+  )
+}
+</file>
+
+<file path="components/Color/index.jsx">
+"use client";
+import React, { useContext, useEffect, useState } from 'react';
+import styles from './style.module.css';
+import { MyContext, MyProvider } from '../context/DataContext';
+import Blur2 from '@/components/Blur'
+
+
+let indexB = 0, indexF = 0;
+
+const ColorChangerComp = ({ user, colorsUser }) => {
+  const { data, updateData } = useContext(MyContext);
+
+
+
+  const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'lightblue'];
+  const words = ["9", "5", "7", "1", "8", "2", "4", "6", "0", "1", "A", "S", "d", "F", "E", "e", "V", "G", "i", "m", "N", "b", "z", "W"];
+
+  const [fontColor, setFontColor] = useState(colorsUser ? colorsUser.font_color : 'orange'); // מגדיר state לצבע הראשון של הפונט
+  const [backgroundColor1, setBackgroundColor1] = useState(colorsUser ? colorsUser.background_color : 'darkblue'); // מגדיר state לצבע הראשון של הרקע
+  const [backgroundColor2] = useState('transparent'); // מגדיר state לצבע השני של הרקע
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+
+  useEffect(() => {
+    updateData();
+    const newPathname = `/color/${backgroundColor1}_${fontColor}`;
+    window.history.pushState({}, '', newPathname);
+  }, [backgroundColor1,fontColor]);
+
+  const changeFontColor = () => {
+    indexF = (indexF + 1) % colors.length;
+    if (indexB === indexF) indexF = (indexF + 1) % colors.length;
+    setFontColor(colors[indexF]);
+  };
+
+  const changeBackgroundColor = () => {
+    indexB = (indexB + 1) % colors.length;
+    if (indexB === indexF) indexB = (indexB + 1) % colors.length;
+    setBackgroundColor1(colors[indexB]);
+  };
+
+  const overWord = () => {
+    setCurrentWordIndex((currentWordIndex - 1 + words.length) % words.length); // Cycle through words
+  };
+
+  const handleMistake = async () => {
+    let taut = { background_color: backgroundColor1, font_color: fontColor };
+    user.colorWeaknesses.push(taut);
+    // שליחת הבקשה ל-API route
+    const response = await fetch('/api/updateUser', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        filter: { email: user.email },
+        updateData: { colorWeaknesses: user.colorWeaknesses }
+      })
+    });
+
+    if (response.ok) {
+      const updatedUser = await response.json();
+      console.log('User updated successfully:', updatedUser);
+    } else {
+      console.error('Failed to update user');
+    }
+
+    overWord();
+  };
+
+  const fontTileStyle = {
+    backgroundImage:
+      `linear-gradient(45deg, ${fontColor} 25%, transparent 25%, transparent 75%, ${fontColor} 75%, ${fontColor}),
+            linear-gradient(45deg, ${fontColor} 25%, transparent 25%, transparent 75%, ${fontColor} 75%, ${fontColor})`, // יוצר אפקט פסיפס לפונט
+  };
+
+  const backgroundTileStyle = {
+    backgroundImage:
+      `linear-gradient(45deg, ${backgroundColor1} 25%, ${backgroundColor2} 25%, ${backgroundColor2} 75%, ${backgroundColor1} 75%, ${backgroundColor1}),
+            linear-gradient(45deg, ${backgroundColor1} 25%, ${backgroundColor2} 25%, ${backgroundColor2} 75%, ${backgroundColor1} 75%, ${backgroundColor1})`, // יוצר אפקט פסיפס לרקע
+  };
+
+  return (
+    <div className={`w-2/3 ${styles.contain} p-4`}>
+      <div className={styles.inContain}>
+        <div className={styles.rekaBackground} style={backgroundTileStyle}>
+          <div className={styles.font} style={fontTileStyle}>
+            {words[currentWordIndex]}
+          </div>
+        </div>
+        <br />
+        <div className="flex flex-wrap gap-4 mb-4">
+          <button
+            className="bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold py-2 px-4 rounded flex-1"
+            onClick={changeBackgroundColor}
+          >
+            Change Background Color
+          </button>
+          <button
+            className="bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold py-2 px-4 rounded flex-1"
+            onClick={changeFontColor}
+          >
+            Change Font
+
+          </button>
+        </div>
+        <div className="flex flex-wrap gap-4 mb-4">
+          <button
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex-1"
+            onClick={overWord}
+          >
+            Change Word
+          </button>
+          <button
+            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex-1"
+            onClick={() => handleMistake()}
+          >
+            Mistake
+          </button>
+        </div>
+      </div>
+    </div>
+
+  );
+};
+
+const ColorChanger = ({ user, colorsUser }) => (
+  <MyProvider>
+    <ColorChangerComp user={user} colorsUser={colorsUser} />
+    {/* <Blur2 user={user}/> */}
+  </MyProvider>
+);
+
+export default ColorChanger;
+</file>
+
+<file path="package.json">
+{
+  "name": "next-jerusalem",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@auth/supabase-adapter": "^1.4.2",
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^6.1.1",
+    "@mui/material": "^6.1.1",
+    "@react-oauth/google": "^0.12.1",
+    "@react-three/cannon": "^6.6.0",
+    "@react-three/drei": "^9.121.5",
+    "@react-three/fiber": "^8.17.14",
+    "@supabase/supabase-js": "^2.45.1",
+    "bootstrap": "^5.3.3",
+    "chart.js": "^4.4.6",
+    "framer-motion": "^11.7.0",
+    "js-cookie": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.4.0",
+    "next": "^14.2.13",
+    "next-auth": "^4.24.7",
+    "react": "^18.3.1",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.2.1",
+    "react-intersection-observer": "^9.13.1",
+    "react-scroll": "^1.9.0",
+    "react-slick": "^0.30.2",
+    "sass": "^1.80.4",
+    "slick-carousel": "^1.8.1",
+    "three": "^0.173.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3"
+  }
+}
+</file>
+
+<file path="app/user/page.jsx">
+import { connectToMongo } from '@/server/connectToMongo';
+import style from './style.module.css';
+import { authAction } from '@/server/BL/actions/login.action';
+import { readUserByFieldService } from '@/server/BL/services/user.service';
+import ColorChanger from '@/components/Color';
+import DetailUser from '@/components/DetailUser';
+import Link from 'next/link';
+import ToLogin from '@/components/ToLogin';
+
+export default async function Page() {
+   await connectToMongo();
+   const authData = await authAction();
+   if (!authData || !authData.userToken) return <ToLogin/>
+
+
+   const { email } = authData.userToken;
+   const { isUser } = authData;
+   let currentUser = await readUserByFieldService({ email });
+   const simplifiedUser = {
+      // userId: currentUser._id,
+      username: currentUser.username,
+      password: currentUser.password,
+      email: currentUser.email,
+      colorWeaknesses: currentUser.colorWeaknesses.map(weakness => ({
+         background_color: weakness.background_color,
+         font_color: weakness.font_color,
+         date: weakness.date
+      })),
+      sizeWeaknesses: currentUser.sizeWeaknesses.map(weakness => ({
+         eye: weakness.eye,
+         fontSize: weakness.fontSize,
+         distance: weakness.distance,
+         date: weakness.date
+      })),
+      fieldWeaknesses: currentUser.fieldWeaknesses.map(weakness => ({
+        side: weakness.side,
+        distance: weakness.distance,
+        date: weakness.date
+      })),
+   };
+
+   return (
+      <>
+         {isUser ? (
+            <DetailUser simplifiedUser={simplifiedUser} />
+         ) : (
+            <h1>User does not exist!</h1>
+         )}
+      </>
+   );
+}
+</file>
+
+<file path="components/DetailUser.jsx">
+import Link from 'next/link'
+import React from 'react'
+import ColorDetails from './ColorDetails'
+import SizesDetails from './SizesDetails'
+import FieldDetails from './FieldDetails'
+
+export default function DetailUser({ simplifiedUser }) {
+  return (
+    <div className="mx-auto w-2/3 p-6 bg-gray-50 shadow-sm rounded-lg">
+      <h2 className="text-2xl font-bold mb-6 text-center">User Details</h2>
+
+      <div className="mb-8">
+        <p className="flex justify-between items-center border-b py-3 text-lg">
+          <span className="font-medium text-gray-600">Username:</span>
+          <span className="text-gray-800">{simplifiedUser.username}</span>
+        </p>
+        <p className="flex justify-between items-center border-b py-3 text-lg">
+          <span className="font-medium text-gray-600">Email:</span>
+          <span className="text-gray-800">{simplifiedUser.email}</span>
+        </p>
+      </div>
+      <ColorDetails simplifiedUser={simplifiedUser} />
+
+      <SizesDetails simplifiedUser={simplifiedUser} />
+
+      <FieldDetails simplifiedUser={simplifiedUser} />
+    </div>
+  )
+}
+</file>
+
+<file path="server/BL/actions/login.action.js">
+"use server"
+import { connectToMongo } from "@/server/connectToMongo"
+import { cookies } from 'next/headers'
+import { redirect } from "next/navigation";
+import { readUserByFieldService } from "../services/user.service";
+const jwt = require('jsonwebtoken');
+const SECRET = process.env.JWT_SECRET ||"AYINBRIGHT"
+const EMAIL_ADMIN = process.env.EMAIL_ADMIN
+const PASSWORD_ADMIN = process.env.PASSWORD_ADMIN
+
+
+export async function generate(user) {
+    let token = jwt.sign(user, SECRET, { expiresIn: "200m" });
+    return `Bearer ${token}`
+}
+
+export const loginAction = async (fd) => {
+    "use server"
+    let body = Object.fromEntries(fd)
+    const user = { email: body.email, password: body.password }
+    connectToMongo()
+    const newU = await readUserByFieldService(user)
+    let token;
+    try {
+        if (newU) {
+            token = await generate(user);
+            cookies().set('token', token);
+            return { success: true, newU: newU.email };
+        } else {
+            console.error('Could not create new user');
+            return { success: false, message: 'Your details are invalid' };
+        }
+    } catch (error) {
+        console.log({ error });
+        return { success: false, message: 'An error occurred' };
+    }
+}
+
+
+export const logoutAction = async () => {
+    "use server"
+    try {
+        cookies().delete('token');
+        redirect('/');
+        return { success: true, message: 'Logged out successfully' };
+    } catch (error) {
+        console.error('Logout error:', error);
+        return { success: false, message: 'An error occurred during logout' };
+    }
+}
+
+export async function authAction() {
+    "use server"
+    try {
+        let token = cookies().get('token');
+        if (!token) throw "no token provided";
+        if (!token.value) return false;
+        token = token.value.split('Bearer ')[1] || "null";
+        const userFromToken = jwt.verify(token, SECRET);
+        if (!userFromToken) throw "not correct";
+        if (userFromToken.email === EMAIL_ADMIN && userFromToken.password === PASSWORD_ADMIN)
+            return { isUser: true, userToken: userFromToken, isManager: true };
+        return { isUser: true, userToken: userFromToken, isManager: false };
+    }
+    catch (e) {
+        console.log(e);
+        return false;
+    }
+}
+</file>
+
+<file path="components/Field/index.jsx">
+"use client"
+import React, { useEffect, useState } from 'react';
+import style from './style.module.css';
+import Popup from '../Popup';
+import Button from '@mui/material/Button';
+
+export default function Field({ user, distanceUser }) {
+  const words = ["9", "5", "7", "1", "8", "2", "4", "6", "0", "1", "A", "S", "d", "F", "E", "X", "V", "G", "I", "M", "N", "B", "Z", "W"];
+  // const sizes =  [-18, -17, -16, -15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+  ; // ערכים בס"מ למיקום
+  const fillSizes = () => {
+    const sizes = [];
+    for (let i = -24; i <= 24; i += 2) {
+      sizes.push(i);
+    }
+    return sizes;
+  }
+
+
+
+  const [open, setOpen] = useState(false);
+  const [isLeft, setIsLeft] = useState(distanceUser?.side === 'left' ? true : false);
+  const [sizes, setSizes] = useState(fillSizes());
+  const [distance, setDistance] = useState(distanceUser ? distanceUser.distance : 0);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [firstTime, setFirstTime] = useState(true);
+  const [currentSizeIndex, setCurrentSizeIndex] = useState(distanceUser ? sizes.indexOf(Number(distanceUser.distance)) : Math.floor(sizes.length / 2)); // TODO : לעדכן את המרחק מהפאראם לפי האינדקס!!!
+
+
+  useEffect(() => {
+    if (firstTime) {
+      setFirstTime(false);
+      setDistance(distanceUser ? distanceUser.distance : sizes[currentSizeIndex]);
+    } else {
+      setDistance(sizes[currentSizeIndex]);
+    }
+    const side = isLeft ? 'left' : 'right';
+    const distance = sizes[currentSizeIndex];
+    const newPathname = `/field/${side}_${distance}`;
+
+    // Update the URL without using search parameters
+    window.history.pushState({}, '', newPathname);
+  }, [currentSizeIndex, isLeft]);
+
+  const moveRight = () => {
+    if (currentSizeIndex < sizes.length - 1) setCurrentSizeIndex(currentSizeIndex + 1);
+    setDistance(sizes[currentSizeIndex])
+  };
+
+  const moveLeft = () => {
+    if (currentSizeIndex > 0) setCurrentSizeIndex(currentSizeIndex - 1);
+    setDistance(sizes[currentSizeIndex])
+  };
+
+  const overWord = () => {
+    setCurrentWordIndex((currentWordIndex - 1 + words.length) % words.length); // מחזור מילים
+  };
+
+  const handleMistake = async () => {
+    let taut = { side: isLeft ? 'left' : 'right', distance: sizes[currentSizeIndex] };
+
+    user.fieldWeaknesses.push(taut);
+    // שליחת הבקשה ל-API route
+    const response = await fetch('/api/updateUser', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        filter: { email: user.email },
+        updateData: { fieldWeaknesses: user.fieldWeaknesses }
+      })
+    });
+
+    if (response.ok) {
+      const updatedUser = await response.json();
+      console.log('User updated successfully:', updatedUser);
+    } else {
+      console.error('Failed to update user');
+    }
+
+    overWord();
+  };
+
+  return (
+    <div
+      className={`flex items-center justify-center flex-col w-full mx-auto h-[84vh] bg-[aliceblue]  border-2 border-[#bfdbfe] border-b border-purple-400 p-4`}
+      style={{
+        borderLeft: isLeft ? '32px solid #bfdbfe' : 'none',
+        borderRight: !isLeft ? '32px solid #bfdbfe' : 'none',
+        transition: 'border 0.3s ease'
+
+      }}
+    >
+      <Button
+        variant="contained"
+        sx={{
+          backgroundColor: '#bfdbfe',
+          color: '#1F2937',
+          fontWeight: 'bold',
+          padding: '8px 16px',
+          borderRadius: '0.375rem',
+          '&:hover': {
+            backgroundColor: '#D97706',
+          },
+        }}
+        onClick={() => setOpen(!open)}
+      >
+        Please read the details before use
+      </Button>
+      <div className="w-full " style={{ transform: `translateX(${distance}cm)`, transition: 'transform 0.3s ease-in-out' }}>
+        <p className="text-7xl flex items-center justify-center flex-row w-[96vw] h-[42vh]">
+          {words[currentWordIndex]}
+        </p>
+      </div>
+      <div className="flex flex-wrap gap-4 mb-4">
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: '#1e293b',
+            '&:hover': {
+              backgroundColor: '#334155',
+            },
+            color: '#bfdbfe',
+            fontWeight: 'bold',
+            py: 1,
+            px: 2,
+            clipPath: 'polygon(20% 0, 100% 0, 80% 50%, 100% 100%, 20% 100%, 0 50%)',
+            borderRadius: 0,
+            flex: 1,
+          }}
+          onClick={moveLeft}
+        >
+           Left
+        </Button>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: '#1e293b',
+            '&:hover': {
+              backgroundColor: '#334155',
+            },
+            color: '#bfdbfe',
+            fontWeight: 'bold',
+            py: 1,  // Reduced padding
+            px: 2,  // Reduced padding
+            flex: 1,
+            borderRadius: '0 0 0 0', // Rounded right corners, square left corners
+            borderLeft: isLeft ? '8px solid #bfdbfe' : 'none',
+            borderRight: !isLeft ? '8px solid #bfdbfe' : 'none',
+          }}
+          onClick={() => setIsLeft(!isLeft)}
+        >
+          Choose a Side
+        </Button>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: '#1e293b',
+            '&:hover': {
+              backgroundColor: '#334155',
+            },
+            color: '#bfdbfe',
+            fontWeight: 'bold',
+            py: 1,
+            px: 2,
+            clipPath: 'polygon(0 0, 80% 0, 100% 50%, 80% 100%, 0 100%, 20% 50%)',
+            borderRadius: 0,
+            flex: 1,
+          }}
+          onClick={moveRight}
+        >
+           Right
+        </Button>
+      </div>
+      <div className="flex flex-wrap gap-4 mb-4">
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: '#48bb78', // equivalent to bg-green-500
+            '&:hover': {
+              backgroundColor: '#2f855a', // equivalent to hover:bg-green-700
+            },
+            color: 'white', // equivalent to text-white
+            fontWeight: 'bold',
+            py: 1,  // Reduced padding for smaller size
+            px: 2,  // Reduced padding for smaller size
+            borderRadius: '8px',
+            flex: 1,
+          }}
+          onClick={overWord}
+        >
+          Change Word
+        </Button>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: '#f56565', // equivalent to bg-red-500
+            '&:hover': {
+              backgroundColor: '#c53030', // equivalent to hover:bg-red-700
+            },
+            color: 'white', // equivalent to text-white
+            fontWeight: 'bold',
+            py: 1,  // Reduced padding for smaller size
+            px: 2,  // Reduced padding for smaller size
+            borderRadius: '8px',
+            flex: 1,
+          }}
+          onClick={handleMistake}
+        >
+          Mistake
+        </Button>
+      </div>
+
+      <Popup open={open} setOpen={setOpen} type={'field'} />
+    </div>
+  );
+}
+</file>
+
+<file path="components/Blur/index.jsx">
+"use client"
+import React, { useEffect, useState } from 'react';
+import style from './style.module.css';
+import Button from '@mui/material/Button';
+import Popup from '../Popup';
+
+let indexSize = 0;
+export default function Blur({ user, sizeUser }) {
+  const words = ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape', 'honeydew', 'kiwi', 'lemon', 'mango', 'nectarine', 'orange', 'papaya', 'quince', 'raspberry', 'strawberry', 'tangerine', 'ugli fruit', 'vanilla', 'watermelon'];
+  const sizes = [14.6, 11, 8.8, 7.3, 5.8, 4.4, 3.66, 2.9, 2.2, 1.46];
+  const [open, setOpen] = useState(false);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [fontSize, setFontSize] = useState(sizeUser ? sizeUser.fontSize : 14.6);
+  const [isLeftEye, setIsLeftEye] = useState(sizeUser?.eye === "left" ? true : false);
+
+
+
+  useEffect(() => {
+    if (window.location.pathname !== '/blur/improve') {
+      const eye = isLeftEye ? "left" : "right";
+      const newPathname = `/blur/improve/${fontSize}_1_${eye}`;
+      
+      if (window.location.pathname !== newPathname) {
+        window.history.pushState({}, '', newPathname);
+      }
+    }
+  }, [fontSize, isLeftEye]);
+
+  const increaseFontSize = () => {
+    if (indexSize > 0) {
+      indexSize--;
+      setFontSize(sizes[indexSize]);
+    }
+  };
+
+  const decreaseFontSize = () => {
+    if (indexSize < sizes.length - 1) {
+      indexSize++;
+      setFontSize(sizes[indexSize]);
+    }
+  };
+
+  const changeFontSize = (event) => {
+    const newSize = parseFloat(event.target.value) || 0;
+    setFontSize(newSize);
+    const newIndex = sizes.findIndex(size => size === newSize);
+    if (newIndex !== -1) {
+      indexSize = newIndex;
+    }
+  };
+
+  const overWord = () => {
+    setCurrentWordIndex((prevIndex) => (prevIndex + 1) % words.length);
+  };
+
+  const handleMistake = async () => {
+    try {
+      const taut = {
+        fontSize: fontSize,
+        distance: 1,
+        eye: isLeftEye ? 'left' : 'right'
+      };
+
+      const updatedWeaknesses = [...user.sizeWeaknesses, taut];
+
+      const response = await fetch('/api/updateUser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          filter: { email: user.email },
+          updateData: { sizeWeaknesses: updatedWeaknesses }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user');
+      }
+
+      const updatedUser = await response.json();
+      user.sizeWeaknesses = updatedWeaknesses;
+      console.log('User updated successfully:', updatedUser);
+      overWord();
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
+  };
+
+  return (
+    <div className={`${style.contain} border-b border-green-400 p-4`}>
+      <Button
+        variant="contained"
+        style={{
+          backgroundColor: '#FBBF24',
+          color: '#1F2937',
+          fontWeight: 'bold',
+          padding: '8px 16px',
+          borderRadius: '0.375rem',
+          '&:hover': {
+            backgroundColor: '#D97706',
+          },
+        }}
+        onClick={() => setOpen(!open)}
+      >
+        Please read the details before use
+      </Button>
+      <p className={style.inContain}>Font size: {fontSize}mm</p>
+      <p
+        style={{ fontSize: `${fontSize}mm` }}
+        className={`${style.inContain} transition-all duration-300 ease-in-out`}
+      >
+        {words[currentWordIndex]}
+      </p>
+      <input
+        type="number"
+        value={fontSize}
+        onChange={changeFontSize}
+        className="border border-gray-300 rounded px-2 p-1 mb-4 text-center w-44"
+        placeholder="Enter font size"
+        min="1"
+        max="25"
+        step="0.1"
+      />
+      <div className="flex flex-wrap gap-4 mb-4">
+        <button
+          className="bg-slate-800 hover:bg-slate-700 text-yellow-400 font-bold py-2 px-4 rounded flex-1"
+          onClick={increaseFontSize}
+        >
+          Increase Font Size
+        </button>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: '#1e293b',
+            '&:hover': {
+              backgroundColor: '#334155',
+            },
+            color: '#facc15',
+            fontWeight: 'bold',
+            py: 1,
+            px: 2,
+            flex: 1,
+            borderRadius: '0 0 0 0',
+            borderLeft: isLeftEye ? '8px solid #facc15' : 'none',
+            borderRight: !isLeftEye ? '8px solid #facc15' : 'none',
+          }}
+          onClick={() => setIsLeftEye(!isLeftEye)}
+        >
+          Choose a Eye
+        </Button>
+        <button
+          className="bg-slate-800 hover:bg-slate-700 text-yellow-400 font-bold py-2 px-4 rounded flex-1"
+          onClick={decreaseFontSize}
+        >
+          Decrease Font Size
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-4 mb-4">
+        <button
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex-1"
+          onClick={overWord}
+        >
+          Change Word
+        </button>
+        <button
+          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex-1"
+          onClick={handleMistake}
+        >
+          Mistake
+        </button>
+      </div>
+      <Popup open={open} setOpen={setOpen} type={'blur'} />
+    </div>
+  );
+}
+</file>
+
+<file path="components/Header/index.jsx">
+"use client";
+import React, { useEffect, useState } from 'react';
+import { RiLogoutCircleRLine } from "react-icons/ri";
+import { IoMdLogIn } from "react-icons/io";
+import { AiFillHome } from "react-icons/ai";
+import { BiInfoCircle } from "react-icons/bi";
+import { FaUser } from "react-icons/fa";
+import { MdBlurOn } from "react-icons/md";
+import { IoColorPaletteSharp } from "react-icons/io5";
+import { GiField } from "react-icons/gi";
+import { MdAdminPanelSettings } from "react-icons/md";
+import Navlink from '../Navlink';
+import style from './style.module.css';
+import Logo from '../Logo';
+import { authAction, logoutAction } from '@/server/BL/actions/login.action';
+import Link from 'next/link';
+
+const brightColors = ["text-red-500", "text-purple-500", "text-teal-400", "text-yellow-400", "text-orange-400", "text-blue-200"];
+
+const linksList = [
+   { href: '/', text: 'Home', icon: <AiFillHome className="text-xl" /> },
+   { href: '/about', text: 'About', icon: <BiInfoCircle className="text-xl" /> },
+   { href: '/user', text: 'User Status', icon: <FaUser className="text-xl" /> },
+   { href: '/blur', text: 'Blur Vision', icon: <MdBlurOn className="text-xl" /> },
+   { href: '/color', text: 'Color Vision', icon: <IoColorPaletteSharp className="text-xl" /> },
+   { href: '/field', text: 'Field Vision', icon: <GiField className="text-xl" /> },
+];
+
+export default function Header() {
+   const [isManager, setIsManager] = useState(false);
+   const [isUser, setIsUser] = useState(false);
+
+   useEffect(() => {
+      async function checkAuth() {
+         try {
+            const authResult = await authAction();
+            if (authResult) {
+               setIsManager(authResult.isManager);
+               setIsUser(authResult.isUser);
+            }
+         } catch (error) {
+            console.log(error);
+         }
+      }
+      checkAuth();
+   }, []);
+
+   return (
+      <header className={`${style.header} flex justify-between items-center bg-gray-800 p-4`}>
+         <nav className="flex space-x-4">
+            {linksList.map((link, index) => (
+               <Navlink
+                  key={link.href}
+                  href={link.href}
+                  colorText={brightColors[index % brightColors.length]}
+               >
+                  <div className="flex flex-col items-center">
+                     {link.icon}
+                     <span className="text-xs hidden sm:block">{link.text}</span>
+                  </div>
+               </Navlink>
+            ))}
+            {isManager && (
+               <Navlink href="/admin" colorText="text-orange-200">
+                  <div className="flex flex-col items-center">
+                     <MdAdminPanelSettings className="text-xl" />
+                     <span className="text-xs hidden sm:block">Admin</span>
+                  </div>
+               </Navlink>
+            )}
+         </nav>
+
+         <div className="flex items-center space-x-4">
+            {isUser ? (
+               <form action={logoutAction}>
+                  <button
+                     className="text-orange-200 cursor-pointer"
+                     title='logout'
+                     type="submit"
+                     onClick={() => {
+                        setIsUser(false);
+                        logoutAction();
+                     }}
+                  >
+                     <div className="flex flex-col items-center">
+                        <RiLogoutCircleRLine className="text-xl" />
+                        <span className="text-xs hidden sm:block">Logout</span>
+                     </div>
+                  </button>
+               </form>
+            ) : (
+               <Link href="/login" className="text-orange-200 cursor-pointer" title='login'>
+                  <div className="flex flex-col items-center">
+                     <IoMdLogIn className="text-xl" />
+                     <span className="text-xs hidden sm:block">Login</span>
+                  </div>
+               </Link>
+            )}
+            <div className="hidden md:block">
+               <Logo />
+            </div>         </div>
+      </header>
+   );
+}
+</file>
+
+<file path="app/blur/page.jsx">
+import React from 'react';
+import { connectToMongo } from '@/server/connectToMongo';
+import { unstable_noStore } from 'next/cache';
+import { authAction } from '@/server/BL/actions/login.action';
+import { readUserByFieldService } from '@/server/BL/services/user.service';
+import Blur from '@/components/Blur';
+import ToLogin from '@/components/ToLogin';
+import Link from 'next/link';
+
+const AnimatedLink = ({ href, children }) => (
+  <Link 
+    href={href} 
+    className="
+      block mb-4 bg-gradient-to-r from-yellow-300 to-yellow-500 
+      text-white font-bold py-2 px-4 rounded-md shadow-lg 
+      transition-all duration-300 ease-in-out
+      hover:shadow-xl hover:from-yellow-200 hover:to-yellow-800
+      hover:scale-105 active:scale-95
+      transform hover:-translate-y-1 active:translate-y-0
+      flex items-center justify-center
+    "
+  >
+    {children}
+  </Link>
+);
+
+export default async function BlurPage() {
+  // await new Promise(resolve => setTimeout(resolve, 3000));
+  await connectToMongo();
+  const authData = await authAction();
+  
+  if (!authData || !authData.userToken) return <ToLogin />;
+  
+  const { email } = authData.userToken;
+  let currentUser = await readUserByFieldService({ email });
+  
+  const simplifiedUser = {
+    username: currentUser.username,
+    password: currentUser.password,
+    email: currentUser.email,
+    sizeWeaknesses: currentUser.sizeWeaknesses.map(weakness => ({
+      fontSize: weakness.fontSize,
+      distance: weakness.distance,
+      date: weakness.date
+    })),
+  };
+  
+  unstable_noStore();
+  
+  return (
+  <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-xl shadow-2xl space-y-6 max-w-md w-full transform transition-all duration-500 ease-in-out hover:scale-105">
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Blur Options</h1>
+        {simplifiedUser.sizeWeaknesses.length > 0 && (
+          <AnimatedLink href="blur/improve/20_1_left">Improve Blur</AnimatedLink>
+        )}
+        <AnimatedLink href="/blur/diagnosis">Blur Diagnosis</AnimatedLink>
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="app/page.jsx">
+import { connectToMongo } from '@/server/connectToMongo'
+
+import CurrentTime from '@/components/CurrentTime'
+import ImageCarousel from '@/components/ImageCarousel'
+import SighnIn from '@/components/SighnIn'
+import VisionImprovementHub from '@/components/VisionImprovementHub '
+import { authAction } from '@/server/BL/actions/login.action'
+import Login from '../components/Login'
+
+export default async function Home() {
+
+  await connectToMongo()
+
+
+  const isUser = await authAction();
+
+  return (
+    <div>
+      <ImageCarousel >
+        <VisionImprovementHub />
+      </ImageCarousel >
+      {isUser ? (
+        <Login />
+      ) : (
+        <SighnIn />
+      )}
+      <CurrentTime />  
+    </div>
+  )
+}
+</file>
+
+</files>

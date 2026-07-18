@@ -2,13 +2,11 @@
 const nextConfig = {
    images: {
       remotePatterns: [
-         {
-            hostname: 'www.carpetim.co.il',
-           },
-         {
-            hostname: 'tzemer.co.il',
-         },
+         { hostname: 'tzemer.co.il' },
       ],
+   },
+   experimental: {
+      serverComponentsExternalPackages: ['mongoose', 'jsonwebtoken'],
    },
 };
 

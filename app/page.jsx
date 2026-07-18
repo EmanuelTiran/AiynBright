@@ -3,7 +3,7 @@ import { connectToMongo } from '@/server/connectToMongo'
 import CurrentTime from '@/components/CurrentTime'
 import ImageCarousel from '@/components/ImageCarousel'
 import SighnIn from '@/components/SighnIn'
-import VisionImprovementHub from '@/components/VisionImprovementHub '
+import VisionImprovementHub from '@/components/VisionImprovementHub'
 import { authAction } from '@/server/BL/actions/login.action'
 import Login from '../components/Login'
 
