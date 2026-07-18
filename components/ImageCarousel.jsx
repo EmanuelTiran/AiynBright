@@ -30,10 +30,9 @@ export default function ImageCarousel({ children }) {
                         <Image
                             src={imageSrc}
                             alt={`image-${index}`}
-                            layout="fill"
-                            objectFit="cover"
+                            fill
+                            style={{ objectFit: 'cover', zIndex: 1 }}
                             priority={index === currentImageIndex}
-                            style={{ zIndex: 1 }} // Ensure image has a low z-index
                         />
                     </div>
                 ))}
