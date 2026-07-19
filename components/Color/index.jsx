@@ -1,133 +1,281 @@
 "use client";
-import React, { useContext, useEffect, useState } from 'react';
-import styles from './style.module.css';
-import { MyContext, MyProvider } from '../context/DataContext';
-import Blur2 from '@/components/Blur'
 
+import { useEffect, useState } from "react";
+import styles from "./style.module.css";
 
-let indexB = 0, indexF = 0;
+const COLORS = [
+  "red",
+  "blue",
+  "green",
+  "yellow",
+  "purple",
+  "orange",
+  "lightblue",
+];
 
-const ColorChangerComp = ({ user, colorsUser }) => {
-  const { data, updateData } = useContext(MyContext);
+const CHARACTERS = [
+  "9",
+  "5",
+  "7",
+  "1",
+  "8",
+  "2",
+  "4",
+  "6",
+  "0",
+  "A",
+  "S",
+  "D",
+  "F",
+  "E",
+  "V",
+  "G",
+  "I",
+  "M",
+  "N",
+  "B",
+  "Z",
+  "W",
+];
 
+function getNextColor(
+  currentColor,
+  excludedColor,
+) {
+  const currentIndex =
+    COLORS.indexOf(currentColor);
 
+  for (
+    let offset = 1;
+    offset <= COLORS.length;
+    offset += 1
+  ) {
+    const nextColor =
+      COLORS[
+        (currentIndex +
+          offset +
+          COLORS.length) %
+          COLORS.length
+      ];
 
-  const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'lightblue'];
-  const words = ["9", "5", "7", "1", "8", "2", "4", "6", "0", "1", "A", "S", "d", "F", "E", "e", "V", "G", "i", "m", "N", "b", "z", "W"];
+    if (nextColor !== excludedColor) {
+      return nextColor;
+    }
+  }
 
-  const [fontColor, setFontColor] = useState(colorsUser ? colorsUser.font_color : 'orange'); // מגדיר state לצבע הראשון של הפונט
-  const [backgroundColor1, setBackgroundColor1] = useState(colorsUser ? colorsUser.background_color : 'darkblue'); // מגדיר state לצבע הראשון של הרקע
-  const [backgroundColor2] = useState('transparent'); // מגדיר state לצבע השני של הרקע
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  return currentColor;
+}
+
+export default function ColorChanger({
+  user,
+  colorsUser,
+}) {
+  const [fontColor, setFontColor] = useState(
+    colorsUser?.font_color ?? "orange",
+  );
+
+  const [
+    backgroundColor,
+    setBackgroundColor,
+  ] = useState(
+    colorsUser?.background_color ?? "darkblue",
+  );
+
+  const [
+    currentCharacterIndex,
+    setCurrentCharacterIndex,
+  ] = useState(0);
+
+  const [
+    colorWeaknesses,
+    setColorWeaknesses,
+  ] = useState(() =>
+    Array.isArray(user?.colorWeaknesses)
+      ? user.colorWeaknesses
+      : [],
+  );
+
+  const [isSaving, setIsSaving] =
+    useState(false);
+
+  const [saveError, setSaveError] =
+    useState("");
 
   useEffect(() => {
-    updateData();
-    const newPathname = `/color/${backgroundColor1}_${fontColor}`;
-    window.history.pushState({}, '', newPathname);
-  }, [backgroundColor1,fontColor]);
+    const nextPathname =
+      `/color/${backgroundColor}_${fontColor}`;
 
-  const changeFontColor = () => {
-    indexF = (indexF + 1) % colors.length;
-    if (indexB === indexF) indexF = (indexF + 1) % colors.length;
-    setFontColor(colors[indexF]);
-  };
+    if (
+      window.location.pathname !== nextPathname
+    ) {
+      window.history.replaceState(
+        {},
+        "",
+        nextPathname,
+      );
+    }
+  }, [backgroundColor, fontColor]);
 
-  const changeBackgroundColor = () => {
-    indexB = (indexB + 1) % colors.length;
-    if (indexB === indexF) indexB = (indexB + 1) % colors.length;
-    setBackgroundColor1(colors[indexB]);
-  };
-
-  const overWord = () => {
-    setCurrentWordIndex((currentWordIndex - 1 + words.length) % words.length); // Cycle through words
+  const changeCharacter = () => {
+    setCurrentCharacterIndex(
+      (currentIndex) =>
+        (currentIndex + 1) %
+        CHARACTERS.length,
+    );
   };
 
   const handleMistake = async () => {
-    let taut = { background_color: backgroundColor1, font_color: fontColor };
-    user.colorWeaknesses.push(taut);
-    // שליחת הבקשה ל-API route
-    const response = await fetch('/api/updateUser', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        filter: { email: user.email },
-        updateData: { colorWeaknesses: user.colorWeaknesses }
-      })
-    });
+    const result = {
+      background_color: backgroundColor,
+      font_color: fontColor,
+    };
 
-    if (response.ok) {
-      const updatedUser = await response.json();
-      console.log('User updated successfully:', updatedUser);
-    } else {
-      console.error('Failed to update user');
+    const updatedWeaknesses = [
+      ...colorWeaknesses,
+      result,
+    ];
+
+    setIsSaving(true);
+    setSaveError("");
+
+    try {
+      const response = await fetch(
+        "/api/updateUser",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            updateData: {
+              colorWeaknesses:
+                updatedWeaknesses,
+            },
+          }),
+        },
+      );
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          payload.message ||
+            "Failed to save the result.",
+        );
+      }
+
+      setColorWeaknesses(
+        updatedWeaknesses,
+      );
+
+      changeCharacter();
+    } catch (error) {
+      setSaveError(
+        error.message ||
+          "Failed to save the result.",
+      );
+    } finally {
+      setIsSaving(false);
     }
-
-    overWord();
   };
 
   const fontTileStyle = {
     backgroundImage:
-      `linear-gradient(45deg, ${fontColor} 25%, transparent 25%, transparent 75%, ${fontColor} 75%, ${fontColor}),
-            linear-gradient(45deg, ${fontColor} 25%, transparent 25%, transparent 75%, ${fontColor} 75%, ${fontColor})`, // יוצר אפקט פסיפס לפונט
+      `linear-gradient(45deg, ${fontColor} 25%, transparent 25%, transparent 75%, ${fontColor} 75%, ${fontColor}), ` +
+      `linear-gradient(45deg, ${fontColor} 25%, transparent 25%, transparent 75%, ${fontColor} 75%, ${fontColor})`,
   };
 
   const backgroundTileStyle = {
     backgroundImage:
-      `linear-gradient(45deg, ${backgroundColor1} 25%, ${backgroundColor2} 25%, ${backgroundColor2} 75%, ${backgroundColor1} 75%, ${backgroundColor1}),
-            linear-gradient(45deg, ${backgroundColor1} 25%, ${backgroundColor2} 25%, ${backgroundColor2} 75%, ${backgroundColor1} 75%, ${backgroundColor1})`, // יוצר אפקט פסיפס לרקע
+      `linear-gradient(45deg, ${backgroundColor} 25%, transparent 25%, transparent 75%, ${backgroundColor} 75%, ${backgroundColor}), ` +
+      `linear-gradient(45deg, ${backgroundColor} 25%, transparent 25%, transparent 75%, ${backgroundColor} 75%, ${backgroundColor})`,
   };
 
   return (
-    <div className={`w-2/3 ${styles.contain} p-4`}>
+    <section
+      className={`w-2/3 p-4 ${styles.contain}`}
+    >
       <div className={styles.inContain}>
-        <div className={styles.rekaBackground} style={backgroundTileStyle}>
-          <div className={styles.font} style={fontTileStyle}>
-            {words[currentWordIndex]}
+        <div
+          className={styles.rekaBackground}
+          style={backgroundTileStyle}
+        >
+          <div
+            className={styles.font}
+            style={fontTileStyle}
+          >
+            {
+              CHARACTERS[
+                currentCharacterIndex
+              ]
+            }
           </div>
         </div>
-        <br />
-        <div className="flex flex-wrap gap-4 mb-4">
+
+        <div className="mb-4 mt-4 flex flex-wrap gap-4">
           <button
-            className="bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold py-2 px-4 rounded flex-1"
-            onClick={changeBackgroundColor}
+            type="button"
+            className="flex-1 rounded bg-slate-800 px-4 py-2 font-bold text-orange-400 hover:bg-slate-700"
+            onClick={() =>
+              setBackgroundColor(
+                (current) =>
+                  getNextColor(
+                    current,
+                    fontColor,
+                  ),
+              )
+            }
           >
             Change Background Color
           </button>
-          <button
-            className="bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold py-2 px-4 rounded flex-1"
-            onClick={changeFontColor}
-          >
-            Change Font
 
+          <button
+            type="button"
+            className="flex-1 rounded bg-slate-800 px-4 py-2 font-bold text-orange-400 hover:bg-slate-700"
+            onClick={() =>
+              setFontColor((current) =>
+                getNextColor(
+                  current,
+                  backgroundColor,
+                ),
+              )
+            }
+          >
+            Change Font Color
           </button>
         </div>
-        <div className="flex flex-wrap gap-4 mb-4">
+
+        <div className="mb-4 flex flex-wrap gap-4">
           <button
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex-1"
-            onClick={overWord}
+            type="button"
+            className="flex-1 rounded bg-green-500 px-4 py-2 font-bold text-white hover:bg-green-700"
+            onClick={changeCharacter}
           >
-            Change Word
+            Change Character
           </button>
+
           <button
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex-1"
-            onClick={() => handleMistake()}
+            type="button"
+            className="flex-1 rounded bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+            onClick={handleMistake}
+            disabled={isSaving}
           >
-            Mistake
+            {isSaving
+              ? "Saving…"
+              : "Mistake"}
           </button>
         </div>
+
+        {saveError && (
+          <p
+            role="alert"
+            className="text-red-700"
+          >
+            {saveError}
+          </p>
+        )}
       </div>
-    </div>
-
+    </section>
   );
-};
-
-const ColorChanger = ({ user, colorsUser }) => (
-  <MyProvider>
-    <ColorChangerComp user={user} colorsUser={colorsUser} />
-    {/* <Blur2 user={user}/> */}
-  </MyProvider>
-);
-
-export default ColorChanger;
+}

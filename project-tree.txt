@@ -1,0 +1,165 @@
+﻿[DIR]  app
+[DIR]  components
+[DIR]  pages
+[DIR]  public
+[DIR]  server
+[FILE] .env
+[FILE] .gitignore
+[FILE] AyinBright - עמנואל ויהשוע -הצעת פרוייקט.docx
+[FILE] eslint.config.mjs
+[FILE] jsconfig.json
+[FILE] list.txt
+[FILE] next.config.mjs
+[FILE] package-lock.json
+[FILE] package.json
+[FILE] postcss.config.mjs
+[FILE] project-tree.txt
+[FILE] README.md
+[FILE] repomix-output.xml
+[FILE] tailwind.config.js
+[FILE] ~$inBright - עמנואל ויהשוע.docx
+[FILE] אישור מהט - עמנואל טירן.pdf
+[FILE] מצגת_מהט.pdf
+[FILE] ספר פרוייקט _ פתוח לעריכה.docx
+[FILE] ספר פרוייקט_AyinBright.pdf
+    [DIR]  about
+    [DIR]  admin
+    [DIR]  api
+    [DIR]  blur
+    [DIR]  color
+    [DIR]  field
+    [DIR]  login
+    [DIR]  signin
+    [DIR]  user
+    [FILE] globals.css
+    [FILE] helper.js
+    [FILE] layout.jsx
+    [FILE] page.jsx
+    [FILE] style.module.css
+        [FILE] page.jsx
+        [FILE] style.module.css
+        [FILE] layout.jsx
+        [FILE] page.jsx
+        [DIR]  auth
+        [DIR]  revalidate
+            [DIR]  [...nextauth]
+                [FILE] route.js
+            [FILE] route.js
+        [DIR]  diagnosis
+        [DIR]  improve
+        [FILE] loading.jsx
+        [FILE] page.jsx
+        [FILE] style.module.css
+            [FILE] page.jsx
+            [DIR]  [detail]
+            [FILE] page.jsx
+                [FILE] page.jsx
+        [DIR]  [detail]
+        [FILE] loading.jsx
+        [FILE] page.jsx
+        [FILE] style.module.css
+            [FILE] page.jsx
+        [DIR]  [detail]
+        [FILE] page.jsx
+        [FILE] style.module.css
+            [FILE] loading.jsx
+            [FILE] page.jsx
+        [FILE] page.jsx
+        [FILE] page.jsx
+        [FILE] style.module.css
+        [FILE] layout.jsx
+        [FILE] page.jsx
+        [FILE] style.module.css
+    [DIR]  Blur
+    [DIR]  Color
+    [DIR]  context
+    [DIR]  Field
+    [DIR]  Header
+    [DIR]  Images
+    [DIR]  Logo
+    [DIR]  Navlink
+    [DIR]  Popup
+    [DIR]  Snellen
+    [FILE] AboutPage.jsx
+    [FILE] AnimatedLinks.jsx
+    [FILE] Appbar.jsx
+    [FILE] ArrUsers.jsx
+    [FILE] ColorDetails.jsx
+    [FILE] CurrentTime.jsx
+    [FILE] dataContext.jsx
+    [FILE] DetailUser.jsx
+    [FILE] EyeExaminationPrompt.jsx
+    [FILE] FieldDetails.jsx
+    [FILE] ImageCarousel.jsx
+    [FILE] ImageCarousel.module.css
+    [FILE] Login.jsx
+    [FILE] ProgressBar.jsx
+    [FILE] Providers.jsx
+    [FILE] RandomCharacterGame.jsx
+    [FILE] ResultTestBlur.jsx
+    [FILE] SighnIn.jsx
+    [FILE] SignInButton.jsx
+    [FILE] SiteDescription.jsx
+    [FILE] SizesDetails.jsx
+    [FILE] ToLogin.jsx
+    [FILE] UsersTable.jsx
+    [FILE] VisionImprovementHub.jsx
+    [FILE] VisionWebsiteDescription.jsx
+    [FILE] Weaknesses.jsx
+        [FILE] index.jsx
+        [FILE] style.module.css
+        [FILE] index.jsx
+        [FILE] style.module.css
+        [FILE] DataContext.jsx
+        [FILE] index.jsx
+        [FILE] style.module.css
+        [FILE] index.jsx
+        [FILE] style.module.css
+        [FILE] index.jsx
+        [FILE] style.module.css
+        [FILE] index.jsx
+        [FILE] style.module.css
+        [FILE] index.jsx
+        [FILE] style.module.css
+        [FILE] index.jsx
+        [FILE] style.module.css
+        [FILE] index.jsx
+        [FILE] SnellenChart.css
+    [DIR]  api
+    [FILE] _document.js
+        [FILE] deleteWeakness.js
+        [FILE] get-time.js
+        [FILE] updateUser.js
+    [DIR]  images
+    [FILE] blurRules.txt
+    [FILE] favicon.ico
+    [FILE] fieldsRules.txt
+    [FILE] next.svg
+    [FILE] productData.js
+    [FILE] vercel.svg
+        [FILE] image1.jpg
+        [FILE] image2.jpg
+        [FILE] image3.jpg
+    [DIR]  BL
+    [DIR]  data
+    [DIR]  DL
+    [DIR]  security
+    [DIR]  validation
+    [FILE] auth.js
+    [FILE] connectToMongo.js
+        [DIR]  actions
+        [DIR]  pages
+        [DIR]  services
+            [FILE] login.action.js
+            [FILE] sighnin.action.js
+            [FILE] user.service.js
+        [FILE] current-user.js
+        [DIR]  controllers
+        [DIR]  models
+            [FILE] user.controller.js
+            [FILE] user.model.js
+        [FILE] password.js
+        [FILE] session.js
+        [FILE] auth.js
+        [FILE] results.js
+        [FILE] route-params.js

@@ -1,10 +1,10 @@
-This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+This file is a merged representation of a subset of the codebase, containing files not matching ignore patterns, combined into a single document by Repomix.
 
 <file_summary>
 This section contains a summary of this file.
 
 <purpose>
-This file contains a packed representation of the entire repository's contents.
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
 It is designed to be easily consumable by AI systems for analysis, code review,
 or other automated processes.
 </purpose>
@@ -32,6 +32,7 @@ The content is organized as follows:
 <notes>
 - Some files may have been excluded based on .gitignore rules and Repomix's configuration
 - Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching these patterns are excluded: node_modules/**, .next/**, out/**, dist/**, build/**, coverage/**, .git/**
 - Files matching patterns in .gitignore are excluded
 - Files matching default ignore patterns are excluded
 - Files are sorted by Git change count (files with more changes are at the bottom)
@@ -123,6 +124,7 @@ components/UsersTable.jsx
 components/VisionImprovementHub.jsx
 components/VisionWebsiteDescription.jsx
 components/Weaknesses.jsx
+eslint.config.mjs
 jsconfig.json
 list.txt
 next.config.mjs
@@ -147,13 +149,504 @@ server/BL/actions/login.action.js
 server/BL/actions/sighnin.action.js
 server/BL/services/user.service.js
 server/connectToMongo.js
+server/data/current-user.js
 server/DL/controllers/user.controller.js
 server/DL/models/user.model.js
+server/security/password.js
+server/security/session.js
+server/validation/auth.js
+server/validation/results.js
+server/validation/route-params.js
 tailwind.config.js
 </directory_structure>
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="eslint.config.mjs">
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+
+const eslintConfig = defineConfig([
+  ...nextVitals,
+
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "build/**",
+    "repomix-output.xml",
+  ]),
+]);
+
+export default eslintConfig;
+</file>
+
+<file path="server/data/current-user.js">
+import "server-only";
+
+import { connectToMongo } from "@/server/connectToMongo";
+import { readUserByIdService } from "@/server/BL/services/user.service";
+import {
+  getSession,
+  resolveUserRole,
+} from "@/server/security/session";
+
+function serializeResult(result) {
+  return {
+    ...result,
+    _id: result._id?.toString(),
+    date:
+      result.date instanceof Date
+        ? result.date.toISOString()
+        : result.date,
+  };
+}
+
+export function toSafeUserDTO(user) {
+  return {
+    id: user._id.toString(),
+    username: user.username,
+    email: user.email,
+    role: user.role,
+
+    colorWeaknesses: (
+      user.colorWeaknesses || []
+    ).map(serializeResult),
+
+    sizeWeaknesses: (
+      user.sizeWeaknesses || []
+    ).map(serializeResult),
+
+    fieldWeaknesses: (
+      user.fieldWeaknesses || []
+    ).map(serializeResult),
+  };
+}
+
+export async function getCurrentUserDTO() {
+  const session = await getSession();
+
+  if (!session) {
+    return null;
+  }
+
+  await connectToMongo();
+
+  const user = await readUserByIdService(
+    session.userId,
+  );
+
+  return user ? toSafeUserDTO(user) : null;
+}
+
+export async function getAdminSession() {
+  const session = await getSession();
+
+  if (!session) {
+    return null;
+  }
+
+  await connectToMongo();
+
+  const user = await readUserByIdService(
+    session.userId,
+  );
+
+  if (
+    !user ||
+    resolveUserRole(user) !== "admin"
+  ) {
+    return null;
+  }
+
+  return session;
+}
+</file>
+
+<file path="server/security/password.js">
+import "server-only";
+import { timingSafeEqual } from "node:crypto";
+import bcrypt from "bcryptjs";
+
+const HASH_ROUNDS = 12;
+
+export function hashPassword(password) {
+  return bcrypt.hash(password, HASH_ROUNDS);
+}
+
+function safeLegacyCompare(candidate, storedPassword) {
+  const candidateBuffer = Buffer.from(candidate);
+  const storedBuffer = Buffer.from(storedPassword);
+
+  if (candidateBuffer.length !== storedBuffer.length) {
+    return false;
+  }
+
+  return timingSafeEqual(candidateBuffer, storedBuffer);
+}
+
+export async function verifyStoredPassword({
+  candidate,
+  passwordHash,
+  legacyPassword,
+}) {
+  if (passwordHash) {
+    return {
+      isValid: await bcrypt.compare(candidate, passwordHash),
+      needsMigration: false,
+    };
+  }
+
+  if (
+    legacyPassword &&
+    safeLegacyCompare(candidate, legacyPassword)
+  ) {
+    return {
+      isValid: true,
+      needsMigration: true,
+    };
+  }
+
+  return {
+    isValid: false,
+    needsMigration: false,
+  };
+}
+</file>
+
+<file path="server/security/session.js">
+import "server-only";
+import { cookies } from "next/headers";
+import { SignJWT, jwtVerify } from "jose";
+
+export const SESSION_COOKIE_NAME = "ayinbright_session";
+
+const SESSION_DURATION_SECONDS = 60 * 60 * 8;
+
+function getSessionSecret() {
+  const secret = process.env.SESSION_SECRET;
+
+  if (!secret || secret.length < 32) {
+    throw new Error(
+      "SESSION_SECRET must contain at least 32 characters.",
+    );
+  }
+
+  return new TextEncoder().encode(secret);
+}
+
+export function isConfiguredAdminEmail(email) {
+  const adminEmails = (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+
+  return adminEmails.includes(email.trim().toLowerCase());
+}
+
+export function resolveUserRole(user) {
+  return (
+    user.role === "admin" ||
+    isConfiguredAdminEmail(user.email)
+  )
+    ? "admin"
+    : "user";
+}
+
+export async function createSessionToken({
+  userId,
+  email,
+  role,
+}) {
+  return new SignJWT({ email, role })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(String(userId))
+    .setIssuedAt()
+    .setExpirationTime(`${SESSION_DURATION_SECONDS}s`)
+    .sign(getSessionSecret());
+}
+
+export async function verifySessionToken(token) {
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const { payload } = await jwtVerify(
+      token,
+      getSessionSecret(),
+      {
+        algorithms: ["HS256"],
+      },
+    );
+
+    if (
+      !payload.sub ||
+      typeof payload.email !== "string" ||
+      !["user", "admin"].includes(payload.role)
+    ) {
+      return null;
+    }
+
+    return {
+      userId: payload.sub,
+      email: payload.email,
+      role: payload.role,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function setSessionCookie(user) {
+  const token = await createSessionToken(user);
+  const cookieStore = await cookies();
+
+  cookieStore.set(SESSION_COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: SESSION_DURATION_SECONDS,
+  });
+}
+
+export async function clearSessionCookie() {
+  const cookieStore = await cookies();
+
+  cookieStore.set(SESSION_COOKIE_NAME, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+}
+
+export async function getSession() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(
+    SESSION_COOKIE_NAME,
+  )?.value;
+
+  return verifySessionToken(token);
+}
+</file>
+
+<file path="server/validation/auth.js">
+import "server-only";
+import { z } from "zod";
+
+const emailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .email("Enter a valid email address.")
+  .max(254, "The email address is too long.");
+
+export const loginSchema = z.object({
+  email: emailSchema,
+  password: z
+    .string()
+    .min(1, "Enter your password.")
+    .max(128, "The password is too long."),
+});
+
+export const registrationSchema = z.object({
+  username: z
+    .string()
+    .trim()
+    .min(
+      2,
+      "The name must contain at least 2 characters.",
+    )
+    .max(
+      50,
+      "The name can contain at most 50 characters.",
+    ),
+
+  email: emailSchema,
+
+  password: z
+    .string()
+    .min(
+      8,
+      "The password must contain at least 8 characters.",
+    )
+    .max(
+      128,
+      "The password can contain at most 128 characters.",
+    )
+    .regex(
+      /[a-zA-Z]/,
+      "The password must contain a letter.",
+    )
+    .regex(
+      /[0-9]/,
+      "The password must contain a number.",
+    ),
+});
+
+export function firstValidationError(result) {
+  return (
+    result.error?.issues?.[0]?.message ||
+    "The submitted data is invalid."
+  );
+}
+</file>
+
+<file path="server/validation/results.js">
+import "server-only";
+import { z } from "zod";
+
+const colorName = z
+  .string()
+  .trim()
+  .min(1)
+  .max(32)
+  .regex(/^[a-zA-Z0-9#(),.%\s-]+$/);
+
+const colorResultSchema = z.object({
+  background_color: colorName,
+  font_color: colorName,
+  date: z.coerce.date().optional(),
+});
+
+const sizeResultSchema = z.object({
+  eye: z.enum(["right", "left"]).default("right"),
+  fontSize: z.coerce.number().min(1).max(30),
+  distance: z.coerce.number().min(0.1).max(10),
+  date: z.coerce.date().optional(),
+});
+
+const fieldResultSchema = z.object({
+  side: z.enum(["right", "left"]),
+  distance: z.coerce.number().min(-30).max(30),
+  date: z.coerce.date().optional(),
+});
+
+const resultsUpdateSchema = z
+  .object({
+    colorWeaknesses: z
+      .array(colorResultSchema)
+      .max(500)
+      .optional(),
+
+    sizeWeaknesses: z
+      .array(sizeResultSchema)
+      .max(500)
+      .optional(),
+
+    fieldWeaknesses: z
+      .array(fieldResultSchema)
+      .max(500)
+      .optional(),
+  })
+  .strict()
+  .refine(
+    (value) =>
+      Object.values(value).filter(
+        (item) => item !== undefined,
+      ).length === 1,
+    "Exactly one result collection can be updated at a time.",
+  );
+
+export function validateResultsUpdate(value) {
+  return resultsUpdateSchema.safeParse(value);
+}
+</file>
+
+<file path="server/validation/route-params.js">
+import "server-only";
+
+const COLOR_VALUE_PATTERN =
+  /^[a-zA-Z0-9#(),.%\s-]{1,32}$/;
+
+export function parseBlurDetail(detail) {
+  const [
+    fontSizeValue,
+    distanceValue,
+    eye,
+  ] = detail.split("_");
+
+  const fontSize =
+    Number(fontSizeValue);
+
+  const distance =
+    Number(distanceValue);
+
+  if (
+    !Number.isFinite(fontSize) ||
+    fontSize < 1 ||
+    fontSize > 30 ||
+    !Number.isFinite(distance) ||
+    distance < 0.1 ||
+    distance > 10 ||
+    !["left", "right"].includes(eye)
+  ) {
+    return null;
+  }
+
+  return {
+    fontSize,
+    distance,
+    eye,
+  };
+}
+
+export function parseColorDetail(detail) {
+  const separatorIndex =
+    detail.indexOf("_");
+
+  if (separatorIndex < 1) {
+    return null;
+  }
+
+  const background_color =
+    detail.slice(0, separatorIndex);
+
+  const font_color =
+    detail.slice(separatorIndex + 1);
+
+  if (
+    !COLOR_VALUE_PATTERN.test(
+      background_color,
+    ) ||
+    !COLOR_VALUE_PATTERN.test(
+      font_color,
+    )
+  ) {
+    return null;
+  }
+
+  return {
+    background_color,
+    font_color,
+  };
+}
+
+export function parseFieldDetail(detail) {
+  const [side, distanceValue] =
+    detail.split("_");
+
+  const distance =
+    Number(distanceValue);
+
+  if (
+    !["left", "right"].includes(side) ||
+    !Number.isFinite(distance) ||
+    distance < -30 ||
+    distance > 30
+  ) {
+    return null;
+  }
+
+  return {
+    side,
+    distance,
+  };
+}
+</file>
 
 <file path=".gitignore">
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
@@ -269,58 +762,49 @@ export default function Layout({children}) {
 </file>
 
 <file path="app/admin/page.jsx">
-import React from 'react'
-import { authAction } from '@/server/BL/actions/login.action';
-import { readUsersService } from '@/server/BL/services/user.service';
-import { unstable_noStore } from 'next/cache';
-import ArrUsers from '@/components/ArrUsers';
+import ArrUsers from "@/components/ArrUsers";
+import { connectToMongo } from "@/server/connectToMongo";
+import { readUsersService } from "@/server/BL/services/user.service";
 
-export default async function admin() {
-  unstable_noStore()
+import {
+  getAdminSession,
+  toSafeUserDTO,
+} from "@/server/data/current-user";
 
-  const { isManager } = await authAction();
-  const users = await readUsersService({});
-  const filteredUsers = users.map(user => ({
-    username: user.username,
-    password: user.password,
-    email: user.email,
-    colorWeaknesses: user.colorWeaknesses.map(weakness => ({
-      background_color: weakness.background_color,
-      font_color: weakness.font_color,
-      date: weakness.date
-    })),
-    sizeWeaknesses: user.sizeWeaknesses.map(weakness => ({
-      eye: weakness.eye,
-      fontSize: weakness.fontSize,
-      distance: weakness.distance,
-      date: weakness.date
-    })),
-    fieldWeaknesses: user.fieldWeaknesses.map(weakness => ({
-      side: weakness.side,
-      distance: weakness.distance,
-      date: weakness.date
-    }))
-  }));
+export const metadata = {
+  title: "Administration",
+};
 
+function AccessDenied() {
   return (
-    <>
-      {isManager ?
-        <ArrUsers users={filteredUsers} />
-        : <div className="flex flex-col items-center justify-center min-h-[300px]">
-          <div className="relative">
-            <h1 className="text-4xl font-bold text-yellow-100 animate-bounce">
-              Access Denied
-            </h1>
-            <div className="mt-4 flex justify-center space-x-1">
-              <div className="w-2 h-2 bg-yellow-100 rounded-full animate-bounce"></div>
-              <div className="w-2 h-2 bg-yellow-100 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-              <div className="w-2 h-2 bg-yellow-100 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-            </div>
-          </div>
-        </div>
-      }
-    </>
-  )
+    <main className="flex min-h-[60vh] items-center justify-center p-6">
+      <div className="rounded-xl bg-white p-8 text-center shadow-lg">
+        <h1 className="text-3xl font-bold text-slate-800">
+          Access denied
+        </h1>
+
+        <p className="mt-2 text-slate-600">
+          Administrator permission is
+          required to view this page.
+        </p>
+      </div>
+    </main>
+  );
+}
+
+export default async function AdminPage() {
+  const session = await getAdminSession();
+
+  if (!session) {
+    return <AccessDenied />;
+  }
+
+  await connectToMongo();
+
+  const users = await readUsersService({});
+  const safeUsers = users.map(toSafeUserDTO);
+
+  return <ArrUsers users={safeUsers} />;
 }
 </file>
 
@@ -345,171 +829,127 @@ export default async function admin() {
 </file>
 
 <file path="app/api/revalidate/route.js">
-export async function GET(request) {
-    const url = new URL(request.url);
-    const secret = url.searchParams.get('secret');  // סוד לאימות הבקשה
-  
-    if (secret !== process.env.REVALIDATE_SECRET) {
-      return new Response('Invalid secret', { status: 401 });
-    }
-  
-    try {
-      await revalidatePath('/');  // לדוגמה: ריענון עמוד הבית
-      return new Response('Revalidated!', { status: 200 });
-    } catch (error) {
-      return new Response('Error revalidating', { status: 500 });
-    }
+import { revalidatePath } from "next/cache";
+
+export async function POST(request) {
+  const authorization =
+    request.headers.get("authorization");
+
+  const expectedSecret =
+    process.env.REVALIDATE_SECRET;
+
+  if (
+    !expectedSecret ||
+    authorization !==
+      `Bearer ${expectedSecret}`
+  ) {
+    return Response.json(
+      {
+        message: "Unauthorized.",
+      },
+      {
+        status: 401,
+      },
+    );
   }
+
+  let path = "/";
+
+  try {
+    const body = await request.json();
+
+    if (
+      typeof body?.path === "string" &&
+      body.path.startsWith("/")
+    ) {
+      path = body.path;
+    }
+  } catch {
+    // An empty body revalidates the home page.
+  }
+
+  revalidatePath(path);
+
+  return Response.json({
+    revalidated: true,
+    path,
+  });
+}
 </file>
 
 <file path="app/blur/diagnosis/page.jsx">
-import React from 'react';
-import { connectToMongo } from '@/server/connectToMongo';
-import { unstable_noStore } from 'next/cache';
-import { authAction } from '@/server/BL/actions/login.action';
-import { readUserByFieldService } from '@/server/BL/services/user.service';
-import Blur from '@/components/Blur';
-import ToLogin from '@/components/ToLogin';
-import Link from 'next/link';
-import RandomCharacterGame from '@/components/RandomCharacterGame';
+import RandomCharacterGame from "@/components/RandomCharacterGame";
+import ToLogin from "@/components/ToLogin";
+import { getCurrentUserDTO } from "@/server/data/current-user";
 
-const AnimatedLink = ({ href, children }) => (
-    <Link
-        href={href}
-        className="
-      block mb-4 bg-gradient-to-r from-yellow-200 to-yellow-800 
-      text-white font-bold py-2 px-4 rounded-full shadow-lg 
-      transition-all duration-300 ease-in-out
-      hover:shadow-xl hover:from-yellow-200 hover:to-yellow-800
-      hover:scale-105 active:scale-95
-      transform hover:-translate-y-1 active:translate-y-0
-      flex items-center justify-center
-    "
-    >
-        {children}
-    </Link>
-);
+export const metadata = {
+  title: "Blur screening",
+};
 
-export default async function BlurPage() {
-    await connectToMongo();
-    const authData = await authAction();
+export default async function BlurDiagnosisPage() {
+  const user = await getCurrentUserDTO();
 
-    if (!authData || !authData.userToken) return <ToLogin />;
+  if (!user) {
+    return <ToLogin />;
+  }
 
-    const { email } = authData.userToken;
-    let currentUser = await readUserByFieldService({ email });
-
-    const simplifiedUser = {
-        username: currentUser.username,
-        password: currentUser.password,
-        email: currentUser.email,
-        sizeWeaknesses: currentUser.sizeWeaknesses.map(weakness => ({
-            eye: weakness.eye,
-            fontSize: weakness.fontSize,
-            distance: weakness.distance,
-            date: weakness.date
-        })),
-    };
-
-    unstable_noStore();
-
-    return (
-        <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen bg-gray-100">
-            <RandomCharacterGame user={simplifiedUser} />
-        </div>
-    );
+  return (
+    <main className="container mx-auto flex min-h-screen items-center justify-center bg-gray-100 p-4">
+      <RandomCharacterGame user={user} />
+    </main>
+  );
 }
 </file>
 
 <file path="app/blur/improve/[detail]/page.jsx">
-import { connectToMongo } from '@/server/connectToMongo'
-import { unstable_noStore } from 'next/cache'
-import Blur from '@/components/Blur'
-import { authAction } from '@/server/BL/actions/login.action'
-import { readUserByFieldService } from '@/server/BL/services/user.service'
-import ToLogin from '@/components/ToLogin'
+import { notFound } from "next/navigation";
+import Blur from "@/components/Blur";
+import ToLogin from "@/components/ToLogin";
+import { getCurrentUserDTO } from "@/server/data/current-user";
+import { parseBlurDetail } from "@/server/validation/route-params";
 
+export default async function BlurImprovementDetailPage({
+  params,
+}) {
+  const { detail } = await params;
+  const sizeUser = parseBlurDetail(detail);
 
-
-
-export default async function page({ params: { detail } }) {
-  function extract_size(detail) {
-    const size = detail.split('_');
-
-    return {
-      fontSize: size[0],
-      distance: size[1],
-      eye: size[2]
-    };
+  if (!sizeUser) {
+    notFound();
   }
-  let sizeUser = extract_size(detail);
 
-  // await new Promise(resolve => setTimeout(resolve, 3000))
-  await connectToMongo();
-  const authData = await authAction();
-  if (!authData || !authData.userToken) return <ToLogin/>
+  const user = await getCurrentUserDTO();
 
-  const { email } = authData.userToken;
+  if (!user) {
+    return <ToLogin />;
+  }
 
-  let currentUser = await readUserByFieldService({ email });
-  const simplifiedUser = {
-    eye: currentUser.eye,
-    username: currentUser.username,
-    password: currentUser.password,
-    email: currentUser.email,
-    sizeWeaknesses: currentUser.sizeWeaknesses.map(weakness => ({
-      fontSize: weakness.fontSize,
-      distance: weakness.distance,
-      date: weakness.date
-    }))
-  };
-  unstable_noStore()
   return (
-    <div >
-      <Blur user={simplifiedUser} sizeUser={sizeUser} />
-    </div>
-  )
+    <Blur
+      user={user}
+      sizeUser={sizeUser}
+    />
+  );
 }
 </file>
 
 <file path="app/blur/improve/page.jsx">
-import { connectToMongo } from '@/server/connectToMongo'
-import { unstable_noStore } from 'next/cache'
-import { authAction } from '@/server/BL/actions/login.action'
-import { readUserByFieldService } from '@/server/BL/services/user.service'
-import Blur from '@/components/Blur'
-import ToLogin from '@/components/ToLogin'
+import Blur from "@/components/Blur";
+import ToLogin from "@/components/ToLogin";
+import { getCurrentUserDTO } from "@/server/data/current-user";
 
-export default async function BlurPage() {
-  await new Promise(resolve => setTimeout(resolve, 3000))
-  await connectToMongo();
-  const authData = await authAction();
-  if (!authData || !authData.userToken) return <ToLogin />
+export const metadata = {
+  title: "Blur exercise",
+};
 
-  const { email } = authData.userToken;
+export default async function BlurImprovementPage() {
+  const user = await getCurrentUserDTO();
 
-  let currentUser = await readUserByFieldService({ email });
+  if (!user) {
+    return <ToLogin />;
+  }
 
-  const simplifiedUser = {
-    userId: currentUser.userId?.toString() || '',
-    username: currentUser.username,
-    password: currentUser.password,
-    email: currentUser.email,
-    colorWeaknesses: currentUser.colorWeaknesses || [],
-    sizeWeaknesses: currentUser.sizeWeaknesses?.map(weakness => ({
-      fontSize: weakness.fontSize,
-      distance: weakness.distance,
-      date: weakness.date instanceof Date ? weakness.date.toISOString() : weakness.date, // המרת Date למחרוזת
-    })) || [],
-    fieldWeaknesses: currentUser.fieldWeaknesses || [],
-  };
-
-  unstable_noStore();
-  return (
-    <div>
-      <Blur user={simplifiedUser} />
-    </div>
-  );
+  return <Blur user={user} />;
 }
 </file>
 
@@ -528,65 +968,65 @@ export default function loading() {
 </file>
 
 <file path="app/blur/page.jsx">
-import React from 'react';
-import { connectToMongo } from '@/server/connectToMongo';
-import { unstable_noStore } from 'next/cache';
-import { authAction } from '@/server/BL/actions/login.action';
-import { readUserByFieldService } from '@/server/BL/services/user.service';
-import Blur from '@/components/Blur';
-import ToLogin from '@/components/ToLogin';
-import Link from 'next/link';
+import Link from "next/link";
+import ToLogin from "@/components/ToLogin";
+import { getCurrentUserDTO } from "@/server/data/current-user";
 
-const AnimatedLink = ({ href, children }) => (
-  <Link 
-    href={href} 
-    className="
-      block mb-4 bg-gradient-to-r from-yellow-300 to-yellow-500 
-      text-white font-bold py-2 px-4 rounded-md shadow-lg 
-      transition-all duration-300 ease-in-out
-      hover:shadow-xl hover:from-yellow-200 hover:to-yellow-800
-      hover:scale-105 active:scale-95
-      transform hover:-translate-y-1 active:translate-y-0
-      flex items-center justify-center
-    "
-  >
-    {children}
-  </Link>
-);
+export const metadata = {
+  title: "Blur vision",
+};
+
+function OptionLink({ href, children }) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center justify-center rounded-lg bg-gradient-to-r from-amber-300 to-amber-500 px-4 py-3 font-bold text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:from-amber-200 hover:to-amber-600 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
+    >
+      {children}
+    </Link>
+  );
+}
 
 export default async function BlurPage() {
-  // await new Promise(resolve => setTimeout(resolve, 3000));
-  await connectToMongo();
-  const authData = await authAction();
-  
-  if (!authData || !authData.userToken) return <ToLogin />;
-  
-  const { email } = authData.userToken;
-  let currentUser = await readUserByFieldService({ email });
-  
-  const simplifiedUser = {
-    username: currentUser.username,
-    password: currentUser.password,
-    email: currentUser.email,
-    sizeWeaknesses: currentUser.sizeWeaknesses.map(weakness => ({
-      fontSize: weakness.fontSize,
-      distance: weakness.distance,
-      date: weakness.date
-    })),
-  };
-  
-  unstable_noStore();
-  
+  const user = await getCurrentUserDTO();
+
+  if (!user) {
+    return <ToLogin />;
+  }
+
   return (
-  <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-xl shadow-2xl space-y-6 max-w-md w-full transform transition-all duration-500 ease-in-out hover:scale-105">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Blur Options</h1>
-        {simplifiedUser.sizeWeaknesses.length > 0 && (
-          <AnimatedLink href="blur/improve/20_1_left">Improve Blur</AnimatedLink>
+    <main className="container mx-auto flex min-h-[calc(100vh-72px)] items-center justify-center bg-gray-100 p-4">
+      <section className="w-full max-w-md space-y-5 rounded-xl bg-white p-8 shadow-2xl">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-800">
+            Blur vision
+          </h1>
+
+          <p className="mt-2 text-sm text-gray-600">
+            Start a screening exercise or
+            continue from a previous result.
+          </p>
+        </div>
+
+        {user.sizeWeaknesses.length > 0 && (
+          <OptionLink href="/blur/improve">
+            Continue exercise
+          </OptionLink>
         )}
-        <AnimatedLink href="/blur/diagnosis">Blur Diagnosis</AnimatedLink>
-      </div>
-    </div>
+
+        <OptionLink href="/blur/diagnosis">
+          Start screening
+        </OptionLink>
+
+        <p className="rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-900">
+          AyinBright is an educational
+          screening tool, not a medical
+          diagnosis. Consult a qualified
+          eye-care professional about symptoms
+          or changes in vision.
+        </p>
+      </section>
+    </main>
   );
 }
 </file>
@@ -611,49 +1051,37 @@ export default async function BlurPage() {
 </file>
 
 <file path="app/color/[detail]/page.jsx">
-import ColorChanger from '@/components/Color';
-import ToLogin from '@/components/ToLogin';
-import { authAction } from '@/server/BL/actions/login.action';
-import { readUserByFieldService } from '@/server/BL/services/user.service';
-import { connectToMongo } from '@/server/connectToMongo'
-import { unstable_noStore } from 'next/cache';
-import Link from 'next/link'
+import { notFound } from "next/navigation";
+import ColorChanger from "@/components/Color";
+import ToLogin from "@/components/ToLogin";
+import { getCurrentUserDTO } from "@/server/data/current-user";
+import { parseColorDetail } from "@/server/validation/route-params";
 
-export default async function page({ params: { detail } }) {
+export default async function ColorDetailPage({
+  params,
+}) {
+  const { detail } = await params;
 
-    function extractColors(detail) {
-        const colors = detail.split('_');
+  const colorsUser =
+    parseColorDetail(detail);
 
-        return {
-            background_color: colors[0],
-            font_color: colors[1]
-        };
-    }
-    let colorsUser = extractColors(detail);
-  
-    const authData = await authAction();
+  if (!colorsUser) {
+    notFound();
+  }
 
-  if (!authData || !authData.userToken) return <ToLogin/>
+  const user =
+    await getCurrentUserDTO();
 
-  const { email } = authData.userToken;
-
-  let currentUser = await readUserByFieldService({ email });
-  const simplifiedUser = {
-    username: currentUser.username,
-    password: currentUser.password,
-    email: currentUser.email,
-    colorWeaknesses: currentUser.colorWeaknesses.map(weakness => ({
-      background_color: weakness.background_color,
-      font_color: weakness.font_color
-    }))
-  };
-  unstable_noStore()
+  if (!user) {
+    return <ToLogin />;
+  }
 
   return (
-    <div >
-      <ColorChanger user={simplifiedUser} colorsUser={colorsUser} />
-    </div>
-  )
+    <ColorChanger
+      user={user}
+      colorsUser={colorsUser}
+    />
+  );
 }
 </file>
 
@@ -672,44 +1100,22 @@ export default function loading() {
 </file>
 
 <file path="app/color/page.jsx">
-import { connectToMongo } from '@/server/connectToMongo'
-import { unstable_noStore } from 'next/cache'
-import style from './style.module.css'
-import ColorChanger from '@/components/Color'
-import SnellenChart from '@/components/Snellen'
-import { readUserByFieldService } from '@/server/BL/services/user.service'
-import { authAction } from '@/server/BL/actions/login.action'
-import ToLogin from '@/components/ToLogin'
+import ColorChanger from "@/components/Color";
+import ToLogin from "@/components/ToLogin";
+import { getCurrentUserDTO } from "@/server/data/current-user";
 
+export const metadata = {
+  title: "Color screening",
+};
 
+export default async function ColorPage() {
+  const user = await getCurrentUserDTO();
 
-export default async function Color() {
-  await connectToMongo();
+  if (!user) {
+    return <ToLogin />;
+  }
 
-  const authData = await authAction();
-
-  if (!authData || !authData.userToken) return <ToLogin/>
-
-  const { email } = authData.userToken;
-
-  let currentUser = await readUserByFieldService({ email });
-  const simplifiedUser = {
-    username: currentUser.username,
-    password: currentUser.password,
-    email: currentUser.email,
-    colorWeaknesses: currentUser.colorWeaknesses.map(weakness => ({
-      background_color: weakness.background_color,
-      font_color: weakness.font_color
-    }))
-  };
-  unstable_noStore()
-  // await new Promise(resolve => setTimeout(resolve, 7000))
-
-  return (
-    <div className={style.container}>
-      <ColorChanger user={simplifiedUser} />
-    </div>
-  )
+  return <ColorChanger user={user} />;
 }
 </file>
 
@@ -738,94 +1144,55 @@ export default function loading() {
 </file>
 
 <file path="app/field/[detail]/page.jsx">
-import { connectToMongo } from '@/server/connectToMongo'
-import { unstable_noStore } from 'next/cache'
-import Field from '@/components/Field'
-import { authAction } from '@/server/BL/actions/login.action'
-import { readUserByFieldService } from '@/server/BL/services/user.service'
-import ToLogin from '@/components/ToLogin'
+import { notFound } from "next/navigation";
+import Field from "@/components/Field";
+import ToLogin from "@/components/ToLogin";
+import { getCurrentUserDTO } from "@/server/data/current-user";
+import { parseFieldDetail } from "@/server/validation/route-params";
 
+export default async function FieldDetailPage({
+  params,
+}) {
+  const { detail } = await params;
+  const distanceUser =
+    parseFieldDetail(detail);
 
-
-
-export default async function page({ params: { detail } }) {
-  function extract_size(detail) {
-    const size = detail.split('_');
-
-    return {
-      side: size[0],
-      distance: size[1]
-    };
+  if (!distanceUser) {
+    notFound();
   }
-  let distanceUser = extract_size(detail);
-  // await new Promise(resolve => setTimeout(resolve, 3000))
-  await connectToMongo();
-  const authData = await authAction();
-  if (!authData || !authData.userToken) return <ToLogin/>
 
-  const { email } = authData.userToken;
+  const user = await getCurrentUserDTO();
 
-  let currentUser = await readUserByFieldService({ email });
-  const simplifiedUser = {
-    username: currentUser.username,
-    password: currentUser.password,
-    email: currentUser.email,
-    fieldWeaknesses: currentUser.fieldWeaknesses.map(weakness => ({
-      side: weakness.side,
-      distance: weakness.distance,
-      date: weakness.date
-    })),
-  };
-  unstable_noStore()
+  if (!user) {
+    return <ToLogin />;
+  }
+
   return (
-    <div >
-      <Field user={simplifiedUser} distanceUser={distanceUser} />
-    </div>
-  )
+    <Field
+      user={user}
+      distanceUser={distanceUser}
+    />
+  );
 }
 </file>
 
 <file path="app/field/page.jsx">
-import { connectToMongo } from '@/server/connectToMongo'
-import { unstable_noStore } from 'next/cache'
-import style from './style.module.css'
-import Field from '@/components/Field'
-import { authAction } from '@/server/BL/actions/login.action'
-import { readUserByFieldService } from '@/server/BL/services/user.service'
-import Login from '@/components/Login'
-import Link from 'next/link'
-import ToLogin from '@/components/ToLogin'
+import Field from "@/components/Field";
+import ToLogin from "@/components/ToLogin";
+import { getCurrentUserDTO } from "@/server/data/current-user";
 
-
-
+export const metadata = {
+  title: "Visual-field screening",
+};
 
 export default async function FieldPage() {
-  await new Promise(resolve => setTimeout(resolve, 3000))
-  await connectToMongo();
-  const authData = await authAction();
-  // console.log({ authData })
-  if (!authData || !authData.userToken) return <ToLogin/>
+  const user = await getCurrentUserDTO();
 
+  if (!user) {
+    return <ToLogin />;
+  }
 
-  const { email } = authData.userToken;
-
-  let currentUser = await readUserByFieldService({ email });
-  const simplifiedUser = {
-    username: currentUser.username,
-    password: currentUser.password,
-    email: currentUser.email,
-    fieldWeaknesses: currentUser.fieldWeaknesses.map(weakness => ({
-      side: weakness.side,
-      distance: weakness.distance,
-      date: weakness.date
-    })),
-  };
-  unstable_noStore()
-  return (
-    <div className={style.container}>
-      <Field user={simplifiedUser} />
-    </div>
-  )
+  return <Field user={user} />;
 }
 </file>
 
@@ -914,28 +1281,44 @@ export default function extract_param(detail){
 </file>
 
 <file path="app/layout.jsx">
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
-import Providers from "@/components/Providers";
-import Appbar from "@/components/Appbar";
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  display: "swap",
+});
 
 export const metadata = {
-  title: "Create Emanuel & Josh",
-  description: "Generated for optimitries",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ||
+      "http://localhost:3000",
+  ),
+
+  title: {
+    default: "AyinBright",
+    template: "%s | AyinBright",
+  },
+
+  description:
+    "Interactive vision screening exercises and personal result tracking.",
 };
 
-export default function RootLayout({ children }) {
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  colorScheme: "light",
+  themeColor: "#1f2937",
+};
+
+export default function RootLayout({
+  children,
+}) {
   return (
     <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className="font-poppins">
+      <body className={poppins.className}>
         <Header />
         {children}
       </body>
@@ -945,70 +1328,95 @@ export default function RootLayout({ children }) {
 </file>
 
 <file path="app/login/page.jsx">
-"use server"
+import Login from "@/components/Login";
 
-import Login from '@/components/Login';
+export const metadata = {
+  title: "Sign in",
+};
 
-export default async function LoginPage() {
-
-
-  return (<>
-    <Login />
-  </>
-  )
+export default function LoginPage() {
+  return <Login />;
 }
 </file>
 
 <file path="app/page.jsx">
-import { connectToMongo } from '@/server/connectToMongo'
+import Link from "next/link";
+import CurrentTime from "@/components/CurrentTime";
+import ImageCarousel from "@/components/ImageCarousel";
+import SighnIn from "@/components/SighnIn";
+import VisionImprovementHub from "@/components/VisionImprovementHub";
 
-import CurrentTime from '@/components/CurrentTime'
-import ImageCarousel from '@/components/ImageCarousel'
-import SighnIn from '@/components/SighnIn'
-import VisionImprovementHub from '@/components/VisionImprovementHub'
-import { authAction } from '@/server/BL/actions/login.action'
-import Login from '../components/Login'
+import {
+  authAction,
+  logoutAction,
+} from "@/server/BL/actions/login.action";
 
-export default async function Home() {
-
-  await connectToMongo()
-
-
-  const isUser = await authAction();
+export default async function HomePage() {
+  const authData = await authAction();
 
   return (
-    <div>
-      <ImageCarousel >
+    <main>
+      <ImageCarousel>
         <VisionImprovementHub />
-      </ImageCarousel >
-      {isUser ? (
-        <Login />
+      </ImageCarousel>
+
+      {authData ? (
+        <section className="mx-auto my-10 max-w-md rounded-xl bg-white p-6 text-center shadow-xl">
+          <h2 className="text-2xl font-bold text-slate-800">
+            Welcome back
+          </h2>
+
+          <p className="mt-2 text-slate-600">
+            Continue to your personal
+            vision-test history.
+          </p>
+
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/user"
+              className="rounded-lg bg-slate-800 px-4 py-2 font-semibold text-white hover:bg-slate-700"
+            >
+              My profile
+            </Link>
+
+            {authData.isManager && (
+              <Link
+                href="/admin"
+                className="rounded-lg bg-amber-500 px-4 py-2 font-semibold text-white hover:bg-amber-600"
+              >
+                Admin
+              </Link>
+            )}
+
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="rounded-lg border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Sign out
+              </button>
+            </form>
+          </div>
+        </section>
       ) : (
         <SighnIn />
       )}
-      <CurrentTime />  
-    </div>
-  )
+
+      <CurrentTime />
+    </main>
+  );
 }
 </file>
 
 <file path="app/signin/page.jsx">
-"use server"
-const jwt = require('jsonwebtoken');
+import SignUp from "@/components/SighnIn";
 
-import { loginAction } from '@/server/BL/actions/login.action';
-import { cookies } from 'next/headers'
-import Login from '@/components/Login';
-import SighnIn from '@/components/SighnIn';
+export const metadata = {
+  title: "Create account",
+};
 
-export default async function Signin() {
-  const cookieStore = cookies()
-
-
-  return (<>
-    <SighnIn />
-  </>
-  )
+export default function SignUpPage() {
+  return <SignUp />;
 }
 </file>
 
@@ -1238,98 +1646,135 @@ export default async function Page() {
 </file>
 
 <file path="components/AboutPage.jsx">
-"use client"
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
+"use client";
 
-const Section = ({ title, children, color }) => {
-    const [isOpen, setIsOpen] = useState(false);
+import { useId, useState } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
 
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-8 bg-white rounded-lg shadow-lg overflow-hidden"
+const SECTION_COLORS = {
+  story: "bg-yellow-400",
+  mission: "bg-orange-500",
+  services: "bg-gray-800",
+  journey: "bg-teal-600",
+};
+
+const COPY = {
+  story:
+    "My journey into the world of vision diagnosis and improvement is deeply personal. It all began when my child was born with cortical blindness. This life-changing event led me down a path that would not only transform my child's life but also become my life's mission. When faced with my child's diagnosis, I dove headfirst into understanding everything I could about vision disorders and potential treatments. Through intensive work and unwavering determination, we achieved what once seemed impossible — my child gained the ability to see objects and identify shapes.",
+  mission:
+    "This amazing progress ignited a passion within me that I knew I had to share with the world. While it's not my clinical profession, it has become the driving force of my life. I've dedicated countless hours to research, learning, and developing techniques to help people with various vision impairments. My approach is rooted in personal experience and fueled by the joy of witnessing progress. I understand the challenges, fears, and hopes that come with vision impairments because I've lived them.",
+  services:
+    "Through this website, I aim to share knowledge, offer support, and provide hope to those facing similar challenges. Whether you're a parent of a child with vision impairments, an individual struggling with your own vision issues, or simply someone interested in vision health, you'll find resources here to assist you on your journey.",
+  journey:
+    "Remember, progress is possible. My child's journey is a testament to that. While every case is unique, and results may vary, I believe in the power of dedication, knowledge, and never giving up hope. I'm not here just to share information — I'm here to share a vision of possibility. Let's work together to harness the potential of your vision or that of your loved ones. Your journey towards clearer sight begins here, and I'm honored to be a part of it.",
+};
+
+function Section({ title, children, color }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const contentId = useId();
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.5 }}
+      className="mb-8 overflow-hidden rounded-lg bg-white shadow-lg"
+    >
+      <button
+        type="button"
+        onClick={() => setIsOpen((current) => !current)}
+        className={`flex w-full items-center justify-between p-4 text-left text-xl font-bold text-white ${SECTION_COLORS[color]}`}
+        aria-expanded={isOpen}
+        aria-controls={contentId}
+      >
+        {title}
+
+        <svg
+          className={`h-6 w-6 transform transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
         >
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                // className={`w-full text-left bg-teal-600 text-white p-4 font-bold text-xl flex justify-between items-center`}
-                className={`w-full text-left bg-${color} text-white p-4 font-bold text-xl flex justify-between items-center`}
-            >
-                {title}
-                <svg
-                    className={`w-6 h-6 transform transition-transform ${isOpen ? 'rotate-180' : ''
-                        }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
-            <motion.div
-                initial={false}
-                animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
-            >
-                <div className="p-4">{children}</div>
-            </motion.div>
-        </motion.div>
-    );
-};
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
 
-const AboutPage = () => {
-    return (
-        <div className="min-h-screen  p-8">
-            <div className="max-w-4xl mx-auto">
-                <motion.h1
-                    initial={{ opacity: 0, y: -50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="text-4xl font-bold text-white mb-8 text-center"
-                >
-                    Emanuel Tiran And Joush Bloch
-                </motion.h1>
+      <motion.div
+        id={contentId}
+        initial={false}
+        animate={{
+          height: isOpen ? "auto" : 0,
+          opacity: isOpen ? 1 : 0,
+        }}
+        transition={{ duration: 0.3 }}
+        className="overflow-hidden"
+        aria-hidden={!isOpen}
+      >
+        <div className="p-4">{children}</div>
+      </motion.div>
+    </motion.section>
+  );
+}
 
-                <Section title="My Story" color='yellow-400'>
-                    <p className="text-gray-800 leading-relaxed">
-                        My journey into the world of vision diagnosis and improvement is deeply personal. It all began when my child was born with cortical blindness. This life-changing event led me down a path that would not only transform my child's life but also become my life's mission. When faced with my child's diagnosis, I dove headfirst into understanding everything I could about vision disorders and potential treatments. Through intensive work and unwavering determination, we achieved what once seemed impossible - my child gained the ability to see objects and identify shapes.
-                    </p>
-                </Section>
+export default function AboutPage() {
+  return (
+    <main className="min-h-screen p-8">
+      <div className="mx-auto max-w-4xl">
+        <motion.h1
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8 text-center text-4xl font-bold text-white"
+        >
+          Emanuel Tiran and Josh Bloch
+        </motion.h1>
 
-                <Section title="My Mission" color='orange-500'>
-                    <p className="text-gray-800 leading-relaxed">
-                        This amazing progress ignited a passion within me that I knew I had to share with the world. While it's not my clinical profession, it has become the driving force of my life. I've dedicated countless hours to research, learning, and developing techniques to help people with various vision impairments. My approach is rooted in personal experience and fueled by the joy of witnessing progress. I understand the challenges, fears, and hopes that come with vision impairments because I've lived them.
-                    </p>
-                </Section>
+        <Section title="My Story" color="story">
+          <p className="leading-relaxed text-gray-800">{COPY.story}</p>
+        </Section>
 
-                <Section title="Our Services" color='gray-800'>
-                    <p className="text-gray-800 leading-relaxed mb-4">
-                        Through this website, I aim to share knowledge, offer support, and provide hope to those facing similar challenges. Whether you're a parent of a child with vision impairments, an individual struggling with your own vision issues, or simply someone interested in vision health, you'll find resources here to assist you on your journey.
-                    </p>
-                    <ul className="list-disc list-inside text-gray-800 space-y-2">
-                        <li>Diagnosis and treatment of blurred vision</li>
-                        <li>Understanding and managing color blindness</li>
-                        <li>Techniques for improving visual field</li>
-                    </ul>
-                </Section>
+        <Section title="My Mission" color="mission">
+          <p className="leading-relaxed text-gray-800">{COPY.mission}</p>
+        </Section>
 
-                <Section title="Join the Journey" color='teal-600'>
-                    <p className="text-gray-800 leading-relaxed mb-4">
-                        Remember, progress is possible. My child's journey is a testament to that. While every case is unique, and results may vary, I believe in the power of dedication, knowledge, and never giving up hope. I'm not here just to share information - I'm here to share a vision of possibility. Let's work together to harness the potential of your vision or that of your loved ones. Your journey towards clearer sight begins here, and I'm honored to be a part of it.
-                    </p>
-                    <Link className="bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 transition duration-300"
-                        href={`mailto:eatiran39@gmail.com?subject=אני מעוניין להצטרף למסע&body=שלום,%20"`}> Contact Us Now</Link>
-                </Section>
-            </div>
-        </div>
-    );
-};
+        <Section title="Our Services" color="services">
+          <p className="mb-4 leading-relaxed text-gray-800">
+            {COPY.services}
+          </p>
 
-export default AboutPage;
+          <ul className="list-inside list-disc space-y-2 text-gray-800">
+            <li>Diagnosis and treatment of blurred vision</li>
+            <li>Understanding and managing color blindness</li>
+            <li>Techniques for improving visual field</li>
+          </ul>
+        </Section>
+
+        <Section title="Join the Journey" color="journey">
+          <p className="mb-4 leading-relaxed text-gray-800">
+            {COPY.journey}
+          </p>
+
+          <Link
+            className="rounded bg-purple-600 px-4 py-2 text-white transition duration-300 hover:bg-purple-700"
+            href="mailto:eatiran39@gmail.com?subject=%D7%90%D7%A0%D7%99%20%D7%9E%D7%A2%D7%95%D7%A0%D7%99%D7%99%D7%9F%20%D7%9C%D7%94%D7%A6%D7%98%D7%A8%D7%A3%20%D7%9C%D7%9E%D7%A1%D7%A2&body=%D7%A9%D7%9C%D7%95%D7%9D%2C%20"
+          >
+            Contact Us Now
+          </Link>
+        </Section>
+      </div>
+    </main>
+  );
+}
 </file>
 
 <file path="components/AnimatedLinks.jsx">
@@ -1382,297 +1827,516 @@ export default Appbar;
 </file>
 
 <file path="components/ArrUsers.jsx">
-"use client"
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Weaknesses from './Weaknesses';
-import UsersTable from './UsersTable';
+"use client";
 
-function ArrUsers({ users }) {
-    const [sortedUsers, setSortedUsers] = useState(users);
-    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
-    const [searchQuery, setSearchQuery] = useState('');
-    const [visibleUsersCount, setVisibleUsersCount] = useState(5);
-    const [expandedSection, setExpandedSection] = useState({ userId: null, type: null });
+import { useMemo, useState } from "react";
+import UsersTable from "./UsersTable";
 
-    useEffect(() => {
-        let sortedArray = [...users];
-        if (sortConfig.key !== null) {
-            sortedArray.sort((a, b) => {
-                if (a[sortConfig.key] < b[sortConfig.key]) {
-                    return sortConfig.direction === 'ascending' ? -1 : 1;
-                }
-                if (a[sortConfig.key] > b[sortConfig.key]) {
-                    return sortConfig.direction === 'ascending' ? 1 : -1;
-                }
-                return 0;
-            });
-        }
-        setSortedUsers(sortedArray);
-    }, [users, sortConfig]);
+const PAGE_SIZE = 5;
 
-    const requestSort = (key) => {
-        let direction = 'ascending';
-        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-            direction = 'descending';
-        }
-        setSortConfig({ key, direction });
-    };
+function compareUsers(firstUser, secondUser, key, direction) {
+  const firstValue = String(firstUser?.[key] ?? "");
+  const secondValue = String(secondUser?.[key] ?? "");
 
-    const handleSearch = (event) => {
-        setSearchQuery(event.target.value);
-    };
+  const comparison = firstValue.localeCompare(secondValue, undefined, {
+    sensitivity: "base",
+  });
 
-    const handleShowMore = () => {
-        setVisibleUsersCount(prevCount => prevCount + 5);
-    };
-
-    const filteredUsers = sortedUsers.filter(user =>
-        user &&
-        ((user.username && user.username.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase())))
-    );
-
-    const usersToDisplay = filteredUsers.slice(0, visibleUsersCount);
-
-    const deleteWeakness = async (email, type, index) => {
-        try {
-            const response = await fetch('/api/deleteWeakness', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, field: type, index })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const updatedUser = data.user;
-                if (updatedUser) {
-                    setSortedUsers(prevUsers =>
-                        prevUsers.map(u => (u.email === email ? updatedUser : u))
-                    );
-                }
-                alert('Weakness deleted and updated');
-            } else {
-                const errorData = await response.json();
-                console.error('Failed to delete weakness:', errorData.error);
-            }
-        } catch (error) {
-            console.error('Failed to delete weakness:', error);
-        }
-    };
-
-    const handleExpand = (userId, type, isExpanded) => {
-        setExpandedSection(isExpanded ? { userId, type } : { userId: null, type: null });
-    };
-
-    return (
-        <div className="container mx-auto p-4 w-auto border-2 border-orange-200">
-            <input
-                type="text"
-                placeholder="Search by username or email"
-                value={searchQuery}
-                onChange={handleSearch}
-                className="mb-4 p-2 border border-gray-300 rounded w-full"
-            />
-           <UsersTable
-                usersToDisplay={usersToDisplay}
-                requestSort={requestSort}
-                expandedSection={expandedSection}
-                handleExpand={handleExpand}
-                deleteWeakness={deleteWeakness}
-            />
-            {visibleUsersCount < filteredUsers.length && (
-                <button
-                    onClick={handleShowMore}
-                    className="mt-4 px-4 py-2 bg-orange-200 text-white rounded"
-                >
-                    Show More
-                </button>
-            )}
-        </div>
-    );
+  return direction === "ascending" ? comparison : -comparison;
 }
 
-export default ArrUsers;
+export default function ArrUsers({ users = [] }) {
+  const [sortConfig, setSortConfig] = useState({
+    key: null,
+    direction: "ascending",
+  });
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [visibleUsersCount, setVisibleUsersCount] = useState(PAGE_SIZE);
+
+  const [expandedSection, setExpandedSection] = useState({
+    userId: null,
+    type: null,
+  });
+
+  const [updatedUsers, setUpdatedUsers] = useState({});
+  const [requestError, setRequestError] = useState("");
+
+  const filteredUsers = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLocaleLowerCase();
+
+    const currentUsers = users
+      .filter(Boolean)
+      .map((user) => updatedUsers[user.email] ?? user);
+
+    if (sortConfig.key) {
+      currentUsers.sort((firstUser, secondUser) =>
+        compareUsers(
+          firstUser,
+          secondUser,
+          sortConfig.key,
+          sortConfig.direction,
+        ),
+      );
+    }
+
+    if (!normalizedQuery) {
+      return currentUsers;
+    }
+
+    return currentUsers.filter((user) => {
+      const username = String(
+        user.username ?? "",
+      ).toLocaleLowerCase();
+
+      const email = String(
+        user.email ?? "",
+      ).toLocaleLowerCase();
+
+      return (
+        username.includes(normalizedQuery) ||
+        email.includes(normalizedQuery)
+      );
+    });
+  }, [searchQuery, sortConfig, updatedUsers, users]);
+
+  const usersToDisplay = filteredUsers.slice(
+    0,
+    visibleUsersCount,
+  );
+
+  const requestSort = (key) => {
+    setSortConfig((current) => ({
+      key,
+      direction:
+        current.key === key &&
+        current.direction === "ascending"
+          ? "descending"
+          : "ascending",
+    }));
+  };
+
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+    setVisibleUsersCount(PAGE_SIZE);
+  };
+
+  const deleteWeakness = async (email, type, index) => {
+    setRequestError("");
+
+    try {
+      const response = await fetch("/api/deleteWeakness", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          field: type,
+          index,
+        }),
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          payload.message || "Failed to delete the result.",
+        );
+      }
+
+      if (payload.user) {
+        setUpdatedUsers((current) => ({
+          ...current,
+          [email]: payload.user,
+        }));
+      }
+    } catch (error) {
+      setRequestError(
+        error.message || "Failed to delete the result.",
+      );
+    }
+  };
+
+  const handleExpand = (userId, type, isExpanded) => {
+    setExpandedSection(
+      isExpanded
+        ? { userId, type }
+        : { userId: null, type: null },
+    );
+  };
+
+  return (
+    <section className="container mx-auto w-auto border-2 border-orange-200 p-4">
+      <label htmlFor="user-search" className="sr-only">
+        Search users
+      </label>
+
+      <input
+        id="user-search"
+        type="search"
+        placeholder="Search by username or email"
+        value={searchQuery}
+        onChange={handleSearch}
+        className="mb-4 w-full rounded border border-gray-300 p-2"
+      />
+
+      {requestError && (
+        <p
+          role="alert"
+          className="mb-4 rounded bg-red-50 p-3 text-red-700"
+        >
+          {requestError}
+        </p>
+      )}
+
+      <UsersTable
+        usersToDisplay={usersToDisplay}
+        requestSort={requestSort}
+        expandedSection={expandedSection}
+        handleExpand={handleExpand}
+        deleteWeakness={deleteWeakness}
+      />
+
+      {visibleUsersCount < filteredUsers.length && (
+        <button
+          type="button"
+          onClick={() =>
+            setVisibleUsersCount(
+              (count) => count + PAGE_SIZE,
+            )
+          }
+          className="mt-4 rounded bg-orange-500 px-4 py-2 text-white hover:bg-orange-600"
+        >
+          Show More
+        </button>
+      )}
+    </section>
+  );
+}
 </file>
 
 <file path="components/Blur/index.jsx">
-"use client"
-import React, { useEffect, useState } from 'react';
-import style from './style.module.css';
-import Button from '@mui/material/Button';
-import Popup from '../Popup';
+"use client";
 
-let indexSize = 0;
+import { useEffect, useState } from "react";
+import Button from "@mui/material/Button";
+import Popup from "../Popup";
+import style from "./style.module.css";
+
+const WORDS = [
+  "apple",
+  "banana",
+  "cherry",
+  "date",
+  "elderberry",
+  "fig",
+  "grape",
+  "honeydew",
+  "kiwi",
+  "lemon",
+  "mango",
+  "nectarine",
+  "orange",
+  "papaya",
+  "quince",
+  "raspberry",
+  "strawberry",
+  "tangerine",
+  "ugli fruit",
+  "vanilla",
+  "watermelon",
+];
+
+const FONT_SIZES = [
+  14.6,
+  11,
+  8.8,
+  7.3,
+  5.8,
+  4.4,
+  3.66,
+  2.9,
+  2.2,
+  1.46,
+];
+
+function findInitialSizeIndex(fontSize) {
+  const numericSize = Number(fontSize);
+  const exactIndex = FONT_SIZES.indexOf(numericSize);
+
+  return exactIndex >= 0 ? exactIndex : 0;
+}
+
 export default function Blur({ user, sizeUser }) {
-  const words = ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape', 'honeydew', 'kiwi', 'lemon', 'mango', 'nectarine', 'orange', 'papaya', 'quince', 'raspberry', 'strawberry', 'tangerine', 'ugli fruit', 'vanilla', 'watermelon'];
-  const sizes = [14.6, 11, 8.8, 7.3, 5.8, 4.4, 3.66, 2.9, 2.2, 1.46];
   const [open, setOpen] = useState(false);
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [fontSize, setFontSize] = useState(sizeUser ? sizeUser.fontSize : 14.6);
-  const [isLeftEye, setIsLeftEye] = useState(sizeUser?.eye === "left" ? true : false);
+  const [currentWordIndex, setCurrentWordIndex] =
+    useState(0);
 
+  const [currentSizeIndex, setCurrentSizeIndex] =
+    useState(() =>
+      findInitialSizeIndex(sizeUser?.fontSize),
+    );
 
+  const [fontSize, setFontSize] = useState(() => {
+    const initialSize = Number(sizeUser?.fontSize);
+
+    return Number.isFinite(initialSize)
+      ? initialSize
+      : FONT_SIZES[0];
+  });
+
+  const [isLeftEye, setIsLeftEye] = useState(
+    sizeUser?.eye === "left",
+  );
+
+  const [sizeWeaknesses, setSizeWeaknesses] =
+    useState(() =>
+      Array.isArray(user?.sizeWeaknesses)
+        ? user.sizeWeaknesses
+        : [],
+    );
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
-    if (window.location.pathname !== '/blur/improve') {
-      const eye = isLeftEye ? "left" : "right";
-      const newPathname = `/blur/improve/${fontSize}_1_${eye}`;
-      
-      if (window.location.pathname !== newPathname) {
-        window.history.pushState({}, '', newPathname);
-      }
+    const eye = isLeftEye ? "left" : "right";
+    const nextPathname =
+      `/blur/improve/${fontSize}_1_${eye}`;
+
+    if (window.location.pathname !== nextPathname) {
+      window.history.replaceState(
+        {},
+        "",
+        nextPathname,
+      );
     }
   }, [fontSize, isLeftEye]);
 
   const increaseFontSize = () => {
-    if (indexSize > 0) {
-      indexSize--;
-      setFontSize(sizes[indexSize]);
-    }
+    const nextIndex = Math.max(
+      0,
+      currentSizeIndex - 1,
+    );
+
+    setCurrentSizeIndex(nextIndex);
+    setFontSize(FONT_SIZES[nextIndex]);
   };
 
   const decreaseFontSize = () => {
-    if (indexSize < sizes.length - 1) {
-      indexSize++;
-      setFontSize(sizes[indexSize]);
-    }
+    const nextIndex = Math.min(
+      FONT_SIZES.length - 1,
+      currentSizeIndex + 1,
+    );
+
+    setCurrentSizeIndex(nextIndex);
+    setFontSize(FONT_SIZES[nextIndex]);
   };
 
   const changeFontSize = (event) => {
-    const newSize = parseFloat(event.target.value) || 0;
-    setFontSize(newSize);
-    const newIndex = sizes.findIndex(size => size === newSize);
-    if (newIndex !== -1) {
-      indexSize = newIndex;
+    const nextSize = Number(event.target.value);
+
+    if (!Number.isFinite(nextSize)) {
+      return;
+    }
+
+    setFontSize(nextSize);
+
+    const exactIndex = FONT_SIZES.indexOf(nextSize);
+
+    if (exactIndex >= 0) {
+      setCurrentSizeIndex(exactIndex);
     }
   };
 
-  const overWord = () => {
-    setCurrentWordIndex((prevIndex) => (prevIndex + 1) % words.length);
+  const changeWord = () => {
+    setCurrentWordIndex(
+      (currentIndex) =>
+        (currentIndex + 1) % WORDS.length,
+    );
   };
 
   const handleMistake = async () => {
+    const result = {
+      fontSize,
+      distance: 1,
+      eye: isLeftEye ? "left" : "right",
+    };
+
+    const updatedWeaknesses = [
+      ...sizeWeaknesses,
+      result,
+    ];
+
+    setIsSaving(true);
+    setSaveError("");
+
     try {
-      const taut = {
-        fontSize: fontSize,
-        distance: 1,
-        eye: isLeftEye ? 'left' : 'right'
-      };
-
-      const updatedWeaknesses = [...user.sizeWeaknesses, taut];
-
-      const response = await fetch('/api/updateUser', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        "/api/updateUser",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            updateData: {
+              sizeWeaknesses: updatedWeaknesses,
+            },
+          }),
         },
-        body: JSON.stringify({
-          filter: { email: user.email },
-          updateData: { sizeWeaknesses: updatedWeaknesses }
-        })
-      });
+      );
+
+      const payload = await response.json();
 
       if (!response.ok) {
-        throw new Error('Failed to update user');
+        throw new Error(
+          payload.message ||
+            "Failed to save the result.",
+        );
       }
 
-      const updatedUser = await response.json();
-      user.sizeWeaknesses = updatedWeaknesses;
-      console.log('User updated successfully:', updatedUser);
-      overWord();
+      setSizeWeaknesses(updatedWeaknesses);
+      changeWord();
     } catch (error) {
-      console.error('Error updating user:', error);
+      setSaveError(
+        error.message ||
+          "Failed to save the result.",
+      );
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
-    <div className={`${style.contain} border-b border-green-400 p-4`}>
+    <section
+      className={`${style.contain} border-b border-green-400 p-4`}
+    >
       <Button
         variant="contained"
-        style={{
-          backgroundColor: '#FBBF24',
-          color: '#1F2937',
-          fontWeight: 'bold',
-          padding: '8px 16px',
-          borderRadius: '0.375rem',
-          '&:hover': {
-            backgroundColor: '#D97706',
+        sx={{
+          backgroundColor: "#fbbf24",
+          color: "#1f2937",
+          fontWeight: "bold",
+          padding: "8px 16px",
+          borderRadius: "0.375rem",
+          "&:hover": {
+            backgroundColor: "#d97706",
           },
         }}
-        onClick={() => setOpen(!open)}
+        onClick={() =>
+          setOpen((current) => !current)
+        }
       >
         Please read the details before use
       </Button>
-      <p className={style.inContain}>Font size: {fontSize}mm</p>
+
+      <p className={style.inContain}>
+        Font size: {fontSize}mm
+      </p>
+
       <p
         style={{ fontSize: `${fontSize}mm` }}
         className={`${style.inContain} transition-all duration-300 ease-in-out`}
       >
-        {words[currentWordIndex]}
+        {WORDS[currentWordIndex]}
       </p>
+
+      <label
+        htmlFor="font-size"
+        className="sr-only"
+      >
+        Font size in millimeters
+      </label>
+
       <input
+        id="font-size"
         type="number"
         value={fontSize}
         onChange={changeFontSize}
-        className="border border-gray-300 rounded px-2 p-1 mb-4 text-center w-44"
-        placeholder="Enter font size"
+        className="mb-4 w-44 rounded border border-gray-300 p-1 px-2 text-center"
         min="1"
         max="25"
         step="0.1"
       />
-      <div className="flex flex-wrap gap-4 mb-4">
+
+      <div className="mb-4 flex flex-wrap gap-4">
         <button
-          className="bg-slate-800 hover:bg-slate-700 text-yellow-400 font-bold py-2 px-4 rounded flex-1"
+          type="button"
+          className="flex-1 rounded bg-slate-800 px-4 py-2 font-bold text-yellow-400 hover:bg-slate-700"
           onClick={increaseFontSize}
         >
           Increase Font Size
         </button>
+
         <Button
           variant="contained"
           sx={{
-            backgroundColor: '#1e293b',
-            '&:hover': {
-              backgroundColor: '#334155',
+            backgroundColor: "#1e293b",
+            "&:hover": {
+              backgroundColor: "#334155",
             },
-            color: '#facc15',
-            fontWeight: 'bold',
+            color: "#facc15",
+            fontWeight: "bold",
             py: 1,
             px: 2,
             flex: 1,
-            borderRadius: '0 0 0 0',
-            borderLeft: isLeftEye ? '8px solid #facc15' : 'none',
-            borderRight: !isLeftEye ? '8px solid #facc15' : 'none',
+            borderRadius: 0,
+            borderLeft: isLeftEye
+              ? "8px solid #facc15"
+              : "none",
+            borderRight: !isLeftEye
+              ? "8px solid #facc15"
+              : "none",
           }}
-          onClick={() => setIsLeftEye(!isLeftEye)}
+          onClick={() =>
+            setIsLeftEye((current) => !current)
+          }
         >
-          Choose a Eye
+          Choose an Eye
         </Button>
+
         <button
-          className="bg-slate-800 hover:bg-slate-700 text-yellow-400 font-bold py-2 px-4 rounded flex-1"
+          type="button"
+          className="flex-1 rounded bg-slate-800 px-4 py-2 font-bold text-yellow-400 hover:bg-slate-700"
           onClick={decreaseFontSize}
         >
           Decrease Font Size
         </button>
       </div>
-      <div className="flex flex-wrap gap-4 mb-4">
+
+      <div className="mb-4 flex flex-wrap gap-4">
         <button
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex-1"
-          onClick={overWord}
+          type="button"
+          className="flex-1 rounded bg-green-500 px-4 py-2 font-bold text-white hover:bg-green-700"
+          onClick={changeWord}
         >
           Change Word
         </button>
+
         <button
-          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex-1"
+          type="button"
+          className="flex-1 rounded bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
           onClick={handleMistake}
+          disabled={isSaving}
         >
-          Mistake
+          {isSaving ? "Saving…" : "Mistake"}
         </button>
       </div>
-      <Popup open={open} setOpen={setOpen} type={'blur'} />
-    </div>
+
+      {saveError && (
+        <p role="alert" className="text-red-700">
+          {saveError}
+        </p>
+      )}
+
+      <Popup
+        open={open}
+        setOpen={setOpen}
+        type="blur"
+      />
+    </section>
   );
 }
 </file>
@@ -1703,138 +2367,286 @@ export default function Blur({ user, sizeUser }) {
 
 <file path="components/Color/index.jsx">
 "use client";
-import React, { useContext, useEffect, useState } from 'react';
-import styles from './style.module.css';
-import { MyContext, MyProvider } from '../context/DataContext';
-import Blur2 from '@/components/Blur'
 
+import { useEffect, useState } from "react";
+import styles from "./style.module.css";
 
-let indexB = 0, indexF = 0;
+const COLORS = [
+  "red",
+  "blue",
+  "green",
+  "yellow",
+  "purple",
+  "orange",
+  "lightblue",
+];
 
-const ColorChangerComp = ({ user, colorsUser }) => {
-  const { data, updateData } = useContext(MyContext);
+const CHARACTERS = [
+  "9",
+  "5",
+  "7",
+  "1",
+  "8",
+  "2",
+  "4",
+  "6",
+  "0",
+  "A",
+  "S",
+  "D",
+  "F",
+  "E",
+  "V",
+  "G",
+  "I",
+  "M",
+  "N",
+  "B",
+  "Z",
+  "W",
+];
 
+function getNextColor(
+  currentColor,
+  excludedColor,
+) {
+  const currentIndex =
+    COLORS.indexOf(currentColor);
 
+  for (
+    let offset = 1;
+    offset <= COLORS.length;
+    offset += 1
+  ) {
+    const nextColor =
+      COLORS[
+        (currentIndex +
+          offset +
+          COLORS.length) %
+          COLORS.length
+      ];
 
-  const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'lightblue'];
-  const words = ["9", "5", "7", "1", "8", "2", "4", "6", "0", "1", "A", "S", "d", "F", "E", "e", "V", "G", "i", "m", "N", "b", "z", "W"];
+    if (nextColor !== excludedColor) {
+      return nextColor;
+    }
+  }
 
-  const [fontColor, setFontColor] = useState(colorsUser ? colorsUser.font_color : 'orange'); // מגדיר state לצבע הראשון של הפונט
-  const [backgroundColor1, setBackgroundColor1] = useState(colorsUser ? colorsUser.background_color : 'darkblue'); // מגדיר state לצבע הראשון של הרקע
-  const [backgroundColor2] = useState('transparent'); // מגדיר state לצבע השני של הרקע
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  return currentColor;
+}
+
+export default function ColorChanger({
+  user,
+  colorsUser,
+}) {
+  const [fontColor, setFontColor] = useState(
+    colorsUser?.font_color ?? "orange",
+  );
+
+  const [
+    backgroundColor,
+    setBackgroundColor,
+  ] = useState(
+    colorsUser?.background_color ?? "darkblue",
+  );
+
+  const [
+    currentCharacterIndex,
+    setCurrentCharacterIndex,
+  ] = useState(0);
+
+  const [
+    colorWeaknesses,
+    setColorWeaknesses,
+  ] = useState(() =>
+    Array.isArray(user?.colorWeaknesses)
+      ? user.colorWeaknesses
+      : [],
+  );
+
+  const [isSaving, setIsSaving] =
+    useState(false);
+
+  const [saveError, setSaveError] =
+    useState("");
 
   useEffect(() => {
-    updateData();
-    const newPathname = `/color/${backgroundColor1}_${fontColor}`;
-    window.history.pushState({}, '', newPathname);
-  }, [backgroundColor1,fontColor]);
+    const nextPathname =
+      `/color/${backgroundColor}_${fontColor}`;
 
-  const changeFontColor = () => {
-    indexF = (indexF + 1) % colors.length;
-    if (indexB === indexF) indexF = (indexF + 1) % colors.length;
-    setFontColor(colors[indexF]);
-  };
+    if (
+      window.location.pathname !== nextPathname
+    ) {
+      window.history.replaceState(
+        {},
+        "",
+        nextPathname,
+      );
+    }
+  }, [backgroundColor, fontColor]);
 
-  const changeBackgroundColor = () => {
-    indexB = (indexB + 1) % colors.length;
-    if (indexB === indexF) indexB = (indexB + 1) % colors.length;
-    setBackgroundColor1(colors[indexB]);
-  };
-
-  const overWord = () => {
-    setCurrentWordIndex((currentWordIndex - 1 + words.length) % words.length); // Cycle through words
+  const changeCharacter = () => {
+    setCurrentCharacterIndex(
+      (currentIndex) =>
+        (currentIndex + 1) %
+        CHARACTERS.length,
+    );
   };
 
   const handleMistake = async () => {
-    let taut = { background_color: backgroundColor1, font_color: fontColor };
-    user.colorWeaknesses.push(taut);
-    // שליחת הבקשה ל-API route
-    const response = await fetch('/api/updateUser', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        filter: { email: user.email },
-        updateData: { colorWeaknesses: user.colorWeaknesses }
-      })
-    });
+    const result = {
+      background_color: backgroundColor,
+      font_color: fontColor,
+    };
 
-    if (response.ok) {
-      const updatedUser = await response.json();
-      console.log('User updated successfully:', updatedUser);
-    } else {
-      console.error('Failed to update user');
+    const updatedWeaknesses = [
+      ...colorWeaknesses,
+      result,
+    ];
+
+    setIsSaving(true);
+    setSaveError("");
+
+    try {
+      const response = await fetch(
+        "/api/updateUser",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            updateData: {
+              colorWeaknesses:
+                updatedWeaknesses,
+            },
+          }),
+        },
+      );
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          payload.message ||
+            "Failed to save the result.",
+        );
+      }
+
+      setColorWeaknesses(
+        updatedWeaknesses,
+      );
+
+      changeCharacter();
+    } catch (error) {
+      setSaveError(
+        error.message ||
+          "Failed to save the result.",
+      );
+    } finally {
+      setIsSaving(false);
     }
-
-    overWord();
   };
 
   const fontTileStyle = {
     backgroundImage:
-      `linear-gradient(45deg, ${fontColor} 25%, transparent 25%, transparent 75%, ${fontColor} 75%, ${fontColor}),
-            linear-gradient(45deg, ${fontColor} 25%, transparent 25%, transparent 75%, ${fontColor} 75%, ${fontColor})`, // יוצר אפקט פסיפס לפונט
+      `linear-gradient(45deg, ${fontColor} 25%, transparent 25%, transparent 75%, ${fontColor} 75%, ${fontColor}), ` +
+      `linear-gradient(45deg, ${fontColor} 25%, transparent 25%, transparent 75%, ${fontColor} 75%, ${fontColor})`,
   };
 
   const backgroundTileStyle = {
     backgroundImage:
-      `linear-gradient(45deg, ${backgroundColor1} 25%, ${backgroundColor2} 25%, ${backgroundColor2} 75%, ${backgroundColor1} 75%, ${backgroundColor1}),
-            linear-gradient(45deg, ${backgroundColor1} 25%, ${backgroundColor2} 25%, ${backgroundColor2} 75%, ${backgroundColor1} 75%, ${backgroundColor1})`, // יוצר אפקט פסיפס לרקע
+      `linear-gradient(45deg, ${backgroundColor} 25%, transparent 25%, transparent 75%, ${backgroundColor} 75%, ${backgroundColor}), ` +
+      `linear-gradient(45deg, ${backgroundColor} 25%, transparent 25%, transparent 75%, ${backgroundColor} 75%, ${backgroundColor})`,
   };
 
   return (
-    <div className={`w-2/3 ${styles.contain} p-4`}>
+    <section
+      className={`w-2/3 p-4 ${styles.contain}`}
+    >
       <div className={styles.inContain}>
-        <div className={styles.rekaBackground} style={backgroundTileStyle}>
-          <div className={styles.font} style={fontTileStyle}>
-            {words[currentWordIndex]}
+        <div
+          className={styles.rekaBackground}
+          style={backgroundTileStyle}
+        >
+          <div
+            className={styles.font}
+            style={fontTileStyle}
+          >
+            {
+              CHARACTERS[
+                currentCharacterIndex
+              ]
+            }
           </div>
         </div>
-        <br />
-        <div className="flex flex-wrap gap-4 mb-4">
+
+        <div className="mb-4 mt-4 flex flex-wrap gap-4">
           <button
-            className="bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold py-2 px-4 rounded flex-1"
-            onClick={changeBackgroundColor}
+            type="button"
+            className="flex-1 rounded bg-slate-800 px-4 py-2 font-bold text-orange-400 hover:bg-slate-700"
+            onClick={() =>
+              setBackgroundColor(
+                (current) =>
+                  getNextColor(
+                    current,
+                    fontColor,
+                  ),
+              )
+            }
           >
             Change Background Color
           </button>
-          <button
-            className="bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold py-2 px-4 rounded flex-1"
-            onClick={changeFontColor}
-          >
-            Change Font
 
+          <button
+            type="button"
+            className="flex-1 rounded bg-slate-800 px-4 py-2 font-bold text-orange-400 hover:bg-slate-700"
+            onClick={() =>
+              setFontColor((current) =>
+                getNextColor(
+                  current,
+                  backgroundColor,
+                ),
+              )
+            }
+          >
+            Change Font Color
           </button>
         </div>
-        <div className="flex flex-wrap gap-4 mb-4">
+
+        <div className="mb-4 flex flex-wrap gap-4">
           <button
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex-1"
-            onClick={overWord}
+            type="button"
+            className="flex-1 rounded bg-green-500 px-4 py-2 font-bold text-white hover:bg-green-700"
+            onClick={changeCharacter}
           >
-            Change Word
+            Change Character
           </button>
+
           <button
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex-1"
-            onClick={() => handleMistake()}
+            type="button"
+            className="flex-1 rounded bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+            onClick={handleMistake}
+            disabled={isSaving}
           >
-            Mistake
+            {isSaving
+              ? "Saving…"
+              : "Mistake"}
           </button>
         </div>
+
+        {saveError && (
+          <p
+            role="alert"
+            className="text-red-700"
+          >
+            {saveError}
+          </p>
+        )}
       </div>
-    </div>
-
+    </section>
   );
-};
-
-const ColorChanger = ({ user, colorsUser }) => (
-  <MyProvider>
-    <ColorChangerComp user={user} colorsUser={colorsUser} />
-    {/* <Blur2 user={user}/> */}
-  </MyProvider>
-);
-
-export default ColorChanger;
+}
 </file>
 
 <file path="components/Color/style.module.css">
@@ -2059,56 +2871,62 @@ export { MyContext, MyProvider };
 </file>
 
 <file path="components/CurrentTime.jsx">
-"use client"
-import React, { useState, useEffect } from 'react';
+"use client";
 
-const CurrentTime = () => {
-  const [time, setTime] = useState(null);
-  const [mounted, setMounted] = useState(false);
+import { useEffect, useState } from "react";
 
-  useEffect(() => {
-    setMounted(true);
-    setTime(new Date());
-    
-    const interval = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // אם הקומפוננטה עוד לא מותקנת, נחזיר div ריק כדי למנוע הבדלים בין השרת ללקוח
-  if (!mounted) {
-    return <div className="flex justify-center items-center">
-      <div className="bg-slate-800 p-4 rounded-lg shadow-lg">
-        <div className="text-yellow-400 text-xl font-semibold">
-          <span className="ml-2">שעה נוכחית:</span>
-          <span className="font-mono">--:--:--</span>
-        </div>
-      </div>
-    </div>;
-  }
-
+function TimeCard({ children }) {
   return (
-    <div className="flex justify-center items-center">
-      <div className="bg-slate-800 p-4 rounded-lg shadow-lg">
-        <div className="text-yellow-400 text-xl font-semibold">
-          <span className="ml-2">שעה נוכחית:</span>
+    <div className="flex items-center justify-center">
+      <div className="rounded-lg bg-slate-800 p-4 shadow-lg">
+        <div className="text-xl font-semibold text-yellow-400">
+          <span className="ml-2">
+            שעה נוכחית:
+          </span>
+
           <span className="font-mono">
-            {time?.toLocaleString('he-IL', {
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
-              hour12: false
-            })}
+            {children}
           </span>
         </div>
       </div>
     </div>
   );
-};
+}
 
-export default CurrentTime;
+export default function CurrentTime() {
+  const [time, setTime] = useState(null);
+
+  useEffect(() => {
+    const updateTime = () =>
+      setTime(new Date());
+
+    const initialTimer =
+      window.setTimeout(updateTime, 0);
+
+    const interval =
+      window.setInterval(updateTime, 1000);
+
+    return () => {
+      window.clearTimeout(initialTimer);
+      window.clearInterval(interval);
+    };
+  }, []);
+
+  if (!time) {
+    return <TimeCard>--:--:--</TimeCard>;
+  }
+
+  return (
+    <TimeCard>
+      {time.toLocaleTimeString("he-IL", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      })}
+    </TimeCard>
+  );
+}
 </file>
 
 <file path="components/dataContext.jsx">
@@ -2179,222 +2997,390 @@ export default EyeExaminationPrompt;
 </file>
 
 <file path="components/Field/index.jsx">
-"use client"
-import React, { useEffect, useState } from 'react';
-import style from './style.module.css';
-import Popup from '../Popup';
-import Button from '@mui/material/Button';
+"use client";
 
-export default function Field({ user, distanceUser }) {
-  const words = ["9", "5", "7", "1", "8", "2", "4", "6", "0", "1", "A", "S", "d", "F", "E", "X", "V", "G", "I", "M", "N", "B", "Z", "W"];
-  // const sizes =  [-18, -17, -16, -15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
-  ; // ערכים בס"מ למיקום
-  const fillSizes = () => {
-    const sizes = [];
-    for (let i = -24; i <= 24; i += 2) {
-      sizes.push(i);
-    }
-    return sizes;
+import { useEffect, useState } from "react";
+import Button from "@mui/material/Button";
+import Popup from "../Popup";
+
+const CHARACTERS = [
+  "9",
+  "5",
+  "7",
+  "1",
+  "8",
+  "2",
+  "4",
+  "6",
+  "0",
+  "A",
+  "S",
+  "D",
+  "F",
+  "E",
+  "X",
+  "V",
+  "G",
+  "I",
+  "M",
+  "N",
+  "B",
+  "Z",
+  "W",
+];
+
+const DISTANCES = Array.from(
+  { length: 25 },
+  (_, index) => -24 + index * 2,
+);
+
+function getInitialDistanceIndex(distance) {
+  const numericDistance = Number(distance);
+
+  if (!Number.isFinite(numericDistance)) {
+    return Math.floor(DISTANCES.length / 2);
   }
 
+  return DISTANCES.reduce(
+    (
+      closestIndex,
+      currentDistance,
+      index,
+    ) => {
+      const closestDifference = Math.abs(
+        DISTANCES[closestIndex] -
+          numericDistance,
+      );
 
+      const currentDifference = Math.abs(
+        currentDistance - numericDistance,
+      );
 
+      return currentDifference <
+        closestDifference
+        ? index
+        : closestIndex;
+    },
+    0,
+  );
+}
+
+export default function Field({
+  user,
+  distanceUser,
+}) {
   const [open, setOpen] = useState(false);
-  const [isLeft, setIsLeft] = useState(distanceUser?.side === 'left' ? true : false);
-  const [sizes, setSizes] = useState(fillSizes());
-  const [distance, setDistance] = useState(distanceUser ? distanceUser.distance : 0);
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [firstTime, setFirstTime] = useState(true);
-  const [currentSizeIndex, setCurrentSizeIndex] = useState(distanceUser ? sizes.indexOf(Number(distanceUser.distance)) : Math.floor(sizes.length / 2)); // TODO : לעדכן את המרחק מהפאראם לפי האינדקס!!!
 
+  const [isLeft, setIsLeft] = useState(
+    distanceUser?.side === "left",
+  );
+
+  const [
+    currentDistanceIndex,
+    setCurrentDistanceIndex,
+  ] = useState(() =>
+    getInitialDistanceIndex(
+      distanceUser?.distance,
+    ),
+  );
+
+  const [
+    currentCharacterIndex,
+    setCurrentCharacterIndex,
+  ] = useState(0);
+
+  const [
+    fieldWeaknesses,
+    setFieldWeaknesses,
+  ] = useState(() =>
+    Array.isArray(user?.fieldWeaknesses)
+      ? user.fieldWeaknesses
+      : [],
+  );
+
+  const [isSaving, setIsSaving] =
+    useState(false);
+
+  const [saveError, setSaveError] =
+    useState("");
+
+  const distance =
+    DISTANCES[currentDistanceIndex];
 
   useEffect(() => {
-    if (firstTime) {
-      setFirstTime(false);
-      setDistance(distanceUser ? distanceUser.distance : sizes[currentSizeIndex]);
-    } else {
-      setDistance(sizes[currentSizeIndex]);
+    const side = isLeft ? "left" : "right";
+    const nextPathname =
+      `/field/${side}_${distance}`;
+
+    if (
+      window.location.pathname !== nextPathname
+    ) {
+      window.history.replaceState(
+        {},
+        "",
+        nextPathname,
+      );
     }
-    const side = isLeft ? 'left' : 'right';
-    const distance = sizes[currentSizeIndex];
-    const newPathname = `/field/${side}_${distance}`;
+  }, [distance, isLeft]);
 
-    // Update the URL without using search parameters
-    window.history.pushState({}, '', newPathname);
-  }, [currentSizeIndex, isLeft]);
-
-  const moveRight = () => {
-    if (currentSizeIndex < sizes.length - 1) setCurrentSizeIndex(currentSizeIndex + 1);
-    setDistance(sizes[currentSizeIndex])
-  };
-
-  const moveLeft = () => {
-    if (currentSizeIndex > 0) setCurrentSizeIndex(currentSizeIndex - 1);
-    setDistance(sizes[currentSizeIndex])
-  };
-
-  const overWord = () => {
-    setCurrentWordIndex((currentWordIndex - 1 + words.length) % words.length); // מחזור מילים
+  const changeCharacter = () => {
+    setCurrentCharacterIndex(
+      (currentIndex) =>
+        (currentIndex + 1) %
+        CHARACTERS.length,
+    );
   };
 
   const handleMistake = async () => {
-    let taut = { side: isLeft ? 'left' : 'right', distance: sizes[currentSizeIndex] };
+    const result = {
+      side: isLeft ? "left" : "right",
+      distance,
+    };
 
-    user.fieldWeaknesses.push(taut);
-    // שליחת הבקשה ל-API route
-    const response = await fetch('/api/updateUser', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        filter: { email: user.email },
-        updateData: { fieldWeaknesses: user.fieldWeaknesses }
-      })
-    });
+    const updatedWeaknesses = [
+      ...fieldWeaknesses,
+      result,
+    ];
 
-    if (response.ok) {
-      const updatedUser = await response.json();
-      console.log('User updated successfully:', updatedUser);
-    } else {
-      console.error('Failed to update user');
+    setIsSaving(true);
+    setSaveError("");
+
+    try {
+      const response = await fetch(
+        "/api/updateUser",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            updateData: {
+              fieldWeaknesses:
+                updatedWeaknesses,
+            },
+          }),
+        },
+      );
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          payload.message ||
+            "Failed to save the result.",
+        );
+      }
+
+      setFieldWeaknesses(
+        updatedWeaknesses,
+      );
+
+      changeCharacter();
+    } catch (error) {
+      setSaveError(
+        error.message ||
+          "Failed to save the result.",
+      );
+    } finally {
+      setIsSaving(false);
     }
-
-    overWord();
   };
 
   return (
-    <div
-      className={`flex items-center justify-center flex-col w-full mx-auto h-[84vh] bg-[aliceblue]  border-2 border-[#bfdbfe] border-b border-purple-400 p-4`}
+    <section
+      className="mx-auto flex h-[84vh] w-full flex-col items-center justify-center border-2 border-b border-purple-400 border-[#bfdbfe] bg-[aliceblue] p-4"
       style={{
-        borderLeft: isLeft ? '32px solid #bfdbfe' : 'none',
-        borderRight: !isLeft ? '32px solid #bfdbfe' : 'none',
-        transition: 'border 0.3s ease'
-
+        borderLeft: isLeft
+          ? "32px solid #bfdbfe"
+          : "none",
+        borderRight: !isLeft
+          ? "32px solid #bfdbfe"
+          : "none",
+        transition: "border 0.3s ease",
       }}
     >
       <Button
         variant="contained"
         sx={{
-          backgroundColor: '#bfdbfe',
-          color: '#1F2937',
-          fontWeight: 'bold',
-          padding: '8px 16px',
-          borderRadius: '0.375rem',
-          '&:hover': {
-            backgroundColor: '#D97706',
+          backgroundColor: "#bfdbfe",
+          color: "#1f2937",
+          fontWeight: "bold",
+          padding: "8px 16px",
+          borderRadius: "0.375rem",
+          "&:hover": {
+            backgroundColor: "#93c5fd",
           },
         }}
-        onClick={() => setOpen(!open)}
+        onClick={() =>
+          setOpen((current) => !current)
+        }
       >
         Please read the details before use
       </Button>
-      <div className="w-full " style={{ transform: `translateX(${distance}cm)`, transition: 'transform 0.3s ease-in-out' }}>
-        <p className="text-7xl flex items-center justify-center flex-row w-[96vw] h-[42vh]">
-          {words[currentWordIndex]}
+
+      <div
+        className="w-full"
+        style={{
+          transform:
+            `translateX(${distance}cm)`,
+          transition:
+            "transform 0.3s ease-in-out",
+        }}
+      >
+        <p className="flex h-[42vh] w-[96vw] flex-row items-center justify-center text-7xl">
+          {
+            CHARACTERS[
+              currentCharacterIndex
+            ]
+          }
         </p>
       </div>
-      <div className="flex flex-wrap gap-4 mb-4">
+
+      <div className="mb-4 flex flex-wrap gap-4">
         <Button
           variant="contained"
           sx={{
-            backgroundColor: '#1e293b',
-            '&:hover': {
-              backgroundColor: '#334155',
+            backgroundColor: "#1e293b",
+            "&:hover": {
+              backgroundColor: "#334155",
             },
-            color: '#bfdbfe',
-            fontWeight: 'bold',
+            color: "#bfdbfe",
+            fontWeight: "bold",
             py: 1,
             px: 2,
-            clipPath: 'polygon(20% 0, 100% 0, 80% 50%, 100% 100%, 20% 100%, 0 50%)',
+            clipPath:
+              "polygon(20% 0, 100% 0, 80% 50%, 100% 100%, 20% 100%, 0 50%)",
             borderRadius: 0,
             flex: 1,
           }}
-          onClick={moveLeft}
+          onClick={() =>
+            setCurrentDistanceIndex(
+              (index) =>
+                Math.max(0, index - 1),
+            )
+          }
         >
-           Left
+          Left
         </Button>
+
         <Button
           variant="contained"
           sx={{
-            backgroundColor: '#1e293b',
-            '&:hover': {
-              backgroundColor: '#334155',
+            backgroundColor: "#1e293b",
+            "&:hover": {
+              backgroundColor: "#334155",
             },
-            color: '#bfdbfe',
-            fontWeight: 'bold',
-            py: 1,  // Reduced padding
-            px: 2,  // Reduced padding
+            color: "#bfdbfe",
+            fontWeight: "bold",
+            py: 1,
+            px: 2,
             flex: 1,
-            borderRadius: '0 0 0 0', // Rounded right corners, square left corners
-            borderLeft: isLeft ? '8px solid #bfdbfe' : 'none',
-            borderRight: !isLeft ? '8px solid #bfdbfe' : 'none',
+            borderRadius: 0,
+            borderLeft: isLeft
+              ? "8px solid #bfdbfe"
+              : "none",
+            borderRight: !isLeft
+              ? "8px solid #bfdbfe"
+              : "none",
           }}
-          onClick={() => setIsLeft(!isLeft)}
+          onClick={() =>
+            setIsLeft(
+              (current) => !current,
+            )
+          }
         >
           Choose a Side
         </Button>
+
         <Button
           variant="contained"
           sx={{
-            backgroundColor: '#1e293b',
-            '&:hover': {
-              backgroundColor: '#334155',
+            backgroundColor: "#1e293b",
+            "&:hover": {
+              backgroundColor: "#334155",
             },
-            color: '#bfdbfe',
-            fontWeight: 'bold',
+            color: "#bfdbfe",
+            fontWeight: "bold",
             py: 1,
             px: 2,
-            clipPath: 'polygon(0 0, 80% 0, 100% 50%, 80% 100%, 0 100%, 20% 50%)',
+            clipPath:
+              "polygon(0 0, 80% 0, 100% 50%, 80% 100%, 0 100%, 20% 50%)",
             borderRadius: 0,
             flex: 1,
           }}
-          onClick={moveRight}
+          onClick={() =>
+            setCurrentDistanceIndex(
+              (index) =>
+                Math.min(
+                  DISTANCES.length - 1,
+                  index + 1,
+                ),
+            )
+          }
         >
-           Right
-        </Button>
-      </div>
-      <div className="flex flex-wrap gap-4 mb-4">
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: '#48bb78', // equivalent to bg-green-500
-            '&:hover': {
-              backgroundColor: '#2f855a', // equivalent to hover:bg-green-700
-            },
-            color: 'white', // equivalent to text-white
-            fontWeight: 'bold',
-            py: 1,  // Reduced padding for smaller size
-            px: 2,  // Reduced padding for smaller size
-            borderRadius: '8px',
-            flex: 1,
-          }}
-          onClick={overWord}
-        >
-          Change Word
-        </Button>
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: '#f56565', // equivalent to bg-red-500
-            '&:hover': {
-              backgroundColor: '#c53030', // equivalent to hover:bg-red-700
-            },
-            color: 'white', // equivalent to text-white
-            fontWeight: 'bold',
-            py: 1,  // Reduced padding for smaller size
-            px: 2,  // Reduced padding for smaller size
-            borderRadius: '8px',
-            flex: 1,
-          }}
-          onClick={handleMistake}
-        >
-          Mistake
+          Right
         </Button>
       </div>
 
-      <Popup open={open} setOpen={setOpen} type={'field'} />
-    </div>
+      <div className="mb-4 flex flex-wrap gap-4">
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#48bb78",
+            "&:hover": {
+              backgroundColor: "#2f855a",
+            },
+            color: "white",
+            fontWeight: "bold",
+            py: 1,
+            px: 2,
+            borderRadius: "8px",
+            flex: 1,
+          }}
+          onClick={changeCharacter}
+        >
+          Change Character
+        </Button>
+
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#f56565",
+            "&:hover": {
+              backgroundColor: "#c53030",
+            },
+            color: "white",
+            fontWeight: "bold",
+            py: 1,
+            px: 2,
+            borderRadius: "8px",
+            flex: 1,
+          }}
+          onClick={handleMistake}
+          disabled={isSaving}
+        >
+          {isSaving
+            ? "Saving…"
+            : "Mistake"}
+        </Button>
+      </div>
+
+      {saveError && (
+        <p
+          role="alert"
+          className="text-red-700"
+        >
+          {saveError}
+        </p>
+      )}
+
+      <Popup
+        open={open}
+        setOpen={setOpen}
+        type="field"
+      />
+    </section>
   );
 }
 </file>
@@ -2693,50 +3679,77 @@ export default function Header() {
 
 <file path="components/ImageCarousel.jsx">
 "use client";
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import styles from './ImageCarousel.module.css'; // Import your CSS file
 
-export default function ImageCarousel({ children }) {
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const images = [
-        '/images/image1.jpg',
-        '/images/image2.jpg',
-        '/images/image3.jpg',
-    ];
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import styles from "./ImageCarousel.module.css";
 
-    useEffect(() => {
-        const interval = setTimeout(() => {
-            setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-        }, 3000); // Change image every 3 seconds
-        return () => clearTimeout(interval);
-    }, [currentImageIndex]);
+const IMAGES = [
+  "/images/image1.jpg",
+  "/images/image2.jpg",
+  "/images/image3.jpg",
+];
 
-    return (
-        <div className="relative w-full h-screen overflow-hidden">
-            <div className={styles.carousel}>
-                {images.map((imageSrc, index) => (
-                    <div
-                        key={index}
-                        className={`${styles.imageWrapper} ${index === currentImageIndex ? styles.active : ''
-                            }`}
-                    >
-                        <Image
-                            src={imageSrc}
-                            alt={`image-${index}`}
-                            fill
-                            style={{ objectFit: 'cover', zIndex: 1 }}
-                            priority={index === currentImageIndex}
-                        />
-                    </div>
-                ))}
-                {/* Center the children */}
-                <div className={styles.childrenWrapper}>
-                    {children}
-                </div>
+export default function ImageCarousel({
+  children,
+}) {
+  const [
+    currentImageIndex,
+    setCurrentImageIndex,
+  ] = useState(0);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setCurrentImageIndex(
+        (currentIndex) =>
+          (currentIndex + 1) %
+          IMAGES.length,
+      );
+    }, 3000);
+
+    return () =>
+      window.clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="relative h-screen w-full overflow-hidden">
+      <div className={styles.carousel}>
+        {IMAGES.map(
+          (imageSource, index) => (
+            <div
+              key={imageSource}
+              className={`${styles.imageWrapper} ${
+                index === currentImageIndex
+                  ? styles.active
+                  : ""
+              }`}
+              aria-hidden={
+                index !== currentImageIndex
+              }
+            >
+              <Image
+                src={imageSource}
+                alt=""
+                fill
+                sizes="100vw"
+                style={{
+                  objectFit: "cover",
+                  zIndex: 1,
+                }}
+                priority={index === 0}
+              />
             </div>
+          ),
+        )}
+
+        <div
+          className={styles.childrenWrapper}
+        >
+          {children}
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 </file>
 
@@ -2787,33 +3800,62 @@ export default function ImageCarousel({ children }) {
 </file>
 
 <file path="components/Images/index.jsx">
-"use client"
-import React, { useState, useEffect } from 'react';
-import style from './style.module.css'
-import Image from 'next/image'
+"use client";
+
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import style from "./style.module.css";
 
 export default function Images({ carpet }) {
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = Array.isArray(
+    carpet?.images,
+  )
+    ? carpet.images
+    : [];
 
-    useEffect(() => {
-        const interval = setTimeout(() => {
-            setCurrentImageIndex(prevIndex => (prevIndex + 1) % carpet.images.length)
-        }, 2000)
-        return () => clearTimeout(interval)
-    }, [currentImageIndex])
+  const imageCount = images.length;
 
-    // const interval = setInterval(() => {
-    //     setCurrentImageIndex(prevIndex => (prevIndex + 1) % carpet.images.length);
-    // }, 3000);
-    return (
-     
-            <div className={style.container}>
-                <Image src={carpet.images[currentImageIndex]} alt={carpet.title} width={600} height={400} className={style.img} />
-            </div>
-           
+  const [
+    currentImageIndex,
+    setCurrentImageIndex,
+  ] = useState(0);
 
+  useEffect(() => {
+    if (imageCount < 2) {
+      return undefined;
+    }
 
-    )
+    const interval = window.setInterval(() => {
+      setCurrentImageIndex(
+        (currentIndex) =>
+          (currentIndex + 1) % imageCount,
+      );
+    }, 2000);
+
+    return () =>
+      window.clearInterval(interval);
+  }, [imageCount]);
+
+  if (imageCount === 0) {
+    return null;
+  }
+
+  const safeImageIndex =
+    currentImageIndex % imageCount;
+
+  return (
+    <div className={style.container}>
+      <Image
+        src={images[safeImageIndex]}
+        alt={
+          carpet?.title || "Gallery image"
+        }
+        width={600}
+        height={400}
+        className={style.img}
+      />
+    </div>
+  );
 }
 </file>
 
@@ -2835,76 +3877,134 @@ export default function Images({ carpet }) {
 
 <file path="components/Login.jsx">
 "use client";
-import { authAction, loginAction } from '@/server/BL/actions/login.action';
-import Cookies from 'js-cookie';
-import React, { useEffect, useState } from 'react';
-import jwt from 'jsonwebtoken';
-import Link from 'next/link';
-const SECRET = process.env.JWT_SECRET;
+
+import {
+  useState,
+  useTransition,
+} from "react";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { loginAction } from "@/server/BL/actions/login.action";
 
 export default function Login() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+  const router = useRouter();
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        const formData = new FormData(event.target);
-        const response = await loginAction(formData);
+  const [message, setMessage] = useState("");
+  const [isPending, startTransition] =
+    useTransition();
 
-        if (response.success) {
-            setError('');
-            let user = "Emanuel tiran";
-            window.location.href = `/user`;
-        } else {
-            setError(response.message);
-            alert(response.message);
-        }
-    };
+  function handleSubmit(event) {
+    event.preventDefault();
+    setMessage("");
 
-    return (
-        <div className="flex justify-center items-center min-h-screen p-4">
-            <form className="w-full max-w-md" onSubmit={handleSubmit}>
-                <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 space-y-4">
-                    <h1 className="text-2xl font-bold mb-4 text-center">Login</h1>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">Email</label>
-                        <input
-                            name='email'
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            id="email"
-                            type="email"
-                            placeholder="Email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">Password</label>
-                        <input
-                            name='password'
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            id="password"
-                            type="password"
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="flex items-center justify-center">
-                        <button className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full sm:w-auto" type="submit">
-                            Login
-                        </button>
-                    </div>
-                    <div className="text-center mt-4">
-                        <Link href={'signin'} className="text-blue-500 hover:underline">Sign In</Link>
-                    </div>
-                </div>
-            </form>
-        </div>
+    const formData = new FormData(
+      event.currentTarget,
     );
+
+    startTransition(async () => {
+      const result =
+        await loginAction(formData);
+
+      if (!result.success) {
+        setMessage(result.message);
+        return;
+      }
+
+      router.replace("/user");
+      router.refresh();
+    });
+  }
+
+  return (
+    <main className="flex min-h-[calc(100vh-72px)] items-center justify-center p-4">
+      <form
+        className="w-full max-w-md"
+        onSubmit={handleSubmit}
+        noValidate
+      >
+        <div className="space-y-5 rounded-xl bg-white px-8 py-7 shadow-xl">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-slate-800">
+              Welcome back
+            </h1>
+
+            <p className="mt-2 text-sm text-slate-500">
+              Sign in to view your
+              vision-test history.
+            </p>
+          </div>
+
+          <div>
+            <label
+              className="mb-2 block text-sm font-semibold text-slate-700"
+              htmlFor="email"
+            >
+              Email address
+            </label>
+
+            <input
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              maxLength={254}
+              required
+            />
+          </div>
+
+          <div>
+            <label
+              className="mb-2 block text-sm font-semibold text-slate-700"
+              htmlFor="password"
+            >
+              Password
+            </label>
+
+            <input
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              maxLength={128}
+              required
+            />
+          </div>
+
+          {message && (
+            <p
+              className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+              role="alert"
+            >
+              {message}
+            </p>
+          )}
+
+          <button
+            className="w-full rounded-lg bg-slate-800 px-4 py-2.5 font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+            type="submit"
+            disabled={isPending}
+          >
+            {isPending
+              ? "Signing in…"
+              : "Sign in"}
+          </button>
+
+          <p className="text-center text-sm text-slate-600">
+            No account yet?{" "}
+            <Link
+              className="font-semibold text-amber-600 hover:underline"
+              href="/signin"
+            >
+              Create an account
+            </Link>
+          </p>
+        </div>
+      </form>
+    </main>
+  );
 }
 </file>
 
@@ -3026,38 +4126,108 @@ export default function Navlink({ children, href, colorText }) {
 </file>
 
 <file path="components/Popup/index.jsx">
-import React, { useEffect, useState } from 'react';
-import style from "./style.module.css"
-export default function Popup({ open, setOpen, type }) {
-    const [text, setText] = useState('');
+"use client";
 
-    useEffect(() => {
-        // טוען את הקובץ txt בצורה דינמית
-        fetch(type === 'blur' ? '/blurRules.txt' : '/fieldsRules.txt')
-            .then(response => response.text())
-            .then(data => setText(data))
-            .catch(error => console.error('Error loading blur.txt:', error));
-    }, []);
+import { useEffect, useState } from "react";
+import style from "./style.module.css";
 
-    const handleOutsideClick = () => {
-        setOpen(!open);
-    };
+const RULE_FILES = {
+  blur: "/blurRules.txt",
+  field: "/fieldsRules.txt",
+};
 
-    const handleInsideClick = (e) => {
-        e.stopPropagation();
-    };
+export default function Popup({
+  open,
+  setOpen,
+  type,
+}) {
+  const [text, setText] = useState("");
+  const [loadError, setLoadError] =
+    useState("");
 
-    return (
-        open && (
-            <div className={style.outside} onClick={handleOutsideClick}>
-                <div className={style.inside} onClick={handleInsideClick}>
-                    <div className={style.scrollContent}>
-                        {text}
-                    </div>
-                </div>
-            </div>
-        )
-    )
+  useEffect(() => {
+    if (!open) {
+      return undefined;
+    }
+
+    const controller =
+      new AbortController();
+
+    const ruleFile =
+      RULE_FILES[type] ?? RULE_FILES.field;
+
+    fetch(ruleFile, {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(
+            "Failed to load the instructions.",
+          );
+        }
+
+        return response.text();
+      })
+      .then((content) => {
+        setText(content);
+        setLoadError("");
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") {
+          setLoadError(
+            error.message ||
+              "Failed to load the instructions.",
+          );
+        }
+      });
+
+    return () => controller.abort();
+  }, [open, type]);
+
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div
+      className={style.outside}
+      onClick={() => setOpen(false)}
+      role="presentation"
+    >
+      <div
+        className={style.inside}
+        onClick={(event) =>
+          event.stopPropagation()
+        }
+        role="dialog"
+        aria-modal="true"
+        aria-label="Test instructions"
+      >
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="mb-3 rounded bg-slate-800 px-3 py-2 text-white"
+        >
+          Close
+        </button>
+
+        <div
+          className={style.scrollContent}
+        >
+          {loadError ? (
+            <p
+              role="alert"
+              className="text-red-700"
+            >
+              {loadError}
+            </p>
+          ) : (
+            text || "Loading…"
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 </file>
 
@@ -3175,291 +4345,642 @@ export default Providers
 
 <file path="components/RandomCharacterGame.jsx">
 "use client";
-import React, { useState, useCallback, useEffect } from 'react';
+
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
 import { Button } from "@mui/material";
-import ResultTestBlur from './ResultTestBlur';
-import EyeExaminationPrompt from './EyeExaminationPrompt';
-import ProgressBar from './ProgressBar';
+import EyeExaminationPrompt from "./EyeExaminationPrompt";
+import ProgressBar from "./ProgressBar";
+import ResultTestBlur from "./ResultTestBlur";
 
-const characters = '1234567890אבגדהוזחטיכלמנסעפצקרשת';
-const initialSize = 14.6;
+const CHARACTERS = Array.from(
+  "1234567890אבגדהוזחטיכלמנסעפצקרשת",
+);
 
-const getRandomCharacter = () => characters[Math.floor(Math.random() * characters.length)];
+const INITIAL_SIZE = 14.6;
+const MINIMUM_SIZE = 2;
+const INITIAL_CHARACTER = CHARACTERS[0];
+const INITIAL_BUTTONS =
+  CHARACTERS.slice(0, 4);
 
-const getRandomButtons = (correctChar) => {
-    const buttons = [correctChar];
-    while (buttons.length < 4) {
-        const char = getRandomCharacter();
-        if (!buttons.includes(char)) {
-            buttons.push(char);
-        }
-    }
-    return buttons.sort(() => Math.random() - 0.5);
-};
+function getRandomCharacter() {
+  return CHARACTERS[
+    Math.floor(
+      Math.random() * CHARACTERS.length,
+    )
+  ];
+}
 
+function shuffle(values) {
+  const shuffledValues = [...values];
 
-
-const RandomCharacterGame = ({ user }) => {
-    const [character, setCharacter] = useState('');
-    const [buttons, setButtons] = useState([]);
-    const [size, setSize] = useState(initialSize);
-    const [clickedIndex, setClickedIndex] = useState(null);
-    const [isCorrect, setIsCorrect] = useState(null);
-    const [countTrue, setCountTrue] = useState(0);
-    const [countFalse, setCountFalse] = useState(0);
-    const [isLeftEye, setIsLeftEye] = useState(false);
-
-    useEffect(() => {
-        const initialChar = getRandomCharacter();
-        setCharacter(initialChar);
-        setButtons(getRandomButtons(initialChar));
-    }, []);
-
-    const handleButtonClick = useCallback((clickedChar, index) => {
-        console.log({ size });
-        const correct = clickedChar === character;
-        setIsCorrect(correct);
-        setClickedIndex(index);
-        if (correct) {
-            setCountTrue(prev => prev + 1);
-            setCountFalse(0);
-        } else {
-            setCountTrue(0);
-            setCountFalse(prev => prev + 1);
-        }
-        if (correct && countTrue === 1) {
-            setCountTrue(0);
-            setSize((prevSize) => Math.max(prevSize - 1.5, 2));
-        }
-
-        setTimeout(() => {
-            const newChar = getRandomCharacter();
-            setCharacter(newChar);
-            setButtons(getRandomButtons(newChar));
-            setClickedIndex(null);
-            setIsCorrect(null);
-        }, 500);
-    }, [character, countTrue]);
-
-    useEffect(() => {
-        const updateUser = async () => {
-            if (countFalse === 3) {
-                let taut = { fontSize: size, distance: 1, eye: isLeftEye ? "left" : "right" };
-                user.sizeWeaknesses.push(taut);
-
-                try {
-                    const response = await fetch('/api/updateUser', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            filter: { email: user.email },
-                            updateData: { sizeWeaknesses: user.sizeWeaknesses }
-                        })
-                    });
-
-                    if (response.ok) {
-                        const updatedUser = await response.json();
-                        console.log('User updated successfully:', updatedUser);
-                    } else {
-                        console.error('Failed to update user');
-                    }
-                } catch (error) {
-                    console.error('Error updating user:', error);
-                }
-            }
-        };
-
-        updateUser();
-    }, [countFalse, size, isLeftEye, user]);
-
-    return (
-        <div className="flex flex-col items-center justify-center space-y-4 p-4 bg-gray-100 rounded-lg">
-
-            <EyeExaminationPrompt isLeftEye={isLeftEye} />
-            
-            <ProgressBar size={size} />
-
-            <div
-                className="flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-md"
-                style={{ fontSize: `${size}mm` }}
-            >
-                {character}
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-                {!(countFalse === 3 || (size === 2)) ?
-                    buttons.map((char, index) => (
-                        <Button
-                            key={index}
-                            onClick={() => handleButtonClick(char, index)}
-                            variant="outlined"
-                            sx={{
-                                border: '2px solid #facc15',
-                                color: 'black',
-                                fontSize: '14.6mm',
-                                padding: '10px 20px',
-                                width: '100px',
-                                height: '100px',
-                            }}
-                            disabled={clickedIndex !== null}
-                            className={`${clickedIndex === index
-                                ? isCorrect
-                                    ? 'bg-green-500 hover:bg-gray-600'
-                                    : 'bg-red-500 hover:bg-red-600'
-                                : 'bg-white hover:bg-gray-200'
-                                }`}
-                        >
-                            {char}
-                        </Button>
-                    )) : <ResultTestBlur size={size} setSize={setSize} isLeftEye={isLeftEye} setIsLeftEye={setIsLeftEye} setCountFalse={setCountFalse} />
-                }
-            </div>
-        </div>
+  for (
+    let index =
+      shuffledValues.length - 1;
+    index > 0;
+    index -= 1
+  ) {
+    const randomIndex = Math.floor(
+      Math.random() * (index + 1),
     );
-};
 
-export default RandomCharacterGame;
+    [
+      shuffledValues[index],
+      shuffledValues[randomIndex],
+    ] = [
+      shuffledValues[randomIndex],
+      shuffledValues[index],
+    ];
+  }
+
+  return shuffledValues;
+}
+
+function createRound() {
+  const character =
+    getRandomCharacter();
+
+  const alternatives =
+    CHARACTERS.filter(
+      (value) => value !== character,
+    );
+
+  const selectedAlternatives = [];
+
+  while (
+    selectedAlternatives.length < 3
+  ) {
+    const randomIndex = Math.floor(
+      Math.random() *
+        alternatives.length,
+    );
+
+    selectedAlternatives.push(
+      alternatives.splice(
+        randomIndex,
+        1,
+      )[0],
+    );
+  }
+
+  return {
+    character,
+    buttons: shuffle([
+      character,
+      ...selectedAlternatives,
+    ]),
+  };
+}
+
+export default function RandomCharacterGame({
+  user,
+}) {
+  const [round, setRound] = useState({
+    character: INITIAL_CHARACTER,
+    buttons: INITIAL_BUTTONS,
+  });
+
+  const [size, setSize] =
+    useState(INITIAL_SIZE);
+
+  const [
+    clickedIndex,
+    setClickedIndex,
+  ] = useState(null);
+
+  const [isCorrect, setIsCorrect] =
+    useState(null);
+
+  const [
+    consecutiveCorrect,
+    setConsecutiveCorrect,
+  ] = useState(0);
+
+  const [
+    consecutiveMistakes,
+    setConsecutiveMistakes,
+  ] = useState(0);
+
+  const [isLeftEye, setIsLeftEye] =
+    useState(false);
+
+  const [
+    sizeWeaknesses,
+    setSizeWeaknesses,
+  ] = useState(() =>
+    Array.isArray(user?.sizeWeaknesses)
+      ? user.sizeWeaknesses
+      : [],
+  );
+
+  const [
+    pendingResult,
+    setPendingResult,
+  ] = useState(null);
+
+  const [isSaving, setIsSaving] =
+    useState(false);
+
+  const [saveError, setSaveError] =
+    useState("");
+
+  const nextRoundTimer = useRef(null);
+
+  useEffect(
+    () => () => {
+      if (
+        nextRoundTimer.current !== null
+      ) {
+        window.clearTimeout(
+          nextRoundTimer.current,
+        );
+      }
+    },
+    [],
+  );
+
+  const beginNextRound = () => {
+    setRound(createRound());
+    setClickedIndex(null);
+    setIsCorrect(null);
+  };
+
+  const saveResult = async (result) => {
+    const updatedWeaknesses = [
+      ...sizeWeaknesses,
+      result,
+    ];
+
+    setPendingResult(result);
+    setIsSaving(true);
+    setSaveError("");
+
+    try {
+      const response = await fetch(
+        "/api/updateUser",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            updateData: {
+              sizeWeaknesses:
+                updatedWeaknesses,
+            },
+          }),
+        },
+      );
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          payload.message ||
+            "Failed to save the result.",
+        );
+      }
+
+      setSizeWeaknesses(
+        updatedWeaknesses,
+      );
+
+      setPendingResult(null);
+    } catch (error) {
+      setSaveError(
+        error.message ||
+          "Failed to save the result.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleButtonClick = (
+    clickedCharacter,
+    index,
+  ) => {
+    if (clickedIndex !== null) {
+      return;
+    }
+
+    const correct =
+      clickedCharacter === round.character;
+
+    setIsCorrect(correct);
+    setClickedIndex(index);
+
+    if (correct) {
+      const nextCorrectCount =
+        consecutiveCorrect + 1;
+
+      setConsecutiveMistakes(0);
+
+      if (nextCorrectCount >= 2) {
+        const nextSize = Math.max(
+          Number(
+            (size - 1.5).toFixed(1),
+          ),
+          MINIMUM_SIZE,
+        );
+
+        setConsecutiveCorrect(0);
+        setSize(nextSize);
+
+        if (
+          nextSize <= MINIMUM_SIZE
+        ) {
+          return;
+        }
+      } else {
+        setConsecutiveCorrect(
+          nextCorrectCount,
+        );
+      }
+    } else {
+      const nextMistakeCount =
+        consecutiveMistakes + 1;
+
+      setConsecutiveCorrect(0);
+      setConsecutiveMistakes(
+        nextMistakeCount,
+      );
+
+      if (nextMistakeCount >= 3) {
+        void saveResult({
+          fontSize: size,
+          distance: 1,
+          eye: isLeftEye
+            ? "left"
+            : "right",
+        });
+
+        return;
+      }
+    }
+
+    nextRoundTimer.current =
+      window.setTimeout(
+        beginNextRound,
+        500,
+      );
+  };
+
+  const continueAfterResult = () => {
+    if (!isLeftEye) {
+      setIsLeftEye(true);
+      setSize(INITIAL_SIZE);
+      setConsecutiveCorrect(0);
+      setConsecutiveMistakes(0);
+      setSaveError("");
+      setPendingResult(null);
+      beginNextRound();
+      return;
+    }
+
+    window.location.assign(
+      `/blur/improve/${size}_1_right`,
+    );
+  };
+
+  const testFinished =
+    consecutiveMistakes >= 3 ||
+    size <= MINIMUM_SIZE;
+
+  return (
+    <section className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-gray-100 p-4">
+      <EyeExaminationPrompt
+        isLeftEye={isLeftEye}
+      />
+
+      <ProgressBar size={size} />
+
+      <div
+        className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-md"
+        style={{
+          fontSize: `${size}mm`,
+        }}
+        aria-live="polite"
+      >
+        {round.character}
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        {!testFinished ? (
+          round.buttons.map(
+            (character, index) => (
+              <Button
+                key={character}
+                onClick={() =>
+                  handleButtonClick(
+                    character,
+                    index,
+                  )
+                }
+                variant="outlined"
+                sx={{
+                  border:
+                    "2px solid #facc15",
+                  color: "black",
+                  fontSize: "14.6mm",
+                  padding: "10px 20px",
+                  width: "100px",
+                  height: "100px",
+                }}
+                disabled={
+                  clickedIndex !== null
+                }
+                className={
+                  clickedIndex === index
+                    ? isCorrect
+                      ? "bg-green-500 hover:bg-green-600"
+                      : "bg-red-500 hover:bg-red-600"
+                    : "bg-white hover:bg-gray-200"
+                }
+              >
+                {character}
+              </Button>
+            ),
+          )
+        ) : (
+          <ResultTestBlur
+            size={size}
+            isLeftEye={isLeftEye}
+            isSaving={isSaving}
+            saveError={saveError}
+            canRetry={Boolean(
+              pendingResult,
+            )}
+            onRetry={() =>
+              pendingResult &&
+              void saveResult(
+                pendingResult,
+              )
+            }
+            onContinue={
+              continueAfterResult
+            }
+          />
+        )}
+      </div>
+    </section>
+  );
+}
 </file>
 
 <file path="components/ResultTestBlur.jsx">
-const ResultTestBlur = ({ size, setSize, isLeftEye, setIsLeftEye, setCountFalse }) => {
-    const handleButton = () => {
-        if (!isLeftEye) {
-            setCountFalse(0)
-            setIsLeftEye(!isLeftEye)
-            setSize(14.6)
-        } else {
-            // window.history.pushState({}, '', `/blur/improve/${size}_1_right`);
-            window.location.href = `/blur/improve/${size}_1_right`;
-        }
+"use client";
 
-    };
+export default function ResultTestBlur({
+  size,
+  isLeftEye,
+  isSaving,
+  saveError,
+  canRetry,
+  onRetry,
+  onContinue,
+}) {
+  const cannotContinue =
+    isSaving || Boolean(saveError);
 
-    return (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 z-50">
-            <div className="bg-white rounded-lg p-8 max-w-md w-full transform transition-all duration-500 ease-in-out hover:scale-105">
-                <h2 className="text-3xl font-bold mb-4 text-center text-yellow-400">{`The result of the test of the ${isLeftEye ? 'left' : 'right'} eye`} </h2>
-                <p className="text-xl mb-6 text-center">
-                    הגודל המינימלי שבו הצלחת לראות הוא:
-                    <span className="font-bold text-2xl text-yellow-400 block mt-2 animate-pulse">
-                        {size}mm
-                    </span>
-                </p>
-                <div className="text-center">
-                    <button
-                        onClick={() => handleButton()}
-                        // onClick={() => window.location.reload()}
-                        className="bg-yellow-400 text-white px-6 py-2 rounded-full hover:bg-yellow-500 transition-colors duration-300 transform hover:scale-105"
-                    >
-                        {!isLeftEye ? "Try left eye" : "Go to improve vision"}
-                    </button>
-                </div>
-            </div>
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-75"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="blur-result-title"
+    >
+      <div className="w-full max-w-md rounded-lg bg-white p-8 transition-all duration-500 ease-in-out hover:scale-105">
+        <h2
+          id="blur-result-title"
+          className="mb-4 text-center text-3xl font-bold text-yellow-500"
+        >
+          The result of the{" "}
+          {isLeftEye ? "left" : "right"}{" "}
+          eye test
+        </h2>
+
+        <p className="mb-6 text-center text-xl">
+          הגודל המינימלי שבו הצלחת לראות
+          הוא:
+
+          <span className="mt-2 block animate-pulse text-2xl font-bold text-yellow-500">
+            {size}mm
+          </span>
+        </p>
+
+        {isSaving && (
+          <p
+            role="status"
+            className="mb-4 text-center text-slate-700"
+          >
+            Saving the result…
+          </p>
+        )}
+
+        {saveError && (
+          <p
+            role="alert"
+            className="mb-4 text-center text-red-700"
+          >
+            {saveError}
+          </p>
+        )}
+
+        <div className="flex flex-col items-center gap-3 text-center">
+          {saveError && canRetry && (
+            <button
+              type="button"
+              onClick={onRetry}
+              disabled={isSaving}
+              className="rounded-full bg-red-600 px-6 py-2 text-white hover:bg-red-700 disabled:opacity-60"
+            >
+              Retry saving
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={onContinue}
+            disabled={cannotContinue}
+            className="rounded-full bg-yellow-500 px-6 py-2 text-white transition-colors duration-300 hover:bg-yellow-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {!isLeftEye
+              ? "Try left eye"
+              : "Go to improve vision"}
+          </button>
         </div>
-    );
-};
-export default ResultTestBlur;
+      </div>
+    </div>
+  );
+}
 </file>
 
 <file path="components/SighnIn.jsx">
 "use client";
-import { signAction } from '@/server/BL/actions/sighnin.action';
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 
-export default function SignIn() {
-    const path = usePathname();
+import {
+  useState,
+  useTransition,
+} from "react";
 
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [email, setEmail] = useState('');
-    const [emailError, setEmailError] = useState('');
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signAction } from "@/server/BL/actions/sighnin.action";
 
-    // פונקציה לבדיקת תקינות אימייל
-    const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
+export default function SignUp() {
+  const router = useRouter();
 
-    // אירוע לשינוי אימייל
-    const handleEmailChange = (e) => {
-        const value = e.target.value;
-        setEmail(value);
-        if (!validateEmail(value)) {
-            setEmailError('Invalid email address');
-        } else {
-            setEmailError('');
-        }
-    };
+  const [message, setMessage] = useState("");
+  const [isPending, startTransition] =
+    useTransition();
 
-    return (
-        <div className="flex justify-center items-center min-h-screen p-4">
-            <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-4 text-center">Sign In</h2>
-                <form action={signAction} className="space-y-4">
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">Username</label>
-                        <input
-                            name='username'
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            id="username"
-                            type="text"
-                            placeholder="Username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">Password</label>
-                        <input
-                            name='password'
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            id="password"
-                            type="password"
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="mb-6">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">Email</label>
-                        <input
-                            name='email'
-                            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                                emailError ? 'border-red-500' : ''
-                            }`}
-                            id="email"
-                            type="email"
-                            placeholder="Email"
-                            value={email}
-                            onChange={handleEmailChange}
-                            required
-                        />
-                        {emailError && <p className="text-red-500 text-xs italic mt-2">{emailError}</p>}
-                    </div>
-                    <div className="flex items-center justify-center">
-                        <button
-                            className="bg-slate-500 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full sm:w-auto"
-                            type="submit"
-                            disabled={!!emailError}>
-                            Sign In
-                        </button>
-                    </div>
-                </form>
-                <div className="text-center mt-4">
-                    <Link
-                        href={'login'}
-                        className={path === 'signin' ? 'text-amber-500' : 'text-gray-500 hover:text-gray-700'}>
-                        Login
-                    </Link>
-                </div>
-            </div>
-        </div>
+  function handleSubmit(event) {
+    event.preventDefault();
+    setMessage("");
+
+    const formData = new FormData(
+      event.currentTarget,
     );
+
+    startTransition(async () => {
+      const result =
+        await signAction(formData);
+
+      if (!result.success) {
+        setMessage(result.message);
+        return;
+      }
+
+      router.replace("/user");
+      router.refresh();
+    });
+  }
+
+  return (
+    <main className="flex min-h-[calc(100vh-72px)] items-center justify-center p-4">
+      <form
+        className="w-full max-w-md"
+        onSubmit={handleSubmit}
+        noValidate
+      >
+        <div className="space-y-5 rounded-xl bg-white px-8 py-7 shadow-xl">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-slate-800">
+              Create an account
+            </h1>
+
+            <p className="mt-2 text-sm text-slate-500">
+              Save and follow your
+              vision-test results securely.
+            </p>
+          </div>
+
+          <div>
+            <label
+              className="mb-2 block text-sm font-semibold text-slate-700"
+              htmlFor="username"
+            >
+              Name
+            </label>
+
+            <input
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+              id="username"
+              name="username"
+              type="text"
+              autoComplete="name"
+              minLength={2}
+              maxLength={50}
+              required
+            />
+          </div>
+
+          <div>
+            <label
+              className="mb-2 block text-sm font-semibold text-slate-700"
+              htmlFor="email"
+            >
+              Email address
+            </label>
+
+            <input
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              maxLength={254}
+              required
+            />
+          </div>
+
+          <div>
+            <label
+              className="mb-2 block text-sm font-semibold text-slate-700"
+              htmlFor="password"
+            >
+              Password
+            </label>
+
+            <input
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              minLength={8}
+              maxLength={128}
+              aria-describedby="password-help"
+              required
+            />
+
+            <p
+              className="mt-1 text-xs text-slate-500"
+              id="password-help"
+            >
+              Use at least 8 characters,
+              including a letter and a number.
+            </p>
+          </div>
+
+          {message && (
+            <p
+              className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+              role="alert"
+            >
+              {message}
+            </p>
+          )}
+
+          <button
+            className="w-full rounded-lg bg-slate-800 px-4 py-2.5 font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+            type="submit"
+            disabled={isPending}
+          >
+            {isPending
+              ? "Creating account…"
+              : "Create account"}
+          </button>
+
+          <p className="text-center text-sm text-slate-600">
+            Already registered?{" "}
+            <Link
+              className="font-semibold text-amber-600 hover:underline"
+              href="/login"
+            >
+              Sign in
+            </Link>
+          </p>
+        </div>
+      </form>
+    </main>
+  );
 }
 </file>
 
@@ -3769,21 +5290,38 @@ export default SnellenChart;
 </file>
 
 <file path="components/ToLogin.jsx">
-import Link from 'next/link'
-import React from 'react'
+import Link from "next/link";
 
 export default function ToLogin() {
   return (
-    <div className="flex  justify-center items-center  h-screen flex-col min-w-full">
-    <h1 className='shake text-yellow-400 text-4xl text-center'>User does not exist or is not authenticated! <br />
-      <Link
-        href={'/login'}
-        replace 
-        className='underline'
-      >please login  </Link>
-    </h1>
-  </div>
-  )
+    <main className="flex min-h-[calc(100vh-72px)] items-center justify-center p-4">
+      <section className="w-full max-w-md rounded-xl bg-white p-8 text-center shadow-xl">
+        <h1 className="text-3xl font-bold text-slate-800">
+          Authentication required
+        </h1>
+
+        <p className="mt-3 text-slate-600">
+          Please sign in or create an account before accessing this page.
+        </p>
+
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link
+            href="/login"
+            className="rounded-lg bg-slate-800 px-5 py-2.5 font-semibold text-white transition hover:bg-slate-700"
+          >
+            Sign in
+          </Link>
+
+          <Link
+            href="/signin"
+            className="rounded-lg bg-amber-500 px-5 py-2.5 font-semibold text-white transition hover:bg-amber-600"
+          >
+            Create an account
+          </Link>
+        </div>
+      </section>
+    </main>
+  );
 }
 </file>
 
@@ -4455,60 +5993,90 @@ C:\Users\Home\Desktop\workin\AyinBright\server\DL\models\user.model.js
 <file path="next.config.mjs">
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+   reactStrictMode: true,
+   poweredByHeader: false,
+ 
    images: {
-      remotePatterns: [
-         { hostname: 'tzemer.co.il' },
-      ],
+     remotePatterns: [
+       {
+         protocol: "https",
+         hostname: "tzemer.co.il",
+       },
+     ],
    },
-   experimental: {
-      serverComponentsExternalPackages: ['mongoose', 'jsonwebtoken'],
+ 
+   serverExternalPackages: ["mongoose"],
+ 
+   async headers() {
+     return [
+       {
+         source: "/:path*",
+         headers: [
+           {
+             key: "X-Content-Type-Options",
+             value: "nosniff",
+           },
+           {
+             key: "X-Frame-Options",
+             value: "DENY",
+           },
+           {
+             key: "Referrer-Policy",
+             value: "strict-origin-when-cross-origin",
+           },
+           {
+             key: "Permissions-Policy",
+             value: "camera=(), microphone=(), geolocation=()",
+           },
+         ],
+       },
+     ];
    },
-};
-
-export default nextConfig;
+ };
+ 
+ export default nextConfig;
 </file>
 
 <file path="package.json">
 {
-  "name": "next-jerusalem",
-  "version": "0.1.0",
+  "name": "ayin-bright",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint . --max-warnings=0"
   },
   "dependencies": {
-    "@auth/supabase-adapter": "^1.4.2",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.1",
     "@mui/material": "^6.1.1",
-    "@react-oauth/google": "^0.12.1",
-    "@supabase/supabase-js": "^2.45.1",
-    "bootstrap": "^5.3.3",
-    "chart.js": "^4.4.6",
-    "framer-motion": "^11.7.0",
-    "js-cookie": "^3.0.5",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.4.0",
-    "next": "^14.2.13",
-    "next-auth": "^4.24.7",
-    "react": "^18.3.1",
-    "react-chartjs-2": "^5.2.0",
-    "react-dom": "^18.3.1",
-    "react-icons": "^5.2.1",
-    "react-intersection-observer": "^9.13.1",
-    "react-scroll": "^1.9.0",
-    "react-slick": "^0.30.2",
-    "sass": "^1.80.4",
-    "slick-carousel": "^1.8.1"
+    "bcryptjs": "3.0.3",
+    "chart.js": "4.5.1",
+    "framer-motion": "^11.18.2",
+    "jose": "6.2.3",
+    "mongoose": "8.24.1",
+    "next": "16.2.10",
+    "react": "19.2.7",
+    "react-chartjs-2": "5.3.1",
+    "react-dom": "19.2.7",
+    "react-icons": "5.7.0",
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.19",
-    "postcss": "^8.4.38",
-    "tailwindcss": "^3.4.3"
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.2.10",
+    "postcss": "8.5.20",
+    "tailwindcss": "3.4.19"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "overrides": {
+    "postcss": "$postcss"
   }
 }
 </file>
@@ -4536,27 +6104,97 @@ export default MyDocument;
 </file>
 
 <file path="pages/api/deleteWeakness.js">
-// pages/api/deleteWeakness.js
+import { connectToMongo } from "@/server/connectToMongo";
+import { deleteUserResultService } from "@/server/BL/services/user.service";
 
-import { deleteUserByFieldService } from "@/server/BL/services/user.service";
+import {
+  SESSION_COOKIE_NAME,
+  verifySessionToken,
+} from "@/server/security/session";
 
-export default async function handler(req, res) {
-    if (req.method === 'POST') {
-        const { email, field, index } = req.body;
+const ALLOWED_RESULT_TYPES = new Set([
+  "color",
+  "size",
+  "field",
+]);
 
-        try {
-            const response = await deleteUserByFieldService(email, field, index);
-            if (response.error) {
-                res.status(400).json({ error: response.error });
-                return;
-            }
-            res.status(200).json({ message: 'Weakness deleted successfully', user: response.user });
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    } else {
-        res.status(405).json({ error: 'Method not allowed' });
-    }
+export default async function handler(
+  request,
+  response,
+) {
+  if (
+    request.method !== "DELETE" &&
+    request.method !== "POST"
+  ) {
+    response.setHeader("Allow", "DELETE");
+
+    return response.status(405).json({
+      message: "Method not allowed.",
+    });
+  }
+
+  const session = await verifySessionToken(
+    request.cookies?.[SESSION_COOKIE_NAME],
+  );
+
+  if (!session) {
+    return response.status(401).json({
+      message: "Authentication required.",
+    });
+  }
+
+  if (session.role !== "admin") {
+    return response.status(403).json({
+      message:
+        "Administrator access required.",
+    });
+  }
+
+  const {
+    email,
+    field,
+    index,
+  } = request.body || {};
+
+  const numericIndex = Number(index);
+
+  if (
+    typeof email !== "string" ||
+    !ALLOWED_RESULT_TYPES.has(field) ||
+    !Number.isInteger(numericIndex) ||
+    numericIndex < 0
+  ) {
+    return response.status(400).json({
+      message: "Invalid deletion request.",
+    });
+  }
+
+  try {
+    await connectToMongo();
+
+    const user = await deleteUserResultService(
+      email,
+      field,
+      numericIndex,
+    );
+
+    return response.status(200).json({
+      message:
+        "Result deleted successfully.",
+      user,
+    });
+  } catch (error) {
+    const notFound =
+      error.message === "User not found.";
+
+    return response
+      .status(notFound ? 404 : 400)
+      .json({
+        message:
+          error.message ||
+          "Failed to delete result.",
+      });
+  }
 }
 </file>
 
@@ -4581,42 +6219,69 @@ export default async function handler(req, res) {
 </file>
 
 <file path="pages/api/updateUser.js">
-import { connectToMongo } from '@/server/connectToMongo';
-import { updateUserByFieldService } from '@/server/BL/services/user.service';
+import { connectToMongo } from "@/server/connectToMongo";
+import { updateUserByIdService } from "@/server/BL/services/user.service";
 
-export default async function handler(req, res) {
-    console.log('Handler called with method:', req.method);
+import {
+  SESSION_COOKIE_NAME,
+  verifySessionToken,
+} from "@/server/security/session";
 
-    if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Only POST method is allowed' });
-    }
+import { validateResultsUpdate } from "@/server/validation/results";
 
-    await connectToMongo(); 
+export default async function handler(
+  request,
+  response,
+) {
+  if (request.method !== "POST") {
+    response.setHeader("Allow", "POST");
 
-    const { filter: { email }, updateData } = req.body;
+    return response.status(405).json({
+      message: "Method not allowed.",
+    });
+  }
 
-    console.log('Email:', email);
-    console.log('UpdateData:', JSON.stringify(updateData, null, 2));
+  const session = await verifySessionToken(
+    request.cookies?.[SESSION_COOKIE_NAME],
+  );
 
-    if (email === undefined || email === null || email === '') {
-        return res.status(406).json({ message: 'Email is required and cannot be empty' });
-    }
+  if (!session) {
+    return response.status(401).json({
+      message: "Authentication required.",
+    });
+  }
 
-    if (updateData === undefined || updateData === null || Object.keys(updateData).length === 0) {
-        return res.status(400).json({ message: 'Update data is required and cannot be empty' });
-    }
+  const validation = validateResultsUpdate(
+    request.body?.updateData,
+  );
 
-    if (updateData.colorWeaknesses && Array.isArray(updateData.colorWeaknesses)) {
-        console.log('Color Weakness:', updateData.colorWeaknesses[0]);
-    }
+  if (!validation.success) {
+    return response.status(400).json({
+      message: "Invalid vision-test result.",
+    });
+  }
 
-    try {
-        const result = await updateUserByFieldService({email}, updateData);
-        res.status(200).json({ message: 'User updated successfully', result });
-    } catch (error) {
-        console.error('Error updating user:', error);
-        res.status(500).json({ message: 'Error updating user', error: error.message });
-    }
+  try {
+    await connectToMongo();
+
+    await updateUserByIdService(
+      session.userId,
+      validation.data,
+    );
+
+    return response.status(200).json({
+      message: "Results updated successfully.",
+    });
+  } catch (error) {
+    console.error(
+      "Failed to update results:",
+      error,
+    );
+
+    return response.status(500).json({
+      message: "Failed to update results.",
+    });
+  }
 }
 </file>
 
@@ -4864,12 +6529,9 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-#   C a r p e t 
- 
- #   A i y n B r i g h t 
- 
- #   A i y n B r i g h t 
- 
+#   C a r p e t  
+ #   A i y n B r i g h t  
+ #   A i y n B r i g h t  
  
 </file>
 
@@ -4919,265 +6581,612 @@ module.exports = {
 </file>
 
 <file path="server/BL/actions/login.action.js">
-"use server"
-import { connectToMongo } from "@/server/connectToMongo"
-import { cookies } from 'next/headers'
+"use server";
+
 import { redirect } from "next/navigation";
-import { readUserByFieldService } from "../services/user.service";
-const jwt = require('jsonwebtoken');
-const SECRET = process.env.JWT_SECRET ||"AYINBRIGHT"
-const EMAIL_ADMIN = process.env.EMAIL_ADMIN
-const PASSWORD_ADMIN = process.env.PASSWORD_ADMIN
+import { connectToMongo } from "@/server/connectToMongo";
 
+import {
+  authenticateUserService,
+  createUserService,
+  readUserByFieldService,
+} from "@/server/BL/services/user.service";
 
-export async function generate(user) {
-    let token = jwt.sign(user, SECRET, { expiresIn: "200m" });
-    return `Bearer ${token}`
+import {
+  clearSessionCookie,
+  getSession,
+  isConfiguredAdminEmail,
+  resolveUserRole,
+  setSessionCookie,
+} from "@/server/security/session";
+
+import {
+  firstValidationError,
+  loginSchema,
+  registrationSchema,
+} from "@/server/validation/auth";
+
+const INVALID_LOGIN_MESSAGE =
+  "The email address or password is incorrect.";
+
+function formDataToObject(formData) {
+  return Object.fromEntries(formData.entries());
 }
 
-export const loginAction = async (fd) => {
-    "use server"
-    let body = Object.fromEntries(fd)
-    const user = { email: body.email, password: body.password }
-    connectToMongo()
-    const newU = await readUserByFieldService(user)
-    let token;
-    try {
-        if (newU) {
-            token = await generate(user);
-            cookies().set('token', token);
-            return { success: true, newU: newU.email };
-        } else {
-            console.error('Could not create new user');
-            return { success: false, message: 'Your details are invalid' };
-        }
-    } catch (error) {
-        console.log({ error });
-        return { success: false, message: 'An error occurred' };
+export async function loginAction(formData) {
+  const validation = loginSchema.safeParse(
+    formDataToObject(formData),
+  );
+
+  if (!validation.success) {
+    return {
+      success: false,
+      message: firstValidationError(validation),
+    };
+  }
+
+  try {
+    await connectToMongo();
+
+    const user = await authenticateUserService(
+      validation.data.email,
+      validation.data.password,
+    );
+
+    if (!user) {
+      return {
+        success: false,
+        message: INVALID_LOGIN_MESSAGE,
+      };
     }
+
+    const role = resolveUserRole(user);
+
+    await setSessionCookie({
+      userId: user.id,
+      email: user.email,
+      role,
+    });
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Login failed:", error);
+
+    return {
+      success: false,
+      message:
+        "Login is temporarily unavailable. Please try again.",
+    };
+  }
 }
 
+export async function registerAction(formData) {
+  const validation =
+    registrationSchema.safeParse(
+      formDataToObject(formData),
+    );
 
-export const logoutAction = async () => {
-    "use server"
-    try {
-        cookies().delete('token');
-        redirect('/');
-        return { success: true, message: 'Logged out successfully' };
-    } catch (error) {
-        console.error('Logout error:', error);
-        return { success: false, message: 'An error occurred during logout' };
+  if (!validation.success) {
+    return {
+      success: false,
+      message: firstValidationError(validation),
+    };
+  }
+
+  if (
+    isConfiguredAdminEmail(
+      validation.data.email,
+    )
+  ) {
+    return {
+      success: false,
+      message:
+        "This email address cannot be registered here.",
+    };
+  }
+
+  try {
+    await connectToMongo();
+
+    const existingUser =
+      await readUserByFieldService({
+        email: validation.data.email,
+      });
+
+    if (existingUser) {
+      return {
+        success: false,
+        message:
+          "An account with this email address already exists.",
+      };
     }
+
+    const user = await createUserService(
+      validation.data,
+    );
+
+    await setSessionCookie({
+      userId: user._id.toString(),
+      email: user.email,
+      role: "user",
+    });
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    if (error?.code === 11000) {
+      return {
+        success: false,
+        message:
+          "An account with this email address already exists.",
+      };
+    }
+
+    console.error("Registration failed:", error);
+
+    return {
+      success: false,
+      message:
+        "Registration is temporarily unavailable. Please try again.",
+    };
+  }
+}
+
+export async function logoutAction() {
+  await clearSessionCookie();
+  redirect("/");
 }
 
 export async function authAction() {
-    "use server"
-    try {
-        let token = cookies().get('token');
-        if (!token) throw "no token provided";
-        if (!token.value) return false;
-        token = token.value.split('Bearer ')[1] || "null";
-        const userFromToken = jwt.verify(token, SECRET);
-        if (!userFromToken) throw "not correct";
-        if (userFromToken.email === EMAIL_ADMIN && userFromToken.password === PASSWORD_ADMIN)
-            return { isUser: true, userToken: userFromToken, isManager: true };
-        return { isUser: true, userToken: userFromToken, isManager: false };
-    }
-    catch (e) {
-        console.log(e);
-        return false;
-    }
+  const session = await getSession();
+
+  if (!session) {
+    return false;
+  }
+
+  return {
+    isUser: true,
+    isManager: session.role === "admin",
+
+    userToken: {
+      id: session.userId,
+      email: session.email,
+      role: session.role,
+    },
+  };
 }
 </file>
 
 <file path="server/BL/actions/sighnin.action.js">
-"use server"
-import { connectToMongo } from "@/server/connectToMongo"
-import { cookies } from 'next/headers'
-import { redirect } from "next/navigation";
-import { createUserService } from "../services/user.service";
-const jwt = require('jsonwebtoken');
-const SECRET = process.env.JWT_SECRET || "AYINBRIGHT"
-const EMAIL = process.env.EMAIL_USER
-const PASSWORD = process.env.PASSWORD_USER
-const cookieStore = cookies()
+"use server";
 
-export async function generate(user) {
-    let token = jwt.sign(user, SECRET, { expiresIn: "200m" });
-    return `Bearer ${token}`
-}
+import { registerAction } from "./login.action";
 
-export const signAction = async (fd) => {
-    "use server"
-    let body = Object.fromEntries(fd)
-    connectToMongo()
-    let user = await createUserService(body);
-    user = { email: user.email, password: user.password }
-    let token;
-    token = await generate(user);
-    cookies().set('token', token)
-    redirect('/user');
-}
-
-
-export async function authAction() {
-    "use server"
-    try {
-        let token = cookies().get('token');
-        if (!token) throw "no token provided"
-        if (!token.value) return false;
-        token = token.value.split('Bearer ')[1] || "null";
-        const userFromToken = jwt.verify(token, SECRET);
-        if (!userFromToken) throw "not correct"
-        if (userFromToken.email == EMAIL && userFromToken.password == PASSWORD) {
-            return true;
-        }
-        else {
-            cookies().delete('token')
-            // redirect('/admin/');
-            return false;
-        }
-    }
-    catch (e) {
-        console.log(e);
-
-    }
+export async function signAction(formData) {
+  return registerAction(formData);
 }
 </file>
 
 <file path="server/BL/services/user.service.js">
-import { createUser, readUserById, readUsers, readUser, updateUser,deleteColorWeaknessAtIndex } from "@/server/DL/controllers/user.controller";
+import "server-only";
 
+import {
+  createUser,
+  deleteResultAtIndex,
+  readUser,
+  readUserById,
+  readUserForAuthentication,
+  readUsers,
+  replaceLegacyPassword,
+  updateUserById,
+} from "@/server/DL/controllers/user.controller";
 
-export const createUserService = (data) => createUser(data)
-export const readUsersService = (filter) => readUsers(filter)
-export const readUserByIdService = (id) => readUserById(id)
-export const readUserByFieldService = (filter) => readUser(filter)
-export const updateUserByFieldService = (filter, updateData) => updateUser(filter, updateData)
-export const deleteUserByFieldService = (email, field, index) => {
-    return deleteColorWeaknessAtIndex(email, field, index);
+import {
+  hashPassword,
+  verifyStoredPassword,
+} from "@/server/security/password";
+
+export async function createUserService({
+  username,
+  email,
+  password,
+}) {
+  const passwordHash = await hashPassword(password);
+
+  return createUser({
+    username,
+    email: email.trim().toLowerCase(),
+    passwordHash,
+  });
+}
+
+export const readUsersService = (filter = {}) =>
+  readUsers(filter);
+
+export const readUserByIdService = (id) =>
+  readUserById(id);
+
+export const readUserByFieldService = (filter) =>
+  readUser(filter);
+
+export const updateUserByIdService = (
+  id,
+  updateData,
+) => updateUserById(id, updateData);
+
+export const deleteUserResultService = (
+  email,
+  field,
+  index,
+) => deleteResultAtIndex(email, field, index);
+
+export async function authenticateUserService(
+  email,
+  candidatePassword,
+) {
+  const user =
+    await readUserForAuthentication(email);
+
+  if (!user) {
+    return null;
+  }
+
+  const verification =
+    await verifyStoredPassword({
+      candidate: candidatePassword,
+      passwordHash: user.passwordHash,
+      legacyPassword: user.password,
+    });
+
+  if (!verification.isValid) {
+    return null;
+  }
+
+  if (verification.needsMigration) {
+    const passwordHash =
+      await hashPassword(candidatePassword);
+
+    await replaceLegacyPassword(
+      user._id,
+      passwordHash,
+    );
+  }
+
+  return {
+    id: user._id.toString(),
+    username: user.username,
+    email: user.email,
+    role: user.role,
+  };
+}
+</file>
+
+<file path="server/connectToMongo.js">
+import "server-only";
+import mongoose from "mongoose";
+
+const globalForMongoose = globalThis;
+
+if (!globalForMongoose.__mongooseCache) {
+  globalForMongoose.__mongooseCache = {
+    connection: null,
+    promise: null,
+  };
+}
+
+const cache = globalForMongoose.__mongooseCache;
+
+export async function connectToMongo() {
+  if (cache.connection && mongoose.connection.readyState === 1) {
+    return cache.connection;
+  }
+
+  const mongoUri = process.env.MONGO_URI;
+
+  if (!mongoUri) {
+    throw new Error(
+      "MONGO_URI is missing from the environment variables.",
+    );
+  }
+
+  if (!cache.promise) {
+    cache.promise = mongoose
+      .connect(mongoUri, {
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 10_000,
+      })
+      .then((mongooseInstance) => mongooseInstance.connection)
+      .catch((error) => {
+        cache.promise = null;
+        throw error;
+      });
+  }
+
+  cache.connection = await cache.promise;
+  return cache.connection;
 }
 </file>
 
 <file path="server/DL/controllers/user.controller.js">
-import { User } from "../models/user.model"
+import "server-only";
+import { User } from "../models/user.model";
 
-export const readUsers = (filter) => User.find(filter)
-export const readUserById = (id) => User.findById(id)
-export const createUser = (data) => User.create(data)
-export const readUser = (filter) => User.findOne(filter)
+const SAFE_USER_FIELDS =
+  "_id username email role colorWeaknesses sizeWeaknesses fieldWeaknesses createdAt updatedAt";
 
-export const updateUser = async (filter, updateData) => {
-    try {
-        const result = await User.findOneAndUpdate(filter, updateData, { new: true });
-        if (!result) {
-            throw new Error('User not found');
-        }
-        return result;
-    } catch (error) {
-        throw new Error(`Error updating user: ${error.message}`);
-    }
+export function readUsers(filter = {}) {
+  return User.find(filter)
+    .select(SAFE_USER_FIELDS)
+    .lean();
 }
 
-export const deleteColorWeaknessAtIndex = async (email, field, index) => {
-    try {
-       // Find the user by email using the custom static method
-       console.log("*******************************8")
-       const user = await User.findOne({email});
+export function readUserById(id) {
+  return User.findById(id)
+    .select(SAFE_USER_FIELDS)
+    .lean();
+}
 
-        // Check if the user exists
-        if (!user) {
-            throw new Error('User not found');
-        }
+export function readUser(filter) {
+  return User.findOne(filter)
+    .select(SAFE_USER_FIELDS)
+    .lean();
+}
 
-        // Check if the index is within the array bounds
-        if (index < 0 || (field === 'color' && index >= user.colorWeaknesses.length) || (field === 'size' && index >= user.sizeWeaknesses.length)) {
-            throw new Error('Invalid index');
-        }
-        field === 'color' && user.colorWeaknesses.splice(index, 1);
-        field === 'size' && user.sizeWeaknesses.splice(index, 1);
+export function readUserForAuthentication(email) {
+  return User.findOne({
+    email: email.trim().toLowerCase(),
+  }).select("+passwordHash +password");
+}
 
-        // Save the updated user
-        await user.save();
+export function createUser(data) {
+  return User.create(data);
+}
 
-        return { message: 'Color weakness deleted successfully' };
-    } catch (error) {
-        return { error: error.message };
-    }
-};
+export async function replaceLegacyPassword(
+  userId,
+  passwordHash,
+) {
+  await User.updateOne(
+    {
+      _id: userId,
+    },
+    {
+      $set: {
+        passwordHash,
+      },
+      $unset: {
+        password: 1,
+      },
+    },
+    {
+      runValidators: true,
+    },
+  );
+}
+
+export async function updateUserById(
+  userId,
+  updateData,
+) {
+  const user = await User.findByIdAndUpdate(
+    userId,
+    {
+      $set: updateData,
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  ).select(SAFE_USER_FIELDS);
+
+  if (!user) {
+    throw new Error("User not found.");
+  }
+
+  return user;
+}
+
+export async function deleteResultAtIndex(
+  email,
+  field,
+  index,
+) {
+  const fieldMap = {
+    color: "colorWeaknesses",
+    size: "sizeWeaknesses",
+    field: "fieldWeaknesses",
+  };
+
+  const collectionName = fieldMap[field];
+
+  if (!collectionName) {
+    throw new Error("Invalid result type.");
+  }
+
+  const user = await User.findOne({
+    email: email.trim().toLowerCase(),
+  });
+
+  if (!user) {
+    throw new Error("User not found.");
+  }
+
+  if (
+    !Number.isInteger(index) ||
+    index < 0 ||
+    index >= user[collectionName].length
+  ) {
+    throw new Error("Invalid result index.");
+  }
+
+  user[collectionName].splice(index, 1);
+  await user.save();
+
+  return user.toJSON();
+}
 </file>
 
 <file path="server/DL/models/user.model.js">
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+import mongoose from "mongoose";
 
-// Define the schema for the USER collection
-const userSchema = new Schema({
+const { Schema } = mongoose;
+
+const colorWeaknessSchema = new Schema(
+  {
+    background_color: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 32,
+    },
+
+    font_color: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 32,
+    },
+
+    date: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  {
+    _id: true,
+  },
+);
+
+const sizeWeaknessSchema = new Schema(
+  {
+    eye: {
+      type: String,
+      enum: ["right", "left"],
+      default: "right",
+    },
+
+    fontSize: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 30,
+    },
+
+    distance: {
+      type: Number,
+      required: true,
+      min: 0.1,
+      max: 10,
+    },
+
+    date: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  {
+    _id: true,
+  },
+);
+
+const fieldWeaknessSchema = new Schema(
+  {
+    side: {
+      type: String,
+      enum: ["right", "left"],
+      required: true,
+    },
+
+    distance: {
+      type: Number,
+      required: true,
+      min: -30,
+      max: 30,
+    },
+
+    date: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  {
+    _id: true,
+  },
+);
+
+const userSchema = new Schema(
+  {
     username: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 2,
+      maxlength: 50,
     },
-    password: {
-        type: String,
-        required: true,
-        default: '123'
-    },
+
     email: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      maxlength: 254,
     },
-    colorWeaknesses: [{
-        background_color: {
-            type: String,
-            required: true
-        },
-        font_color: {
-            type: String,
-            required: true
-        },
-        date: {
-            type: Date,
-            default: Date.now()
-        }
-    }],
-    sizeWeaknesses: [{
-        eye:{
-            type: String,
-            enum: ['right', 'left'],
-            required: false
-        },
-        fontSize: {
-            type: Number,
-            required: true
-        },
-        distance: {
-            type: Number,
-            required: true
-        },
-        date: {
-            type: Date,
-            default: Date.now()
-        }
-    }],
-    fieldWeaknesses: [{
-        side: {
-            type: String,
-            enum: ['right', 'left'],
-            required: true
-        },
-        distance: {
-            type: String,
-            required: true
-        },
-        date: {
-            type: Date,
-            default: Date.now()
-        }
-    }]
 
-});
+    passwordHash: {
+      type: String,
+      select: false,
+    },
 
-export const User = mongoose.models?.User || mongoose.model('User', userSchema);
+    // Temporary legacy field.
+    // Removed automatically after a successful login.
+    password: {
+      type: String,
+      select: false,
+    },
+
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+      index: true,
+    },
+
+    colorWeaknesses: {
+      type: [colorWeaknessSchema],
+      default: [],
+    },
+
+    sizeWeaknesses: {
+      type: [sizeWeaknessSchema],
+      default: [],
+    },
+
+    fieldWeaknesses: {
+      type: [fieldWeaknessSchema],
+      default: [],
+    },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+
+    toJSON: {
+      transform(_document, value) {
+        delete value.password;
+        delete value.passwordHash;
+        return value;
+      },
+    },
+  },
+);
+
+export const User =
+  mongoose.models.User ||
+  mongoose.model("User", userSchema);
 </file>
 
 <file path="tailwind.config.js">

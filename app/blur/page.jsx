@@ -1,61 +1,61 @@
-import React from 'react';
-import { connectToMongo } from '@/server/connectToMongo';
-import { unstable_noStore } from 'next/cache';
-import { authAction } from '@/server/BL/actions/login.action';
-import { readUserByFieldService } from '@/server/BL/services/user.service';
-import Blur from '@/components/Blur';
-import ToLogin from '@/components/ToLogin';
-import Link from 'next/link';
+import Link from "next/link";
+import ToLogin from "@/components/ToLogin";
+import { getCurrentUserDTO } from "@/server/data/current-user";
 
-const AnimatedLink = ({ href, children }) => (
-  <Link 
-    href={href} 
-    className="
-      block mb-4 bg-gradient-to-r from-yellow-300 to-yellow-500 
-      text-white font-bold py-2 px-4 rounded-md shadow-lg 
-      transition-all duration-300 ease-in-out
-      hover:shadow-xl hover:from-yellow-200 hover:to-yellow-800
-      hover:scale-105 active:scale-95
-      transform hover:-translate-y-1 active:translate-y-0
-      flex items-center justify-center
-    "
-  >
-    {children}
-  </Link>
-);
+export const metadata = {
+  title: "Blur vision",
+};
+
+function OptionLink({ href, children }) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center justify-center rounded-lg bg-gradient-to-r from-amber-300 to-amber-500 px-4 py-3 font-bold text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:from-amber-200 hover:to-amber-600 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
+    >
+      {children}
+    </Link>
+  );
+}
 
 export default async function BlurPage() {
-  // await new Promise(resolve => setTimeout(resolve, 3000));
-  await connectToMongo();
-  const authData = await authAction();
-  
-  if (!authData || !authData.userToken) return <ToLogin />;
-  
-  const { email } = authData.userToken;
-  let currentUser = await readUserByFieldService({ email });
-  
-  const simplifiedUser = {
-    username: currentUser.username,
-    password: currentUser.password,
-    email: currentUser.email,
-    sizeWeaknesses: currentUser.sizeWeaknesses.map(weakness => ({
-      fontSize: weakness.fontSize,
-      distance: weakness.distance,
-      date: weakness.date
-    })),
-  };
-  
-  unstable_noStore();
-  
+  const user = await getCurrentUserDTO();
+
+  if (!user) {
+    return <ToLogin />;
+  }
+
   return (
-  <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-xl shadow-2xl space-y-6 max-w-md w-full transform transition-all duration-500 ease-in-out hover:scale-105">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Blur Options</h1>
-        {simplifiedUser.sizeWeaknesses.length > 0 && (
-          <AnimatedLink href="blur/improve/20_1_left">Improve Blur</AnimatedLink>
+    <main className="container mx-auto flex min-h-[calc(100vh-72px)] items-center justify-center bg-gray-100 p-4">
+      <section className="w-full max-w-md space-y-5 rounded-xl bg-white p-8 shadow-2xl">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-800">
+            Blur vision
+          </h1>
+
+          <p className="mt-2 text-sm text-gray-600">
+            Start a screening exercise or
+            continue from a previous result.
+          </p>
+        </div>
+
+        {user.sizeWeaknesses.length > 0 && (
+          <OptionLink href="/blur/improve">
+            Continue exercise
+          </OptionLink>
         )}
-        <AnimatedLink href="/blur/diagnosis">Blur Diagnosis</AnimatedLink>
-      </div>
-    </div>
+
+        <OptionLink href="/blur/diagnosis">
+          Start screening
+        </OptionLink>
+
+        <p className="rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-900">
+          AyinBright is an educational
+          screening tool, not a medical
+          diagnosis. Consult a qualified
+          eye-care professional about symptoms
+          or changes in vision.
+        </p>
+      </section>
+    </main>
   );
 }

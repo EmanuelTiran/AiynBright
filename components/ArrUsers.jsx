@@ -1,114 +1,187 @@
-"use client"
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Weaknesses from './Weaknesses';
-import UsersTable from './UsersTable';
+"use client";
 
-function ArrUsers({ users }) {
-    const [sortedUsers, setSortedUsers] = useState(users);
-    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
-    const [searchQuery, setSearchQuery] = useState('');
-    const [visibleUsersCount, setVisibleUsersCount] = useState(5);
-    const [expandedSection, setExpandedSection] = useState({ userId: null, type: null });
+import { useMemo, useState } from "react";
+import UsersTable from "./UsersTable";
 
-    useEffect(() => {
-        let sortedArray = [...users];
-        if (sortConfig.key !== null) {
-            sortedArray.sort((a, b) => {
-                if (a[sortConfig.key] < b[sortConfig.key]) {
-                    return sortConfig.direction === 'ascending' ? -1 : 1;
-                }
-                if (a[sortConfig.key] > b[sortConfig.key]) {
-                    return sortConfig.direction === 'ascending' ? 1 : -1;
-                }
-                return 0;
-            });
-        }
-        setSortedUsers(sortedArray);
-    }, [users, sortConfig]);
+const PAGE_SIZE = 5;
 
-    const requestSort = (key) => {
-        let direction = 'ascending';
-        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-            direction = 'descending';
-        }
-        setSortConfig({ key, direction });
-    };
+function compareUsers(firstUser, secondUser, key, direction) {
+  const firstValue = String(firstUser?.[key] ?? "");
+  const secondValue = String(secondUser?.[key] ?? "");
 
-    const handleSearch = (event) => {
-        setSearchQuery(event.target.value);
-    };
+  const comparison = firstValue.localeCompare(secondValue, undefined, {
+    sensitivity: "base",
+  });
 
-    const handleShowMore = () => {
-        setVisibleUsersCount(prevCount => prevCount + 5);
-    };
-
-    const filteredUsers = sortedUsers.filter(user =>
-        user &&
-        ((user.username && user.username.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase())))
-    );
-
-    const usersToDisplay = filteredUsers.slice(0, visibleUsersCount);
-
-    const deleteWeakness = async (email, type, index) => {
-        try {
-            const response = await fetch('/api/deleteWeakness', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, field: type, index })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const updatedUser = data.user;
-                if (updatedUser) {
-                    setSortedUsers(prevUsers =>
-                        prevUsers.map(u => (u.email === email ? updatedUser : u))
-                    );
-                }
-                alert('Weakness deleted and updated');
-            } else {
-                const errorData = await response.json();
-                console.error('Failed to delete weakness:', errorData.error);
-            }
-        } catch (error) {
-            console.error('Failed to delete weakness:', error);
-        }
-    };
-
-    const handleExpand = (userId, type, isExpanded) => {
-        setExpandedSection(isExpanded ? { userId, type } : { userId: null, type: null });
-    };
-
-    return (
-        <div className="container mx-auto p-4 w-auto border-2 border-orange-200">
-            <input
-                type="text"
-                placeholder="Search by username or email"
-                value={searchQuery}
-                onChange={handleSearch}
-                className="mb-4 p-2 border border-gray-300 rounded w-full"
-            />
-           <UsersTable
-                usersToDisplay={usersToDisplay}
-                requestSort={requestSort}
-                expandedSection={expandedSection}
-                handleExpand={handleExpand}
-                deleteWeakness={deleteWeakness}
-            />
-            {visibleUsersCount < filteredUsers.length && (
-                <button
-                    onClick={handleShowMore}
-                    className="mt-4 px-4 py-2 bg-orange-200 text-white rounded"
-                >
-                    Show More
-                </button>
-            )}
-        </div>
-    );
+  return direction === "ascending" ? comparison : -comparison;
 }
 
-export default ArrUsers;
+export default function ArrUsers({ users = [] }) {
+  const [sortConfig, setSortConfig] = useState({
+    key: null,
+    direction: "ascending",
+  });
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [visibleUsersCount, setVisibleUsersCount] = useState(PAGE_SIZE);
+
+  const [expandedSection, setExpandedSection] = useState({
+    userId: null,
+    type: null,
+  });
+
+  const [updatedUsers, setUpdatedUsers] = useState({});
+  const [requestError, setRequestError] = useState("");
+
+  const filteredUsers = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLocaleLowerCase();
+
+    const currentUsers = users
+      .filter(Boolean)
+      .map((user) => updatedUsers[user.email] ?? user);
+
+    if (sortConfig.key) {
+      currentUsers.sort((firstUser, secondUser) =>
+        compareUsers(
+          firstUser,
+          secondUser,
+          sortConfig.key,
+          sortConfig.direction,
+        ),
+      );
+    }
+
+    if (!normalizedQuery) {
+      return currentUsers;
+    }
+
+    return currentUsers.filter((user) => {
+      const username = String(
+        user.username ?? "",
+      ).toLocaleLowerCase();
+
+      const email = String(
+        user.email ?? "",
+      ).toLocaleLowerCase();
+
+      return (
+        username.includes(normalizedQuery) ||
+        email.includes(normalizedQuery)
+      );
+    });
+  }, [searchQuery, sortConfig, updatedUsers, users]);
+
+  const usersToDisplay = filteredUsers.slice(
+    0,
+    visibleUsersCount,
+  );
+
+  const requestSort = (key) => {
+    setSortConfig((current) => ({
+      key,
+      direction:
+        current.key === key &&
+        current.direction === "ascending"
+          ? "descending"
+          : "ascending",
+    }));
+  };
+
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+    setVisibleUsersCount(PAGE_SIZE);
+  };
+
+  const deleteWeakness = async (email, type, index) => {
+    setRequestError("");
+
+    try {
+      const response = await fetch("/api/deleteWeakness", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          field: type,
+          index,
+        }),
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          payload.message || "Failed to delete the result.",
+        );
+      }
+
+      if (payload.user) {
+        setUpdatedUsers((current) => ({
+          ...current,
+          [email]: payload.user,
+        }));
+      }
+    } catch (error) {
+      setRequestError(
+        error.message || "Failed to delete the result.",
+      );
+    }
+  };
+
+  const handleExpand = (userId, type, isExpanded) => {
+    setExpandedSection(
+      isExpanded
+        ? { userId, type }
+        : { userId: null, type: null },
+    );
+  };
+
+  return (
+    <section className="container mx-auto w-auto border-2 border-orange-200 p-4">
+      <label htmlFor="user-search" className="sr-only">
+        Search users
+      </label>
+
+      <input
+        id="user-search"
+        type="search"
+        placeholder="Search by username or email"
+        value={searchQuery}
+        onChange={handleSearch}
+        className="mb-4 w-full rounded border border-gray-300 p-2"
+      />
+
+      {requestError && (
+        <p
+          role="alert"
+          className="mb-4 rounded bg-red-50 p-3 text-red-700"
+        >
+          {requestError}
+        </p>
+      )}
+
+      <UsersTable
+        usersToDisplay={usersToDisplay}
+        requestSort={requestSort}
+        expandedSection={expandedSection}
+        handleExpand={handleExpand}
+        deleteWeakness={deleteWeakness}
+      />
+
+      {visibleUsersCount < filteredUsers.length && (
+        <button
+          type="button"
+          onClick={() =>
+            setVisibleUsersCount(
+              (count) => count + PAGE_SIZE,
+            )
+          }
+          className="mt-4 rounded bg-orange-500 px-4 py-2 text-white hover:bg-orange-600"
+        >
+          Show More
+        </button>
+      )}
+    </section>
+  );
+}

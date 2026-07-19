@@ -1,53 +1,44 @@
-import React from 'react'
-import { authAction } from '@/server/BL/actions/login.action';
-import { readUsersService } from '@/server/BL/services/user.service';
-import { unstable_noStore } from 'next/cache';
-import ArrUsers from '@/components/ArrUsers';
+import ArrUsers from "@/components/ArrUsers";
+import { connectToMongo } from "@/server/connectToMongo";
+import { readUsersService } from "@/server/BL/services/user.service";
 
-export default async function admin() {
-  unstable_noStore()
+import {
+  getAdminSession,
+  toSafeUserDTO,
+} from "@/server/data/current-user";
 
-  const { isManager } = await authAction();
-  const users = await readUsersService({});
-  const filteredUsers = users.map(user => ({
-    username: user.username,
-    password: user.password,
-    email: user.email,
-    colorWeaknesses: user.colorWeaknesses.map(weakness => ({
-      background_color: weakness.background_color,
-      font_color: weakness.font_color,
-      date: weakness.date
-    })),
-    sizeWeaknesses: user.sizeWeaknesses.map(weakness => ({
-      eye: weakness.eye,
-      fontSize: weakness.fontSize,
-      distance: weakness.distance,
-      date: weakness.date
-    })),
-    fieldWeaknesses: user.fieldWeaknesses.map(weakness => ({
-      side: weakness.side,
-      distance: weakness.distance,
-      date: weakness.date
-    }))
-  }));
+export const metadata = {
+  title: "Administration",
+};
 
+function AccessDenied() {
   return (
-    <>
-      {isManager ?
-        <ArrUsers users={filteredUsers} />
-        : <div className="flex flex-col items-center justify-center min-h-[300px]">
-          <div className="relative">
-            <h1 className="text-4xl font-bold text-yellow-100 animate-bounce">
-              Access Denied
-            </h1>
-            <div className="mt-4 flex justify-center space-x-1">
-              <div className="w-2 h-2 bg-yellow-100 rounded-full animate-bounce"></div>
-              <div className="w-2 h-2 bg-yellow-100 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-              <div className="w-2 h-2 bg-yellow-100 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-            </div>
-          </div>
-        </div>
-      }
-    </>
-  )
+    <main className="flex min-h-[60vh] items-center justify-center p-6">
+      <div className="rounded-xl bg-white p-8 text-center shadow-lg">
+        <h1 className="text-3xl font-bold text-slate-800">
+          Access denied
+        </h1>
+
+        <p className="mt-2 text-slate-600">
+          Administrator permission is
+          required to view this page.
+        </p>
+      </div>
+    </main>
+  );
+}
+
+export default async function AdminPage() {
+  const session = await getAdminSession();
+
+  if (!session) {
+    return <AccessDenied />;
+  }
+
+  await connectToMongo();
+
+  const users = await readUsersService({});
+  const safeUsers = users.map(toSafeUserDTO);
+
+  return <ArrUsers users={safeUsers} />;
 }

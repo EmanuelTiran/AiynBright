@@ -1,28 +1,57 @@
-"use client"
-import React, { useState, useEffect } from 'react';
-import style from './style.module.css'
-import Image from 'next/image'
+"use client";
+
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import style from "./style.module.css";
 
 export default function Images({ carpet }) {
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = Array.isArray(
+    carpet?.images,
+  )
+    ? carpet.images
+    : [];
 
-    useEffect(() => {
-        const interval = setTimeout(() => {
-            setCurrentImageIndex(prevIndex => (prevIndex + 1) % carpet.images.length)
-        }, 2000)
-        return () => clearTimeout(interval)
-    }, [currentImageIndex])
+  const imageCount = images.length;
 
-    // const interval = setInterval(() => {
-    //     setCurrentImageIndex(prevIndex => (prevIndex + 1) % carpet.images.length);
-    // }, 3000);
-    return (
-     
-            <div className={style.container}>
-                <Image src={carpet.images[currentImageIndex]} alt={carpet.title} width={600} height={400} className={style.img} />
-            </div>
-           
+  const [
+    currentImageIndex,
+    setCurrentImageIndex,
+  ] = useState(0);
 
+  useEffect(() => {
+    if (imageCount < 2) {
+      return undefined;
+    }
 
-    )
+    const interval = window.setInterval(() => {
+      setCurrentImageIndex(
+        (currentIndex) =>
+          (currentIndex + 1) % imageCount,
+      );
+    }, 2000);
+
+    return () =>
+      window.clearInterval(interval);
+  }, [imageCount]);
+
+  if (imageCount === 0) {
+    return null;
+  }
+
+  const safeImageIndex =
+    currentImageIndex % imageCount;
+
+  return (
+    <div className={style.container}>
+      <Image
+        src={images[safeImageIndex]}
+        alt={
+          carpet?.title || "Gallery image"
+        }
+        width={600}
+        height={400}
+        className={style.img}
+      />
+    </div>
+  );
 }

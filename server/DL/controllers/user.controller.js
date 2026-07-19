@@ -1,46 +1,116 @@
-import { User } from "../models/user.model"
+import "server-only";
+import { User } from "../models/user.model";
 
-export const readUsers = (filter) => User.find(filter)
-export const readUserById = (id) => User.findById(id)
-export const createUser = (data) => User.create(data)
-export const readUser = (filter) => User.findOne(filter)
+const SAFE_USER_FIELDS =
+  "_id username email role colorWeaknesses sizeWeaknesses fieldWeaknesses createdAt updatedAt";
 
-export const updateUser = async (filter, updateData) => {
-    try {
-        const result = await User.findOneAndUpdate(filter, updateData, { new: true });
-        if (!result) {
-            throw new Error('User not found');
-        }
-        return result;
-    } catch (error) {
-        throw new Error(`Error updating user: ${error.message}`);
-    }
+export function readUsers(filter = {}) {
+  return User.find(filter)
+    .select(SAFE_USER_FIELDS)
+    .lean();
 }
 
-export const deleteColorWeaknessAtIndex = async (email, field, index) => {
-    try {
-       // Find the user by email using the custom static method
-       console.log("*******************************8")
-       const user = await User.findOne({email});
+export function readUserById(id) {
+  return User.findById(id)
+    .select(SAFE_USER_FIELDS)
+    .lean();
+}
 
-        // Check if the user exists
-        if (!user) {
-            throw new Error('User not found');
-        }
+export function readUser(filter) {
+  return User.findOne(filter)
+    .select(SAFE_USER_FIELDS)
+    .lean();
+}
 
-        // Check if the index is within the array bounds
-        if (index < 0 || (field === 'color' && index >= user.colorWeaknesses.length) || (field === 'size' && index >= user.sizeWeaknesses.length)) {
-            throw new Error('Invalid index');
-        }
-        field === 'color' && user.colorWeaknesses.splice(index, 1);
-        field === 'size' && user.sizeWeaknesses.splice(index, 1);
+export function readUserForAuthentication(email) {
+  return User.findOne({
+    email: email.trim().toLowerCase(),
+  }).select("+passwordHash +password");
+}
 
-        // Save the updated user
-        await user.save();
+export function createUser(data) {
+  return User.create(data);
+}
 
-        return { message: 'Color weakness deleted successfully' };
-    } catch (error) {
-        return { error: error.message };
-    }
-};
+export async function replaceLegacyPassword(
+  userId,
+  passwordHash,
+) {
+  await User.updateOne(
+    {
+      _id: userId,
+    },
+    {
+      $set: {
+        passwordHash,
+      },
+      $unset: {
+        password: 1,
+      },
+    },
+    {
+      runValidators: true,
+    },
+  );
+}
 
+export async function updateUserById(
+  userId,
+  updateData,
+) {
+  const user = await User.findByIdAndUpdate(
+    userId,
+    {
+      $set: updateData,
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  ).select(SAFE_USER_FIELDS);
+
+  if (!user) {
+    throw new Error("User not found.");
+  }
+
+  return user;
+}
+
+export async function deleteResultAtIndex(
+  email,
+  field,
+  index,
+) {
+  const fieldMap = {
+    color: "colorWeaknesses",
+    size: "sizeWeaknesses",
+    field: "fieldWeaknesses",
+  };
+
+  const collectionName = fieldMap[field];
+
+  if (!collectionName) {
+    throw new Error("Invalid result type.");
+  }
+
+  const user = await User.findOne({
+    email: email.trim().toLowerCase(),
+  });
+
+  if (!user) {
+    throw new Error("User not found.");
+  }
+
+  if (
+    !Number.isInteger(index) ||
+    index < 0 ||
+    index >= user[collectionName].length
+  ) {
+    throw new Error("Invalid result index.");
+  }
+
+  user[collectionName].splice(index, 1);
+  await user.save();
+
+  return user.toJSON();
+}

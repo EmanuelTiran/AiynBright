@@ -1,176 +1,322 @@
-"use client"
-import React, { useEffect, useState } from 'react';
-import style from './style.module.css';
-import Button from '@mui/material/Button';
-import Popup from '../Popup';
+"use client";
 
-let indexSize = 0;
+import { useEffect, useState } from "react";
+import Button from "@mui/material/Button";
+import Popup from "../Popup";
+import style from "./style.module.css";
+
+const WORDS = [
+  "apple",
+  "banana",
+  "cherry",
+  "date",
+  "elderberry",
+  "fig",
+  "grape",
+  "honeydew",
+  "kiwi",
+  "lemon",
+  "mango",
+  "nectarine",
+  "orange",
+  "papaya",
+  "quince",
+  "raspberry",
+  "strawberry",
+  "tangerine",
+  "ugli fruit",
+  "vanilla",
+  "watermelon",
+];
+
+const FONT_SIZES = [
+  14.6,
+  11,
+  8.8,
+  7.3,
+  5.8,
+  4.4,
+  3.66,
+  2.9,
+  2.2,
+  1.46,
+];
+
+function findInitialSizeIndex(fontSize) {
+  const numericSize = Number(fontSize);
+  const exactIndex = FONT_SIZES.indexOf(numericSize);
+
+  return exactIndex >= 0 ? exactIndex : 0;
+}
+
 export default function Blur({ user, sizeUser }) {
-  const words = ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape', 'honeydew', 'kiwi', 'lemon', 'mango', 'nectarine', 'orange', 'papaya', 'quince', 'raspberry', 'strawberry', 'tangerine', 'ugli fruit', 'vanilla', 'watermelon'];
-  const sizes = [14.6, 11, 8.8, 7.3, 5.8, 4.4, 3.66, 2.9, 2.2, 1.46];
   const [open, setOpen] = useState(false);
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [fontSize, setFontSize] = useState(sizeUser ? sizeUser.fontSize : 14.6);
-  const [isLeftEye, setIsLeftEye] = useState(sizeUser?.eye === "left" ? true : false);
+  const [currentWordIndex, setCurrentWordIndex] =
+    useState(0);
 
+  const [currentSizeIndex, setCurrentSizeIndex] =
+    useState(() =>
+      findInitialSizeIndex(sizeUser?.fontSize),
+    );
 
+  const [fontSize, setFontSize] = useState(() => {
+    const initialSize = Number(sizeUser?.fontSize);
+
+    return Number.isFinite(initialSize)
+      ? initialSize
+      : FONT_SIZES[0];
+  });
+
+  const [isLeftEye, setIsLeftEye] = useState(
+    sizeUser?.eye === "left",
+  );
+
+  const [sizeWeaknesses, setSizeWeaknesses] =
+    useState(() =>
+      Array.isArray(user?.sizeWeaknesses)
+        ? user.sizeWeaknesses
+        : [],
+    );
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
-    if (window.location.pathname !== '/blur/improve') {
-      const eye = isLeftEye ? "left" : "right";
-      const newPathname = `/blur/improve/${fontSize}_1_${eye}`;
-      
-      if (window.location.pathname !== newPathname) {
-        window.history.pushState({}, '', newPathname);
-      }
+    const eye = isLeftEye ? "left" : "right";
+    const nextPathname =
+      `/blur/improve/${fontSize}_1_${eye}`;
+
+    if (window.location.pathname !== nextPathname) {
+      window.history.replaceState(
+        {},
+        "",
+        nextPathname,
+      );
     }
   }, [fontSize, isLeftEye]);
 
   const increaseFontSize = () => {
-    if (indexSize > 0) {
-      indexSize--;
-      setFontSize(sizes[indexSize]);
-    }
+    const nextIndex = Math.max(
+      0,
+      currentSizeIndex - 1,
+    );
+
+    setCurrentSizeIndex(nextIndex);
+    setFontSize(FONT_SIZES[nextIndex]);
   };
 
   const decreaseFontSize = () => {
-    if (indexSize < sizes.length - 1) {
-      indexSize++;
-      setFontSize(sizes[indexSize]);
-    }
+    const nextIndex = Math.min(
+      FONT_SIZES.length - 1,
+      currentSizeIndex + 1,
+    );
+
+    setCurrentSizeIndex(nextIndex);
+    setFontSize(FONT_SIZES[nextIndex]);
   };
 
   const changeFontSize = (event) => {
-    const newSize = parseFloat(event.target.value) || 0;
-    setFontSize(newSize);
-    const newIndex = sizes.findIndex(size => size === newSize);
-    if (newIndex !== -1) {
-      indexSize = newIndex;
+    const nextSize = Number(event.target.value);
+
+    if (!Number.isFinite(nextSize)) {
+      return;
+    }
+
+    setFontSize(nextSize);
+
+    const exactIndex = FONT_SIZES.indexOf(nextSize);
+
+    if (exactIndex >= 0) {
+      setCurrentSizeIndex(exactIndex);
     }
   };
 
-  const overWord = () => {
-    setCurrentWordIndex((prevIndex) => (prevIndex + 1) % words.length);
+  const changeWord = () => {
+    setCurrentWordIndex(
+      (currentIndex) =>
+        (currentIndex + 1) % WORDS.length,
+    );
   };
 
   const handleMistake = async () => {
+    const result = {
+      fontSize,
+      distance: 1,
+      eye: isLeftEye ? "left" : "right",
+    };
+
+    const updatedWeaknesses = [
+      ...sizeWeaknesses,
+      result,
+    ];
+
+    setIsSaving(true);
+    setSaveError("");
+
     try {
-      const taut = {
-        fontSize: fontSize,
-        distance: 1,
-        eye: isLeftEye ? 'left' : 'right'
-      };
-
-      const updatedWeaknesses = [...user.sizeWeaknesses, taut];
-
-      const response = await fetch('/api/updateUser', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        "/api/updateUser",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            updateData: {
+              sizeWeaknesses: updatedWeaknesses,
+            },
+          }),
         },
-        body: JSON.stringify({
-          filter: { email: user.email },
-          updateData: { sizeWeaknesses: updatedWeaknesses }
-        })
-      });
+      );
+
+      const payload = await response.json();
 
       if (!response.ok) {
-        throw new Error('Failed to update user');
+        throw new Error(
+          payload.message ||
+            "Failed to save the result.",
+        );
       }
 
-      const updatedUser = await response.json();
-      user.sizeWeaknesses = updatedWeaknesses;
-      console.log('User updated successfully:', updatedUser);
-      overWord();
+      setSizeWeaknesses(updatedWeaknesses);
+      changeWord();
     } catch (error) {
-      console.error('Error updating user:', error);
+      setSaveError(
+        error.message ||
+          "Failed to save the result.",
+      );
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
-    <div className={`${style.contain} border-b border-green-400 p-4`}>
+    <section
+      className={`${style.contain} border-b border-green-400 p-4`}
+    >
       <Button
         variant="contained"
-        style={{
-          backgroundColor: '#FBBF24',
-          color: '#1F2937',
-          fontWeight: 'bold',
-          padding: '8px 16px',
-          borderRadius: '0.375rem',
-          '&:hover': {
-            backgroundColor: '#D97706',
+        sx={{
+          backgroundColor: "#fbbf24",
+          color: "#1f2937",
+          fontWeight: "bold",
+          padding: "8px 16px",
+          borderRadius: "0.375rem",
+          "&:hover": {
+            backgroundColor: "#d97706",
           },
         }}
-        onClick={() => setOpen(!open)}
+        onClick={() =>
+          setOpen((current) => !current)
+        }
       >
         Please read the details before use
       </Button>
-      <p className={style.inContain}>Font size: {fontSize}mm</p>
+
+      <p className={style.inContain}>
+        Font size: {fontSize}mm
+      </p>
+
       <p
         style={{ fontSize: `${fontSize}mm` }}
         className={`${style.inContain} transition-all duration-300 ease-in-out`}
       >
-        {words[currentWordIndex]}
+        {WORDS[currentWordIndex]}
       </p>
+
+      <label
+        htmlFor="font-size"
+        className="sr-only"
+      >
+        Font size in millimeters
+      </label>
+
       <input
+        id="font-size"
         type="number"
         value={fontSize}
         onChange={changeFontSize}
-        className="border border-gray-300 rounded px-2 p-1 mb-4 text-center w-44"
-        placeholder="Enter font size"
+        className="mb-4 w-44 rounded border border-gray-300 p-1 px-2 text-center"
         min="1"
         max="25"
         step="0.1"
       />
-      <div className="flex flex-wrap gap-4 mb-4">
+
+      <div className="mb-4 flex flex-wrap gap-4">
         <button
-          className="bg-slate-800 hover:bg-slate-700 text-yellow-400 font-bold py-2 px-4 rounded flex-1"
+          type="button"
+          className="flex-1 rounded bg-slate-800 px-4 py-2 font-bold text-yellow-400 hover:bg-slate-700"
           onClick={increaseFontSize}
         >
           Increase Font Size
         </button>
+
         <Button
           variant="contained"
           sx={{
-            backgroundColor: '#1e293b',
-            '&:hover': {
-              backgroundColor: '#334155',
+            backgroundColor: "#1e293b",
+            "&:hover": {
+              backgroundColor: "#334155",
             },
-            color: '#facc15',
-            fontWeight: 'bold',
+            color: "#facc15",
+            fontWeight: "bold",
             py: 1,
             px: 2,
             flex: 1,
-            borderRadius: '0 0 0 0',
-            borderLeft: isLeftEye ? '8px solid #facc15' : 'none',
-            borderRight: !isLeftEye ? '8px solid #facc15' : 'none',
+            borderRadius: 0,
+            borderLeft: isLeftEye
+              ? "8px solid #facc15"
+              : "none",
+            borderRight: !isLeftEye
+              ? "8px solid #facc15"
+              : "none",
           }}
-          onClick={() => setIsLeftEye(!isLeftEye)}
+          onClick={() =>
+            setIsLeftEye((current) => !current)
+          }
         >
-          Choose a Eye
+          Choose an Eye
         </Button>
+
         <button
-          className="bg-slate-800 hover:bg-slate-700 text-yellow-400 font-bold py-2 px-4 rounded flex-1"
+          type="button"
+          className="flex-1 rounded bg-slate-800 px-4 py-2 font-bold text-yellow-400 hover:bg-slate-700"
           onClick={decreaseFontSize}
         >
           Decrease Font Size
         </button>
       </div>
-      <div className="flex flex-wrap gap-4 mb-4">
+
+      <div className="mb-4 flex flex-wrap gap-4">
         <button
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex-1"
-          onClick={overWord}
+          type="button"
+          className="flex-1 rounded bg-green-500 px-4 py-2 font-bold text-white hover:bg-green-700"
+          onClick={changeWord}
         >
           Change Word
         </button>
+
         <button
-          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex-1"
+          type="button"
+          className="flex-1 rounded bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
           onClick={handleMistake}
+          disabled={isSaving}
         >
-          Mistake
+          {isSaving ? "Saving…" : "Mistake"}
         </button>
       </div>
-      <Popup open={open} setOpen={setOpen} type={'blur'} />
-    </div>
+
+      {saveError && (
+        <p role="alert" className="text-red-700">
+          {saveError}
+        </p>
+      )}
+
+      <Popup
+        open={open}
+        setOpen={setOpen}
+        type="blur"
+      />
+    </section>
   );
 }

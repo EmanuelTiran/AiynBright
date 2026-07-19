@@ -1,17 +1,9 @@
-"use server"
-const jwt = require('jsonwebtoken');
+import SignUp from "@/components/SighnIn";
 
-import { loginAction } from '@/server/BL/actions/login.action';
-import { cookies } from 'next/headers'
-import Login from '@/components/Login';
-import SighnIn from '@/components/SighnIn';
+export const metadata = {
+  title: "Create account",
+};
 
-export default async function Signin() {
-  const cookieStore = cookies()
-
-
-  return (<>
-    <SighnIn />
-  </>
-  )
+export default function SignUpPage() {
+  return <SignUp />;
 }

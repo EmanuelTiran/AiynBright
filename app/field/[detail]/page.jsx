@@ -1,46 +1,30 @@
+import { notFound } from "next/navigation";
+import Field from "@/components/Field";
+import ToLogin from "@/components/ToLogin";
+import { getCurrentUserDTO } from "@/server/data/current-user";
+import { parseFieldDetail } from "@/server/validation/route-params";
 
-import { connectToMongo } from '@/server/connectToMongo'
-import { unstable_noStore } from 'next/cache'
-import Field from '@/components/Field'
-import { authAction } from '@/server/BL/actions/login.action'
-import { readUserByFieldService } from '@/server/BL/services/user.service'
-import ToLogin from '@/components/ToLogin'
+export default async function FieldDetailPage({
+  params,
+}) {
+  const { detail } = await params;
+  const distanceUser =
+    parseFieldDetail(detail);
 
-
-
-
-export default async function page({ params: { detail } }) {
-  function extract_size(detail) {
-    const size = detail.split('_');
-
-    return {
-      side: size[0],
-      distance: size[1]
-    };
+  if (!distanceUser) {
+    notFound();
   }
-  let distanceUser = extract_size(detail);
-  // await new Promise(resolve => setTimeout(resolve, 3000))
-  await connectToMongo();
-  const authData = await authAction();
-  if (!authData || !authData.userToken) return <ToLogin/>
 
-  const { email } = authData.userToken;
+  const user = await getCurrentUserDTO();
 
-  let currentUser = await readUserByFieldService({ email });
-  const simplifiedUser = {
-    username: currentUser.username,
-    password: currentUser.password,
-    email: currentUser.email,
-    fieldWeaknesses: currentUser.fieldWeaknesses.map(weakness => ({
-      side: weakness.side,
-      distance: weakness.distance,
-      date: weakness.date
-    })),
-  };
-  unstable_noStore()
+  if (!user) {
+    return <ToLogin />;
+  }
+
   return (
-    <div >
-      <Field user={simplifiedUser} distanceUser={distanceUser} />
-    </div>
-  )
+    <Field
+      user={user}
+      distanceUser={distanceUser}
+    />
+  );
 }

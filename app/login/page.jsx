@@ -1,12 +1,9 @@
-"use server"
+import Login from "@/components/Login";
 
-import Login from '@/components/Login';
+export const metadata = {
+  title: "Sign in",
+};
 
-export default async function LoginPage() {
-
-
-  return (<>
-    <Login />
-  </>
-  )
+export default function LoginPage() {
+  return <Login />;
 }

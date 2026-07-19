@@ -1,70 +1,177 @@
- "use server"
-import { connectToMongo } from "@/server/connectToMongo"
-import { cookies } from 'next/headers'
+"use server";
+
 import { redirect } from "next/navigation";
-import { readUserByFieldService } from "../services/user.service";
-const jwt = require('jsonwebtoken');
-const SECRET = process.env.JWT_SECRET ||"AYINBRIGHT"
-const EMAIL_ADMIN = process.env.EMAIL_ADMIN
-const PASSWORD_ADMIN = process.env.PASSWORD_ADMIN
+import { connectToMongo } from "@/server/connectToMongo";
 
+import {
+  authenticateUserService,
+  createUserService,
+  readUserByFieldService,
+} from "@/server/BL/services/user.service";
 
-export async function generate(user) {
-    let token = jwt.sign(user, SECRET, { expiresIn: "200m" });
-    return `Bearer ${token}`
+import {
+  clearSessionCookie,
+  getSession,
+  isConfiguredAdminEmail,
+  resolveUserRole,
+  setSessionCookie,
+} from "@/server/security/session";
+
+import {
+  firstValidationError,
+  loginSchema,
+  registrationSchema,
+} from "@/server/validation/auth";
+
+const INVALID_LOGIN_MESSAGE =
+  "The email address or password is incorrect.";
+
+function formDataToObject(formData) {
+  return Object.fromEntries(formData.entries());
 }
 
-export const loginAction = async (fd) => {
-    "use server"
-    let body = Object.fromEntries(fd)
-    const user = { email: body.email, password: body.password }
-    connectToMongo()
-    const newU = await readUserByFieldService(user)
-    let token;
-    try {
-        if (newU) {
-            token = await generate(user);
-            cookies().set('token', token);
-            return { success: true, newU: newU.email };
-        } else {
-            console.error('Could not create new user');
-            return { success: false, message: 'Your details are invalid' };
-        }
-    } catch (error) {
-        console.log({ error });
-        return { success: false, message: 'An error occurred' };
+export async function loginAction(formData) {
+  const validation = loginSchema.safeParse(
+    formDataToObject(formData),
+  );
+
+  if (!validation.success) {
+    return {
+      success: false,
+      message: firstValidationError(validation),
+    };
+  }
+
+  try {
+    await connectToMongo();
+
+    const user = await authenticateUserService(
+      validation.data.email,
+      validation.data.password,
+    );
+
+    if (!user) {
+      return {
+        success: false,
+        message: INVALID_LOGIN_MESSAGE,
+      };
     }
+
+    const role = resolveUserRole(user);
+
+    await setSessionCookie({
+      userId: user.id,
+      email: user.email,
+      role,
+    });
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Login failed:", error);
+
+    return {
+      success: false,
+      message:
+        "Login is temporarily unavailable. Please try again.",
+    };
+  }
 }
 
+export async function registerAction(formData) {
+  const validation =
+    registrationSchema.safeParse(
+      formDataToObject(formData),
+    );
 
-export const logoutAction = async () => {
-    "use server"
-    try {
-        cookies().delete('token');
-        redirect('/');
-        return { success: true, message: 'Logged out successfully' };
-    } catch (error) {
-        console.error('Logout error:', error);
-        return { success: false, message: 'An error occurred during logout' };
+  if (!validation.success) {
+    return {
+      success: false,
+      message: firstValidationError(validation),
+    };
+  }
+
+  if (
+    isConfiguredAdminEmail(
+      validation.data.email,
+    )
+  ) {
+    return {
+      success: false,
+      message:
+        "This email address cannot be registered here.",
+    };
+  }
+
+  try {
+    await connectToMongo();
+
+    const existingUser =
+      await readUserByFieldService({
+        email: validation.data.email,
+      });
+
+    if (existingUser) {
+      return {
+        success: false,
+        message:
+          "An account with this email address already exists.",
+      };
     }
+
+    const user = await createUserService(
+      validation.data,
+    );
+
+    await setSessionCookie({
+      userId: user._id.toString(),
+      email: user.email,
+      role: "user",
+    });
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    if (error?.code === 11000) {
+      return {
+        success: false,
+        message:
+          "An account with this email address already exists.",
+      };
+    }
+
+    console.error("Registration failed:", error);
+
+    return {
+      success: false,
+      message:
+        "Registration is temporarily unavailable. Please try again.",
+    };
+  }
+}
+
+export async function logoutAction() {
+  await clearSessionCookie();
+  redirect("/");
 }
 
 export async function authAction() {
-    "use server"
-    try {
-        let token = cookies().get('token');
-        if (!token) throw "no token provided";
-        if (!token.value) return false;
-        token = token.value.split('Bearer ')[1] || "null";
-        const userFromToken = jwt.verify(token, SECRET);
-        if (!userFromToken) throw "not correct";
-        if (userFromToken.email === EMAIL_ADMIN && userFromToken.password === PASSWORD_ADMIN)
-            return { isUser: true, userToken: userFromToken, isManager: true };
-        return { isUser: true, userToken: userFromToken, isManager: false };
-    }
-    catch (e) {
-        console.log(e);
-        return false;
-    }
-}
+  const session = await getSession();
 
+  if (!session) {
+    return false;
+  }
+
+  return {
+    isUser: true,
+    isManager: session.role === "admin",
+
+    userToken: {
+      id: session.userId,
+      email: session.email,
+      role: session.role,
+    },
+  };
+}

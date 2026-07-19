@@ -1,38 +1,64 @@
-import { connectToMongo } from '@/server/connectToMongo';
-import { updateUserByFieldService } from '@/server/BL/services/user.service';
+import { connectToMongo } from "@/server/connectToMongo";
+import { updateUserByIdService } from "@/server/BL/services/user.service";
 
-export default async function handler(req, res) {
-    console.log('Handler called with method:', req.method);
+import {
+  SESSION_COOKIE_NAME,
+  verifySessionToken,
+} from "@/server/security/session";
 
-    if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Only POST method is allowed' });
-    }
+import { validateResultsUpdate } from "@/server/validation/results";
 
-    await connectToMongo(); 
+export default async function handler(
+  request,
+  response,
+) {
+  if (request.method !== "POST") {
+    response.setHeader("Allow", "POST");
 
-    const { filter: { email }, updateData } = req.body;
+    return response.status(405).json({
+      message: "Method not allowed.",
+    });
+  }
 
-    console.log('Email:', email);
-    console.log('UpdateData:', JSON.stringify(updateData, null, 2));
+  const session = await verifySessionToken(
+    request.cookies?.[SESSION_COOKIE_NAME],
+  );
 
-    if (email === undefined || email === null || email === '') {
-        return res.status(406).json({ message: 'Email is required and cannot be empty' });
-    }
+  if (!session) {
+    return response.status(401).json({
+      message: "Authentication required.",
+    });
+  }
 
-    if (updateData === undefined || updateData === null || Object.keys(updateData).length === 0) {
-        return res.status(400).json({ message: 'Update data is required and cannot be empty' });
-    }
+  const validation = validateResultsUpdate(
+    request.body?.updateData,
+  );
 
-    if (updateData.colorWeaknesses && Array.isArray(updateData.colorWeaknesses)) {
-        console.log('Color Weakness:', updateData.colorWeaknesses[0]);
-    }
+  if (!validation.success) {
+    return response.status(400).json({
+      message: "Invalid vision-test result.",
+    });
+  }
 
-    try {
-        const result = await updateUserByFieldService({email}, updateData);
-        res.status(200).json({ message: 'User updated successfully', result });
-    } catch (error) {
-        console.error('Error updating user:', error);
-        res.status(500).json({ message: 'Error updating user', error: error.message });
-    }
+  try {
+    await connectToMongo();
+
+    await updateUserByIdService(
+      session.userId,
+      validation.data,
+    );
+
+    return response.status(200).json({
+      message: "Results updated successfully.",
+    });
+  } catch (error) {
+    console.error(
+      "Failed to update results:",
+      error,
+    );
+
+    return response.status(500).json({
+      message: "Failed to update results.",
+    });
+  }
 }
-

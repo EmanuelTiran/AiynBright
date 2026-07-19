@@ -1,49 +1,29 @@
+import { notFound } from "next/navigation";
+import Blur from "@/components/Blur";
+import ToLogin from "@/components/ToLogin";
+import { getCurrentUserDTO } from "@/server/data/current-user";
+import { parseBlurDetail } from "@/server/validation/route-params";
 
-import { connectToMongo } from '@/server/connectToMongo'
-import { unstable_noStore } from 'next/cache'
-import Blur from '@/components/Blur'
-import { authAction } from '@/server/BL/actions/login.action'
-import { readUserByFieldService } from '@/server/BL/services/user.service'
-import ToLogin from '@/components/ToLogin'
+export default async function BlurImprovementDetailPage({
+  params,
+}) {
+  const { detail } = await params;
+  const sizeUser = parseBlurDetail(detail);
 
-
-
-
-export default async function page({ params: { detail } }) {
-  function extract_size(detail) {
-    const size = detail.split('_');
-
-    return {
-      fontSize: size[0],
-      distance: size[1],
-      eye: size[2]
-    };
+  if (!sizeUser) {
+    notFound();
   }
-  let sizeUser = extract_size(detail);
 
-  // await new Promise(resolve => setTimeout(resolve, 3000))
-  await connectToMongo();
-  const authData = await authAction();
-  if (!authData || !authData.userToken) return <ToLogin/>
+  const user = await getCurrentUserDTO();
 
-  const { email } = authData.userToken;
+  if (!user) {
+    return <ToLogin />;
+  }
 
-  let currentUser = await readUserByFieldService({ email });
-  const simplifiedUser = {
-    eye: currentUser.eye,
-    username: currentUser.username,
-    password: currentUser.password,
-    email: currentUser.email,
-    sizeWeaknesses: currentUser.sizeWeaknesses.map(weakness => ({
-      fontSize: weakness.fontSize,
-      distance: weakness.distance,
-      date: weakness.date
-    }))
-  };
-  unstable_noStore()
   return (
-    <div >
-      <Blur user={simplifiedUser} sizeUser={sizeUser} />
-    </div>
-  )
+    <Blur
+      user={user}
+      sizeUser={sizeUser}
+    />
+  );
 }

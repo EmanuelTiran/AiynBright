@@ -1,46 +1,73 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import styles from './ImageCarousel.module.css'; // Import your CSS file
 
-export default function ImageCarousel({ children }) {
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const images = [
-        '/images/image1.jpg',
-        '/images/image2.jpg',
-        '/images/image3.jpg',
-    ];
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import styles from "./ImageCarousel.module.css";
 
-    useEffect(() => {
-        const interval = setTimeout(() => {
-            setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-        }, 3000); // Change image every 3 seconds
-        return () => clearTimeout(interval);
-    }, [currentImageIndex]);
+const IMAGES = [
+  "/images/image1.jpg",
+  "/images/image2.jpg",
+  "/images/image3.jpg",
+];
 
-    return (
-        <div className="relative w-full h-screen overflow-hidden">
-            <div className={styles.carousel}>
-                {images.map((imageSrc, index) => (
-                    <div
-                        key={index}
-                        className={`${styles.imageWrapper} ${index === currentImageIndex ? styles.active : ''
-                            }`}
-                    >
-                        <Image
-                            src={imageSrc}
-                            alt={`image-${index}`}
-                            fill
-                            style={{ objectFit: 'cover', zIndex: 1 }}
-                            priority={index === currentImageIndex}
-                        />
-                    </div>
-                ))}
-                {/* Center the children */}
-                <div className={styles.childrenWrapper}>
-                    {children}
-                </div>
+export default function ImageCarousel({
+  children,
+}) {
+  const [
+    currentImageIndex,
+    setCurrentImageIndex,
+  ] = useState(0);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setCurrentImageIndex(
+        (currentIndex) =>
+          (currentIndex + 1) %
+          IMAGES.length,
+      );
+    }, 3000);
+
+    return () =>
+      window.clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="relative h-screen w-full overflow-hidden">
+      <div className={styles.carousel}>
+        {IMAGES.map(
+          (imageSource, index) => (
+            <div
+              key={imageSource}
+              className={`${styles.imageWrapper} ${
+                index === currentImageIndex
+                  ? styles.active
+                  : ""
+              }`}
+              aria-hidden={
+                index !== currentImageIndex
+              }
+            >
+              <Image
+                src={imageSource}
+                alt=""
+                fill
+                sizes="100vw"
+                style={{
+                  objectFit: "cover",
+                  zIndex: 1,
+                }}
+                priority={index === 0}
+              />
             </div>
+          ),
+        )}
+
+        <div
+          className={styles.childrenWrapper}
+        >
+          {children}
         </div>
-    );
+      </div>
+    </div>
+  );
 }

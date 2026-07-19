@@ -1,16 +1,46 @@
-export async function GET(request) {
-    const url = new URL(request.url);
-    const secret = url.searchParams.get('secret');  // סוד לאימות הבקשה
-  
-    if (secret !== process.env.REVALIDATE_SECRET) {
-      return new Response('Invalid secret', { status: 401 });
-    }
-  
-    try {
-      await revalidatePath('/');  // לדוגמה: ריענון עמוד הבית
-      return new Response('Revalidated!', { status: 200 });
-    } catch (error) {
-      return new Response('Error revalidating', { status: 500 });
-    }
+import { revalidatePath } from "next/cache";
+
+export async function POST(request) {
+  const authorization =
+    request.headers.get("authorization");
+
+  const expectedSecret =
+    process.env.REVALIDATE_SECRET;
+
+  if (
+    !expectedSecret ||
+    authorization !==
+      `Bearer ${expectedSecret}`
+  ) {
+    return Response.json(
+      {
+        message: "Unauthorized.",
+      },
+      {
+        status: 401,
+      },
+    );
   }
-  
+
+  let path = "/";
+
+  try {
+    const body = await request.json();
+
+    if (
+      typeof body?.path === "string" &&
+      body.path.startsWith("/")
+    ) {
+      path = body.path;
+    }
+  } catch {
+    // An empty body revalidates the home page.
+  }
+
+  revalidatePath(path);
+
+  return Response.json({
+    revalidated: true,
+    path,
+  });
+}

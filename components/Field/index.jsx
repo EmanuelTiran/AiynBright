@@ -1,218 +1,386 @@
-"use client"
-import React, { useEffect, useState } from 'react';
-import style from './style.module.css';
-import Popup from '../Popup';
-import Button from '@mui/material/Button';
+"use client";
 
-export default function Field({ user, distanceUser }) {
-  const words = ["9", "5", "7", "1", "8", "2", "4", "6", "0", "1", "A", "S", "d", "F", "E", "X", "V", "G", "I", "M", "N", "B", "Z", "W"];
-  // const sizes =  [-18, -17, -16, -15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
-  ; // ערכים בס"מ למיקום
-  const fillSizes = () => {
-    const sizes = [];
-    for (let i = -24; i <= 24; i += 2) {
-      sizes.push(i);
-    }
-    return sizes;
+import { useEffect, useState } from "react";
+import Button from "@mui/material/Button";
+import Popup from "../Popup";
+
+const CHARACTERS = [
+  "9",
+  "5",
+  "7",
+  "1",
+  "8",
+  "2",
+  "4",
+  "6",
+  "0",
+  "A",
+  "S",
+  "D",
+  "F",
+  "E",
+  "X",
+  "V",
+  "G",
+  "I",
+  "M",
+  "N",
+  "B",
+  "Z",
+  "W",
+];
+
+const DISTANCES = Array.from(
+  { length: 25 },
+  (_, index) => -24 + index * 2,
+);
+
+function getInitialDistanceIndex(distance) {
+  const numericDistance = Number(distance);
+
+  if (!Number.isFinite(numericDistance)) {
+    return Math.floor(DISTANCES.length / 2);
   }
 
+  return DISTANCES.reduce(
+    (
+      closestIndex,
+      currentDistance,
+      index,
+    ) => {
+      const closestDifference = Math.abs(
+        DISTANCES[closestIndex] -
+          numericDistance,
+      );
 
+      const currentDifference = Math.abs(
+        currentDistance - numericDistance,
+      );
 
+      return currentDifference <
+        closestDifference
+        ? index
+        : closestIndex;
+    },
+    0,
+  );
+}
+
+export default function Field({
+  user,
+  distanceUser,
+}) {
   const [open, setOpen] = useState(false);
-  const [isLeft, setIsLeft] = useState(distanceUser?.side === 'left' ? true : false);
-  const [sizes, setSizes] = useState(fillSizes());
-  const [distance, setDistance] = useState(distanceUser ? distanceUser.distance : 0);
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [firstTime, setFirstTime] = useState(true);
-  const [currentSizeIndex, setCurrentSizeIndex] = useState(distanceUser ? sizes.indexOf(Number(distanceUser.distance)) : Math.floor(sizes.length / 2)); // TODO : לעדכן את המרחק מהפאראם לפי האינדקס!!!
 
+  const [isLeft, setIsLeft] = useState(
+    distanceUser?.side === "left",
+  );
+
+  const [
+    currentDistanceIndex,
+    setCurrentDistanceIndex,
+  ] = useState(() =>
+    getInitialDistanceIndex(
+      distanceUser?.distance,
+    ),
+  );
+
+  const [
+    currentCharacterIndex,
+    setCurrentCharacterIndex,
+  ] = useState(0);
+
+  const [
+    fieldWeaknesses,
+    setFieldWeaknesses,
+  ] = useState(() =>
+    Array.isArray(user?.fieldWeaknesses)
+      ? user.fieldWeaknesses
+      : [],
+  );
+
+  const [isSaving, setIsSaving] =
+    useState(false);
+
+  const [saveError, setSaveError] =
+    useState("");
+
+  const distance =
+    DISTANCES[currentDistanceIndex];
 
   useEffect(() => {
-    if (firstTime) {
-      setFirstTime(false);
-      setDistance(distanceUser ? distanceUser.distance : sizes[currentSizeIndex]);
-    } else {
-      setDistance(sizes[currentSizeIndex]);
+    const side = isLeft ? "left" : "right";
+    const nextPathname =
+      `/field/${side}_${distance}`;
+
+    if (
+      window.location.pathname !== nextPathname
+    ) {
+      window.history.replaceState(
+        {},
+        "",
+        nextPathname,
+      );
     }
-    const side = isLeft ? 'left' : 'right';
-    const distance = sizes[currentSizeIndex];
-    const newPathname = `/field/${side}_${distance}`;
+  }, [distance, isLeft]);
 
-    // Update the URL without using search parameters
-    window.history.pushState({}, '', newPathname);
-  }, [currentSizeIndex, isLeft]);
-
-  const moveRight = () => {
-    if (currentSizeIndex < sizes.length - 1) setCurrentSizeIndex(currentSizeIndex + 1);
-    setDistance(sizes[currentSizeIndex])
-  };
-
-  const moveLeft = () => {
-    if (currentSizeIndex > 0) setCurrentSizeIndex(currentSizeIndex - 1);
-    setDistance(sizes[currentSizeIndex])
-  };
-
-  const overWord = () => {
-    setCurrentWordIndex((currentWordIndex - 1 + words.length) % words.length); // מחזור מילים
+  const changeCharacter = () => {
+    setCurrentCharacterIndex(
+      (currentIndex) =>
+        (currentIndex + 1) %
+        CHARACTERS.length,
+    );
   };
 
   const handleMistake = async () => {
-    let taut = { side: isLeft ? 'left' : 'right', distance: sizes[currentSizeIndex] };
+    const result = {
+      side: isLeft ? "left" : "right",
+      distance,
+    };
 
-    user.fieldWeaknesses.push(taut);
-    // שליחת הבקשה ל-API route
-    const response = await fetch('/api/updateUser', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        filter: { email: user.email },
-        updateData: { fieldWeaknesses: user.fieldWeaknesses }
-      })
-    });
+    const updatedWeaknesses = [
+      ...fieldWeaknesses,
+      result,
+    ];
 
-    if (response.ok) {
-      const updatedUser = await response.json();
-      console.log('User updated successfully:', updatedUser);
-    } else {
-      console.error('Failed to update user');
+    setIsSaving(true);
+    setSaveError("");
+
+    try {
+      const response = await fetch(
+        "/api/updateUser",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            updateData: {
+              fieldWeaknesses:
+                updatedWeaknesses,
+            },
+          }),
+        },
+      );
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          payload.message ||
+            "Failed to save the result.",
+        );
+      }
+
+      setFieldWeaknesses(
+        updatedWeaknesses,
+      );
+
+      changeCharacter();
+    } catch (error) {
+      setSaveError(
+        error.message ||
+          "Failed to save the result.",
+      );
+    } finally {
+      setIsSaving(false);
     }
-
-    overWord();
   };
 
   return (
-    <div
-      className={`flex items-center justify-center flex-col w-full mx-auto h-[84vh] bg-[aliceblue]  border-2 border-[#bfdbfe] border-b border-purple-400 p-4`}
+    <section
+      className="mx-auto flex h-[84vh] w-full flex-col items-center justify-center border-2 border-b border-purple-400 border-[#bfdbfe] bg-[aliceblue] p-4"
       style={{
-        borderLeft: isLeft ? '32px solid #bfdbfe' : 'none',
-        borderRight: !isLeft ? '32px solid #bfdbfe' : 'none',
-        transition: 'border 0.3s ease'
-
+        borderLeft: isLeft
+          ? "32px solid #bfdbfe"
+          : "none",
+        borderRight: !isLeft
+          ? "32px solid #bfdbfe"
+          : "none",
+        transition: "border 0.3s ease",
       }}
     >
       <Button
         variant="contained"
         sx={{
-          backgroundColor: '#bfdbfe',
-          color: '#1F2937',
-          fontWeight: 'bold',
-          padding: '8px 16px',
-          borderRadius: '0.375rem',
-          '&:hover': {
-            backgroundColor: '#D97706',
+          backgroundColor: "#bfdbfe",
+          color: "#1f2937",
+          fontWeight: "bold",
+          padding: "8px 16px",
+          borderRadius: "0.375rem",
+          "&:hover": {
+            backgroundColor: "#93c5fd",
           },
         }}
-        onClick={() => setOpen(!open)}
+        onClick={() =>
+          setOpen((current) => !current)
+        }
       >
         Please read the details before use
       </Button>
-      <div className="w-full " style={{ transform: `translateX(${distance}cm)`, transition: 'transform 0.3s ease-in-out' }}>
-        <p className="text-7xl flex items-center justify-center flex-row w-[96vw] h-[42vh]">
-          {words[currentWordIndex]}
+
+      <div
+        className="w-full"
+        style={{
+          transform:
+            `translateX(${distance}cm)`,
+          transition:
+            "transform 0.3s ease-in-out",
+        }}
+      >
+        <p className="flex h-[42vh] w-[96vw] flex-row items-center justify-center text-7xl">
+          {
+            CHARACTERS[
+              currentCharacterIndex
+            ]
+          }
         </p>
       </div>
-      <div className="flex flex-wrap gap-4 mb-4">
+
+      <div className="mb-4 flex flex-wrap gap-4">
         <Button
           variant="contained"
           sx={{
-            backgroundColor: '#1e293b',
-            '&:hover': {
-              backgroundColor: '#334155',
+            backgroundColor: "#1e293b",
+            "&:hover": {
+              backgroundColor: "#334155",
             },
-            color: '#bfdbfe',
-            fontWeight: 'bold',
+            color: "#bfdbfe",
+            fontWeight: "bold",
             py: 1,
             px: 2,
-            clipPath: 'polygon(20% 0, 100% 0, 80% 50%, 100% 100%, 20% 100%, 0 50%)',
+            clipPath:
+              "polygon(20% 0, 100% 0, 80% 50%, 100% 100%, 20% 100%, 0 50%)",
             borderRadius: 0,
             flex: 1,
           }}
-          onClick={moveLeft}
+          onClick={() =>
+            setCurrentDistanceIndex(
+              (index) =>
+                Math.max(0, index - 1),
+            )
+          }
         >
-           Left
+          Left
         </Button>
+
         <Button
           variant="contained"
           sx={{
-            backgroundColor: '#1e293b',
-            '&:hover': {
-              backgroundColor: '#334155',
+            backgroundColor: "#1e293b",
+            "&:hover": {
+              backgroundColor: "#334155",
             },
-            color: '#bfdbfe',
-            fontWeight: 'bold',
-            py: 1,  // Reduced padding
-            px: 2,  // Reduced padding
+            color: "#bfdbfe",
+            fontWeight: "bold",
+            py: 1,
+            px: 2,
             flex: 1,
-            borderRadius: '0 0 0 0', // Rounded right corners, square left corners
-            borderLeft: isLeft ? '8px solid #bfdbfe' : 'none',
-            borderRight: !isLeft ? '8px solid #bfdbfe' : 'none',
+            borderRadius: 0,
+            borderLeft: isLeft
+              ? "8px solid #bfdbfe"
+              : "none",
+            borderRight: !isLeft
+              ? "8px solid #bfdbfe"
+              : "none",
           }}
-          onClick={() => setIsLeft(!isLeft)}
+          onClick={() =>
+            setIsLeft(
+              (current) => !current,
+            )
+          }
         >
           Choose a Side
         </Button>
+
         <Button
           variant="contained"
           sx={{
-            backgroundColor: '#1e293b',
-            '&:hover': {
-              backgroundColor: '#334155',
+            backgroundColor: "#1e293b",
+            "&:hover": {
+              backgroundColor: "#334155",
             },
-            color: '#bfdbfe',
-            fontWeight: 'bold',
+            color: "#bfdbfe",
+            fontWeight: "bold",
             py: 1,
             px: 2,
-            clipPath: 'polygon(0 0, 80% 0, 100% 50%, 80% 100%, 0 100%, 20% 50%)',
+            clipPath:
+              "polygon(0 0, 80% 0, 100% 50%, 80% 100%, 0 100%, 20% 50%)",
             borderRadius: 0,
             flex: 1,
           }}
-          onClick={moveRight}
+          onClick={() =>
+            setCurrentDistanceIndex(
+              (index) =>
+                Math.min(
+                  DISTANCES.length - 1,
+                  index + 1,
+                ),
+            )
+          }
         >
-           Right
-        </Button>
-      </div>
-      <div className="flex flex-wrap gap-4 mb-4">
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: '#48bb78', // equivalent to bg-green-500
-            '&:hover': {
-              backgroundColor: '#2f855a', // equivalent to hover:bg-green-700
-            },
-            color: 'white', // equivalent to text-white
-            fontWeight: 'bold',
-            py: 1,  // Reduced padding for smaller size
-            px: 2,  // Reduced padding for smaller size
-            borderRadius: '8px',
-            flex: 1,
-          }}
-          onClick={overWord}
-        >
-          Change Word
-        </Button>
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: '#f56565', // equivalent to bg-red-500
-            '&:hover': {
-              backgroundColor: '#c53030', // equivalent to hover:bg-red-700
-            },
-            color: 'white', // equivalent to text-white
-            fontWeight: 'bold',
-            py: 1,  // Reduced padding for smaller size
-            px: 2,  // Reduced padding for smaller size
-            borderRadius: '8px',
-            flex: 1,
-          }}
-          onClick={handleMistake}
-        >
-          Mistake
+          Right
         </Button>
       </div>
 
-      <Popup open={open} setOpen={setOpen} type={'field'} />
-    </div>
+      <div className="mb-4 flex flex-wrap gap-4">
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#48bb78",
+            "&:hover": {
+              backgroundColor: "#2f855a",
+            },
+            color: "white",
+            fontWeight: "bold",
+            py: 1,
+            px: 2,
+            borderRadius: "8px",
+            flex: 1,
+          }}
+          onClick={changeCharacter}
+        >
+          Change Character
+        </Button>
+
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#f56565",
+            "&:hover": {
+              backgroundColor: "#c53030",
+            },
+            color: "white",
+            fontWeight: "bold",
+            py: 1,
+            px: 2,
+            borderRadius: "8px",
+            flex: 1,
+          }}
+          onClick={handleMistake}
+          disabled={isSaving}
+        >
+          {isSaving
+            ? "Saving…"
+            : "Mistake"}
+        </Button>
+      </div>
+
+      {saveError && (
+        <p
+          role="alert"
+          className="text-red-700"
+        >
+          {saveError}
+        </p>
+      )}
+
+      <Popup
+        open={open}
+        setOpen={setOpen}
+        type="field"
+      />
+    </section>
   );
 }

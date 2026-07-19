@@ -1,19 +1,43 @@
-import mongoose, { connect } from "mongoose";
+import "server-only";
+import mongoose from "mongoose";
 
-let connectionPromise = null;
+const globalForMongoose = globalThis;
 
-export const connectToMongo = async () => {
-   if (mongoose.connection.readyState === 1) {
-      return;
-   }
-   if (!connectionPromise) {
-      const mongoUri = process.env.MONGO_URI || "mongodb+srv://test:1234@cluster0.onb7tvx.mongodb.net/AyinBright";
-      connectionPromise = connect(mongoUri)
-        .then(() => console.log('connected to mongo'))
-        .catch((error) => {
-           connectionPromise = null; // מאפשר ניסיון חוזר בכשל
-           console.log('error connect to mongo', error);
-        });
-   }
-   await connectionPromise;
+if (!globalForMongoose.__mongooseCache) {
+  globalForMongoose.__mongooseCache = {
+    connection: null,
+    promise: null,
+  };
+}
+
+const cache = globalForMongoose.__mongooseCache;
+
+export async function connectToMongo() {
+  if (cache.connection && mongoose.connection.readyState === 1) {
+    return cache.connection;
+  }
+
+  const mongoUri = process.env.MONGO_URI;
+
+  if (!mongoUri) {
+    throw new Error(
+      "MONGO_URI is missing from the environment variables.",
+    );
+  }
+
+  if (!cache.promise) {
+    cache.promise = mongoose
+      .connect(mongoUri, {
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 10_000,
+      })
+      .then((mongooseInstance) => mongooseInstance.connection)
+      .catch((error) => {
+        cache.promise = null;
+        throw error;
+      });
+  }
+
+  cache.connection = await cache.promise;
+  return cache.connection;
 }
