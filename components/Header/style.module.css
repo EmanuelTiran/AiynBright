@@ -1,0 +1,36 @@
+.header {
+    height: auto;
+    width: 100%;
+    padding: 0.5rem;
+    position: sticky;
+    top: 0px;
+    z-index: 10;
+    border-bottom: 1px solid transparent;
+    background-clip: padding-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: large;
+}
+
+.refs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .header {
+        padding: 1rem;
+        font-size: medium;
+        justify-content: space-between;
+    }
+    
+    .refs {
+        flex-direction: column;
+        width: 100%;
+        text-align: center;
+    }
+}

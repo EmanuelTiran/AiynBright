@@ -1,0 +1,13 @@
+.container {
+        display: flex;
+        flex-direction: row;
+        /* width: 50vw; */
+        align-items: start;
+}
+
+.container * {
+        color: var(--orange-yellow);
+}
+.img {
+        clip-path: inset(15% 0 15% 0);
+}
