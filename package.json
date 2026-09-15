@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --max-warnings=0"
+    "lint": "eslint . --max-warnings=0",
+    "test:security": "node --import ./tests/register.mjs --test tests/security.test.mjs tests/migration.test.mjs",
+    "migrate:legacy-passwords": "node scripts/migrate-legacy-passwords.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",

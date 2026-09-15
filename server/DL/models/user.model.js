@@ -1,4 +1,6 @@
+import "server-only";
 import mongoose from "mongoose";
+import { isPasswordHash } from "@/server/security/password";
 
 const { Schema } = mongoose;
 
@@ -107,6 +109,8 @@ const userSchema = new Schema(
     passwordHash: {
       type: String,
       select: false,
+      required() { return this.isNew; },
+      validate: { validator: isPasswordHash, message: "A valid password hash is required." },
     },
 
     // Temporary legacy field.
@@ -149,8 +153,21 @@ const userSchema = new Schema(
         return value;
       },
     },
+    toObject: {
+      transform(_document, value) {
+        delete value.password;
+        delete value.passwordHash;
+        return value;
+      },
+    },
   },
 );
+
+userSchema.pre("validate", function rejectLegacyPasswordWrites() {
+  if (this.password !== undefined && (this.isNew || this.isModified("password"))) {
+    throw new Error("Writing legacy passwords is prohibited.");
+  }
+});
 
 export const User =
   mongoose.models.User ||

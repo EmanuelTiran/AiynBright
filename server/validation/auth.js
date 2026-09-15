@@ -13,6 +13,7 @@ export const loginSchema = z.object({
   password: z
     .string()
     .min(1, "Enter your password.")
+    .refine((value) => value.trim().length > 0, "Enter your password.")
     .max(128, "The password is too long."),
 });
 

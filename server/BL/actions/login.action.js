@@ -12,9 +12,13 @@ import {
 import {
   clearSessionCookie,
   getSession,
+  setSessionCookie,
+} from "@/server/security/session-cookie";
+import { getAuthenticatedUser } from "@/server/security/authenticated-user";
+import {
+  getSessionSecret,
   isConfiguredAdminEmail,
   resolveUserRole,
-  setSessionCookie,
 } from "@/server/security/session";
 
 import {
@@ -27,7 +31,7 @@ const INVALID_LOGIN_MESSAGE =
   "The email address or password is incorrect.";
 
 function formDataToObject(formData) {
-  return Object.fromEntries(formData.entries());
+  return formData instanceof FormData ? Object.fromEntries(formData.entries()) : {};
 }
 
 export async function loginAction(formData) {
@@ -43,6 +47,7 @@ export async function loginAction(formData) {
   }
 
   try {
+    getSessionSecret();
     await connectToMongo();
 
     const user = await authenticateUserService(
@@ -57,19 +62,16 @@ export async function loginAction(formData) {
       };
     }
 
-    const role = resolveUserRole(user);
-
     await setSessionCookie({
       userId: user.id,
       email: user.email,
-      role,
     });
 
     return {
       success: true,
     };
-  } catch (error) {
-    console.error("Login failed:", error);
+  } catch {
+    console.error("Login failed. Check database and JWT_SECRET configuration.");
 
     return {
       success: false,
@@ -105,6 +107,7 @@ export async function registerAction(formData) {
   }
 
   try {
+    getSessionSecret();
     await connectToMongo();
 
     const existingUser =
@@ -127,7 +130,6 @@ export async function registerAction(formData) {
     await setSessionCookie({
       userId: user._id.toString(),
       email: user.email,
-      role: "user",
     });
 
     return {
@@ -142,7 +144,7 @@ export async function registerAction(formData) {
       };
     }
 
-    console.error("Registration failed:", error);
+    console.error("Registration failed. Check database and JWT_SECRET configuration.");
 
     return {
       success: false,
@@ -158,20 +160,20 @@ export async function logoutAction() {
 }
 
 export async function authAction() {
-  const session = await getSession();
+  const user = await getAuthenticatedUser(await getSession());
 
-  if (!session) {
+  if (!user) {
     return false;
   }
 
   return {
     isUser: true,
-    isManager: session.role === "admin",
+    isManager: resolveUserRole(user) === "admin",
 
     userToken: {
-      id: session.userId,
-      email: session.email,
-      role: session.role,
+      id: user._id.toString(),
+      email: user.email,
+      role: resolveUserRole(user),
     },
   };
 }

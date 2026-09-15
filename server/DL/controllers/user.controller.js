@@ -1,5 +1,6 @@
 import "server-only";
 import { User } from "../models/user.model";
+import { validateResultsUpdate } from "@/server/validation/results";
 
 const SAFE_USER_FIELDS =
   "_id username email role colorWeaknesses sizeWeaknesses fieldWeaknesses createdAt updatedAt";
@@ -29,16 +30,25 @@ export function readUserForAuthentication(email) {
 }
 
 export function createUser(data) {
-  return User.create(data);
+  if (Object.hasOwn(data, "password")) throw new Error("Writing legacy passwords is prohibited.");
+  const { username, email, passwordHash } = data;
+  return User.create({ username, email, passwordHash });
+}
+
+export async function isCurrentPasswordHash(userId, passwordHash) {
+  return Boolean(await User.exists({ _id: userId, passwordHash }));
 }
 
 export async function replaceLegacyPassword(
   userId,
   passwordHash,
+  legacyPassword,
 ) {
-  await User.updateOne(
+  const result = await User.updateOne(
     {
       _id: userId,
+      password: legacyPassword,
+      passwordHash: { $in: [null, ""] },
     },
     {
       $set: {
@@ -52,16 +62,19 @@ export async function replaceLegacyPassword(
       runValidators: true,
     },
   );
+  return result.matchedCount === 1;
 }
 
 export async function updateUserById(
   userId,
   updateData,
 ) {
+  const validation = validateResultsUpdate(updateData);
+  if (!validation.success) throw new Error("Invalid vision-test result.");
   const user = await User.findByIdAndUpdate(
     userId,
     {
-      $set: updateData,
+      $set: validation.data,
     },
     {
       new: true,
@@ -77,7 +90,7 @@ export async function updateUserById(
 }
 
 export async function deleteResultAtIndex(
-  email,
+  userId,
   field,
   index,
 ) {
@@ -93,9 +106,7 @@ export async function deleteResultAtIndex(
     throw new Error("Invalid result type.");
   }
 
-  const user = await User.findOne({
-    email: email.trim().toLowerCase(),
-  });
+  const user = await User.findById(userId);
 
   if (!user) {
     throw new Error("User not found.");

@@ -1,43 +1,11 @@
 import "server-only";
 
-import { connectToMongo } from "@/server/connectToMongo";
-import { readUserByIdService } from "@/server/BL/services/user.service";
-import {
-  getSession,
-  resolveUserRole,
-} from "@/server/security/session";
+import { getSession } from "@/server/security/session-cookie";
+import { resolveUserRole } from "@/server/security/session";
+import { getAuthenticatedUser } from "@/server/security/authenticated-user";
 
-function serializeResult(result) {
-  return {
-    ...result,
-    _id: result._id?.toString(),
-    date:
-      result.date instanceof Date
-        ? result.date.toISOString()
-        : result.date,
-  };
-}
-
-export function toSafeUserDTO(user) {
-  return {
-    id: user._id.toString(),
-    username: user.username,
-    email: user.email,
-    role: user.role,
-
-    colorWeaknesses: (
-      user.colorWeaknesses || []
-    ).map(serializeResult),
-
-    sizeWeaknesses: (
-      user.sizeWeaknesses || []
-    ).map(serializeResult),
-
-    fieldWeaknesses: (
-      user.fieldWeaknesses || []
-    ).map(serializeResult),
-  };
-}
+import { toSafeUserDTO } from "./user-dto";
+export { toSafeUserDTO } from "./user-dto";
 
 export async function getCurrentUserDTO() {
   const session = await getSession();
@@ -46,11 +14,7 @@ export async function getCurrentUserDTO() {
     return null;
   }
 
-  await connectToMongo();
-
-  const user = await readUserByIdService(
-    session.userId,
-  );
+  const user = await getAuthenticatedUser(session);
 
   return user ? toSafeUserDTO(user) : null;
 }
@@ -62,11 +26,7 @@ export async function getAdminSession() {
     return null;
   }
 
-  await connectToMongo();
-
-  const user = await readUserByIdService(
-    session.userId,
-  );
+  const user = await getAuthenticatedUser(session);
 
   if (
     !user ||
