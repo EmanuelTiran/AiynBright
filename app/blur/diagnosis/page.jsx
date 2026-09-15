@@ -14,8 +14,6 @@ export default async function BlurDiagnosisPage() {
   }
 
   return (
-    <main className="container mx-auto flex min-h-screen items-center justify-center bg-gray-100 p-4">
-      <RandomCharacterGame user={user} />
-    </main>
+    <RandomCharacterGame user={user} />
   );
 }

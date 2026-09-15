@@ -1,61 +1,38 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import ToLogin from "@/components/ToLogin";
 import { getCurrentUserDTO } from "@/server/data/current-user";
+import { BlurFrame, primaryAction, secondaryAction } from "@/components/Blur/FlowUI";
 
-export const metadata = {
-  title: "Blur vision",
-};
-
-function OptionLink({ href, children }) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center justify-center rounded-lg bg-gradient-to-r from-amber-300 to-amber-500 px-4 py-3 font-bold text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:from-amber-200 hover:to-amber-600 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
-    >
-      {children}
-    </Link>
-  );
-}
+export const metadata = { title: "Blur test" };
 
 export default async function BlurPage() {
   const user = await getCurrentUserDTO();
-
-  if (!user) {
-    return <ToLogin />;
-  }
+  if (!user) return <ToLogin />;
 
   return (
-    <main className="container mx-auto flex min-h-[calc(100vh-72px)] items-center justify-center bg-gray-100 p-4">
-      <section className="w-full max-w-md space-y-5 rounded-xl bg-white p-8 shadow-2xl">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-800">
-            Blur vision
-          </h1>
-
-          <p className="mt-2 text-sm text-gray-600">
-            Start a screening exercise or
-            continue from a previous result.
-          </p>
+    <BlurFrame stage={0}>
+      <section className="overflow-hidden rounded-3xl border border-amber-200 bg-white shadow-sm">
+        <div className="bg-gradient-to-r from-amber-300 to-amber-500 px-6 py-8 sm:px-10 sm:py-10">
+          <p className="mb-3 font-semibold">ONE EYE AT A TIME</p>
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">A little clarity.<br />One step at a time.</h1>
+          <p className="mt-5 max-w-lg text-lg leading-relaxed">Match the characters you can see. This Blur screening exercise records a character size for each eye.</p>
         </div>
-
-        {user.sizeWeaknesses.length > 0 && (
-          <OptionLink href="/blur/improve">
-            Continue exercise
-          </OptionLink>
-        )}
-
-        <OptionLink href="/blur/diagnosis">
-          Start screening
-        </OptionLink>
-
-        <p className="rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-900">
-          AyinBright is an educational
-          screening tool, not a medical
-          diagnosis. Consult a qualified
-          eye-care professional about symptoms
-          or changes in vision.
-        </p>
+        <div className="space-y-7 p-6 sm:p-10">
+          <ul className="flex flex-wrap gap-x-8 gap-y-3 text-lg font-semibold">
+            <li>About 3–5 minutes</li><li>Both eyes, separately</li><li>1 metre from the screen</li>
+          </ul>
+          <p className="text-slate-700">We’ll check your screen setup, then guide you through each eye. You can finish after one eye if you need to.</p>
+          <Link href="/blur/diagnosis" className={primaryAction}>Start test <span aria-hidden="true">→</span></Link>
+          {user.sizeWeaknesses.length > 0 && (
+            <div className="flex flex-wrap items-center gap-4 border-t border-slate-200 pt-6">
+              <p className="w-full font-semibold">Pick up from your previous results</p>
+              <Link href="/blur/improve" className={secondaryAction}>Continue training</Link>
+              <Link href="/user" className={secondaryAction}>View my results</Link>
+            </div>
+          )}
+          <p className="leading-relaxed text-slate-700">An educational screening exercise, not a medical diagnosis.</p>
+        </div>
       </section>
-    </main>
+    </BlurFrame>
   );
 }

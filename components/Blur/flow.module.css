@@ -1,0 +1,11 @@
+﻿.flow button, .flow a, .flow input { font-family: inherit; }
+.flow button { border-style: solid; }
+.flow :is(button, a, input, summary):focus-visible { outline: 3px solid #0f172a; outline-offset: 4px; }
+.flow h1:focus, .flow h2:focus { outline: none; }
+.flow button, .flow input[type="range"] { min-height: 48px; }
+.flow :is(button, a):global(.text-lg) { font-size: 1.125rem; }
+.flow :is(button, a):global(.font-semibold) { font-weight: 600; }
+.flow :is(button, a):global(.text-5xl) { font-size: 3rem; }
+.flow form { font-size: 1rem; border-radius: 1.5rem; background: white; }
+.flow form p { font-size: 1rem; }
+.flow :global(.text-sm) { font-size: 1rem; line-height: 1.5rem; }
