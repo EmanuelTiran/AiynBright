@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { RiLogoutCircleRLine } from "react-icons/ri";
 import { IoMdLogIn } from "react-icons/io";
 import { AiFillHome } from "react-icons/ai";
@@ -8,27 +9,43 @@ import { FaUser } from "react-icons/fa";
 import { MdBlurOn } from "react-icons/md";
 import { IoColorPaletteSharp } from "react-icons/io5";
 import { GiField } from "react-icons/gi";
-import { MdAdminPanelSettings } from "react-icons/md";
-import Navlink from '../Navlink';
+import { MdAdminPanelSettings, MdClose, MdMenu } from "react-icons/md";
 import style from './style.module.css';
 import Logo from '../Logo';
 import { authAction, logoutAction } from '@/server/BL/actions/login.action';
 import Link from 'next/link';
 
-const brightColors = ["text-red-500", "text-purple-500", "text-teal-400", "text-yellow-400", "text-orange-400", "text-blue-200"];
-
-const linksList = [
-   { href: '/', text: 'Home', icon: <AiFillHome className="text-xl" /> },
-   { href: '/about', text: 'About', icon: <BiInfoCircle className="text-xl" /> },
-   { href: '/user', text: 'User Status', icon: <FaUser className="text-xl" /> },
-   { href: '/blur', text: 'Blur Vision', icon: <MdBlurOn className="text-xl" /> },
-   { href: '/color', text: 'Color Vision', icon: <IoColorPaletteSharp className="text-xl" /> },
-   { href: '/field', text: 'Field Vision', icon: <GiField className="text-xl" /> },
+// Keep each destination's existing color when changing its position.
+const mainLinks = [
+   { href: '/', text: 'Home', Icon: AiFillHome, color: 'text-red-500' },
+   { href: '/blur', text: 'Blur Vision', Icon: MdBlurOn, color: 'text-yellow-400' },
+   { href: '/color', text: 'Color Vision', Icon: IoColorPaletteSharp, color: 'text-orange-400' },
+   { href: '/field', text: 'Field Vision', Icon: GiField, color: 'text-blue-200' },
+   { href: '/user', text: 'User Status', Icon: FaUser, color: 'text-teal-400' },
 ];
+
+function HeaderLink({ href, text, Icon, color, pathname, onNavigate }) {
+   const active = pathname === href || (href !== '/' && pathname?.startsWith(`${href}/`));
+
+   return (
+      <Link
+         href={href}
+         aria-current={active ? 'page' : undefined}
+         className={`${style.navLink} ${color} ${active ? style.active : ''}`}
+         onClick={onNavigate}
+      >
+         <Icon aria-hidden="true" focusable="false" />
+         <span>{text}</span>
+      </Link>
+   );
+}
 
 export default function Header() {
    const [isManager, setIsManager] = useState(false);
    const [isUser, setIsUser] = useState(false);
+   const [menuOpen, setMenuOpen] = useState(false);
+   const menuButton = useRef(null);
+   const pathname = usePathname();
 
    useEffect(() => {
       async function checkAuth() {
@@ -46,59 +63,78 @@ export default function Header() {
    }, []);
 
    return (
-      <header className={`${style.header} flex justify-between items-center bg-gray-800 p-4`}>
-         <nav className="flex space-x-4">
-            {linksList.map((link, index) => (
-               <Navlink
-                  key={link.href}
-                  href={link.href}
-                  colorText={brightColors[index % brightColors.length]}
-               >
-                  <div className="flex flex-col items-center">
-                     {link.icon}
-                     <span className="text-xs hidden sm:block">{link.text}</span>
-                  </div>
-               </Navlink>
-            ))}
-            {isManager && (
-               <Navlink href="/admin" colorText="text-orange-200">
-                  <div className="flex flex-col items-center">
-                     <MdAdminPanelSettings className="text-xl" />
-                     <span className="text-xs hidden sm:block">Admin</span>
-                  </div>
-               </Navlink>
-            )}
-         </nav>
+      <header
+         className={`${style.header} bg-gray-800`}
+         onKeyDown={(event) => {
+            if (event.key === 'Escape' && menuOpen) {
+               setMenuOpen(false);
+               menuButton.current?.focus();
+            }
+         }}
+      >
+         <div className={style.brand}>
+            <Logo />
+         </div>
 
-         <div className="flex items-center space-x-4">
-            {isUser ? (
-               <form action={logoutAction}>
-                  <button
-                     className="text-orange-200 cursor-pointer"
-                     title='logout'
-                     type="submit"
-                     onClick={() => {
-                        setIsUser(false);
-                        logoutAction();
-                     }}
-                  >
-                     <div className="flex flex-col items-center">
-                        <RiLogoutCircleRLine className="text-xl" />
-                        <span className="text-xs hidden sm:block">Logout</span>
-                     </div>
-                  </button>
-               </form>
-            ) : (
-               <Link href="/login" className="text-orange-200 cursor-pointer" title='login'>
-                  <div className="flex flex-col items-center">
-                     <IoMdLogIn className="text-xl" />
-                     <span className="text-xs hidden sm:block">Login</span>
-                  </div>
-               </Link>
-            )}
-            <div className="hidden md:block">
-               <Logo />
-            </div>         </div>
+         <button
+            ref={menuButton}
+            type="button"
+            className={`${style.menuButton} text-orange-200`}
+            aria-expanded={menuOpen}
+            aria-controls="header-navigation"
+            onClick={() => setMenuOpen((open) => !open)}
+         >
+            {menuOpen ? <MdClose aria-hidden="true" /> : <MdMenu aria-hidden="true" />}
+            <span>{menuOpen ? 'Close' : 'Menu'}</span>
+         </button>
+
+         <div id="header-navigation" className={`${style.navigation} ${menuOpen ? style.expanded : ''}`}>
+            <nav aria-label="Main navigation" className={style.mainNav}>
+               <ul className={style.mainLinks}>
+                  {mainLinks.map((link) => (
+                     <li key={link.href}>
+                        <HeaderLink {...link} pathname={pathname} onNavigate={() => setMenuOpen(false)} />
+                     </li>
+                  ))}
+               </ul>
+            </nav>
+
+            <div className={style.utilities}>
+               <nav aria-label="Utility navigation">
+                  <ul className={style.utilityLinks}>
+                     <li>
+                        <HeaderLink href="/about" text="About" Icon={BiInfoCircle} color="text-purple-500" pathname={pathname} onNavigate={() => setMenuOpen(false)} />
+                     </li>
+                     {isManager && (
+                        <li>
+                           <HeaderLink href="/admin" text="Admin" Icon={MdAdminPanelSettings} color="text-orange-200" pathname={pathname} onNavigate={() => setMenuOpen(false)} />
+                        </li>
+                     )}
+                  </ul>
+               </nav>
+
+               <div className={style.accountAction}>
+                  {isUser ? (
+                     <form action={logoutAction}>
+                        <button
+                           className={`${style.navLink} ${style.logout} text-orange-200`}
+                           title="logout"
+                           type="submit"
+                           onClick={() => {
+                              setIsUser(false);
+                              logoutAction();
+                           }}
+                        >
+                           <RiLogoutCircleRLine aria-hidden="true" focusable="false" />
+                           <span>Logout</span>
+                        </button>
+                     </form>
+                  ) : (
+                     <HeaderLink href="/login" text="Login" Icon={IoMdLogIn} color="text-orange-200" pathname={pathname} onNavigate={() => setMenuOpen(false)} />
+                  )}
+               </div>
+            </div>
+         </div>
       </header>
    );
 }
