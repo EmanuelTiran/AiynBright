@@ -1,7 +1,16 @@
+"use client";
+
 import React from 'react';
 import './SnellenChart.css';
+import ScreenCalibration, { useCalibration } from '../ScreenCalibration';
+import { mmToPx } from '@/lib/calibration.mjs';
 
 const SnellenChart = () => {
+    return <ScreenCalibration><CalibratedSnellenChart /></ScreenCalibration>;
+};
+
+const CalibratedSnellenChart = () => {
+    const calibration = useCalibration();
     const chartData = [
         { line: "E", size: 14.6 }, // 200 / 12
         { line: "F P", size: 11 }, // 150 / 12
@@ -20,7 +29,7 @@ const SnellenChart = () => {
             <h1>לוח סנלן</h1>
             <div className="gg"></div>
             {chartData.map((data, index) => (
-                <div key={index} className="chart-line" style={{ fontSize: `${data.size}mm` }}>
+                <div key={index} className="chart-line" style={{ fontSize: mmToPx(data.size, calibration) }}>
                     {data.line}
                 </div>
             ))}

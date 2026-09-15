@@ -2,7 +2,6 @@
 
 import {
   useEffect,
-  useRef,
   useState,
 } from "react";
 
@@ -10,6 +9,8 @@ import { Button } from "@mui/material";
 import EyeExaminationPrompt from "./EyeExaminationPrompt";
 import ProgressBar from "./ProgressBar";
 import ResultTestBlur from "./ResultTestBlur";
+import ScreenCalibration, { useCalibration } from "./ScreenCalibration";
+import { mmToPx } from "@/lib/calibration.mjs";
 
 const CHARACTERS = Array.from(
   "1234567890אבגדהוזחטיכלמנסעפצקרשת",
@@ -90,9 +91,14 @@ function createRound() {
   };
 }
 
-export default function RandomCharacterGame({
+export default function RandomCharacterGame(props) {
+  return <ScreenCalibration><CalibratedCharacterGame {...props} /></ScreenCalibration>;
+}
+
+function CalibratedCharacterGame({
   user,
 }) {
+  const calibration = useCalibration();
   const [round, setRound] = useState({
     character: INITIAL_CHARACTER,
     buttons: INITIAL_BUTTONS,
@@ -142,20 +148,17 @@ export default function RandomCharacterGame({
   const [saveError, setSaveError] =
     useState("");
 
-  const nextRoundTimer = useRef(null);
+  const testFinished = consecutiveMistakes >= 3 || size <= MINIMUM_SIZE;
 
-  useEffect(
-    () => () => {
-      if (
-        nextRoundTimer.current !== null
-      ) {
-        window.clearTimeout(
-          nextRoundTimer.current,
-        );
-      }
-    },
-    [],
-  );
+  useEffect(() => {
+    if (clickedIndex === null || testFinished) return;
+    const timer = window.setTimeout(() => {
+      setRound(createRound());
+      setClickedIndex(null);
+      setIsCorrect(null);
+    }, 500);
+    return () => window.clearTimeout(timer);
+  }, [clickedIndex, testFinished]);
 
   const beginNextRound = () => {
     setRound(createRound());
@@ -278,11 +281,6 @@ export default function RandomCharacterGame({
       }
     }
 
-    nextRoundTimer.current =
-      window.setTimeout(
-        beginNextRound,
-        500,
-      );
   };
 
   const continueAfterResult = () => {
@@ -302,10 +300,6 @@ export default function RandomCharacterGame({
     );
   };
 
-  const testFinished =
-    consecutiveMistakes >= 3 ||
-    size <= MINIMUM_SIZE;
-
   return (
     <section className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-gray-100 p-4">
       <EyeExaminationPrompt
@@ -317,7 +311,7 @@ export default function RandomCharacterGame({
       <div
         className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-md"
         style={{
-          fontSize: `${size}mm`,
+          fontSize: mmToPx(size, calibration),
         }}
         aria-live="polite"
       >
@@ -341,7 +335,7 @@ export default function RandomCharacterGame({
                   border:
                     "2px solid #facc15",
                   color: "black",
-                  fontSize: "14.6mm",
+                  fontSize: mmToPx(INITIAL_SIZE, calibration),
                   padding: "10px 20px",
                   width: "100px",
                   height: "100px",

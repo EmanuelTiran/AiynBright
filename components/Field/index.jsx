@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import Popup from "../Popup";
+import ScreenCalibration, { useCalibration } from "../ScreenCalibration";
+import { cmToPx } from "@/lib/calibration.mjs";
 
 const CHARACTERS = [
   "9",
@@ -66,10 +68,15 @@ function getInitialDistanceIndex(distance) {
   );
 }
 
-export default function Field({
+export default function Field(props) {
+  return <ScreenCalibration><CalibratedField {...props} /></ScreenCalibration>;
+}
+
+function CalibratedField({
   user,
   distanceUser,
 }) {
+  const calibration = useCalibration();
   const [open, setOpen] = useState(false);
 
   const [isLeft, setIsLeft] = useState(
@@ -224,7 +231,7 @@ export default function Field({
         className="w-full"
         style={{
           transform:
-            `translateX(${distance}cm)`,
+            calibration ? `translateX(${cmToPx(distance, calibration)}px)` : undefined,
           transition:
             "transform 0.3s ease-in-out",
         }}

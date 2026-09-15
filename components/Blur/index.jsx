@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import Popup from "../Popup";
 import style from "./style.module.css";
+import ScreenCalibration, { useCalibration } from "../ScreenCalibration";
+import { mmToPx } from "@/lib/calibration.mjs";
 
 const WORDS = [
   "apple",
@@ -49,7 +51,12 @@ function findInitialSizeIndex(fontSize) {
   return exactIndex >= 0 ? exactIndex : 0;
 }
 
-export default function Blur({ user, sizeUser }) {
+export default function Blur(props) {
+  return <ScreenCalibration><CalibratedBlur {...props} /></ScreenCalibration>;
+}
+
+function CalibratedBlur({ user, sizeUser }) {
+  const calibration = useCalibration();
   const [open, setOpen] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] =
     useState(0);
@@ -218,7 +225,7 @@ export default function Blur({ user, sizeUser }) {
       </p>
 
       <p
-        style={{ fontSize: `${fontSize}mm` }}
+        style={{ fontSize: mmToPx(fontSize, calibration) }}
         className={`${style.inContain} transition-all duration-300 ease-in-out`}
       >
         {WORDS[currentWordIndex]}
