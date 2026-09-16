@@ -33,6 +33,7 @@
     border-radius: 0.5rem;
     background: transparent;
     cursor: pointer;
+    transition: background-color 180ms ease, color 180ms ease;
 }
 
 /* Large, bold labels retain readable contrast with the original accent colors. */
@@ -43,13 +44,44 @@
 }
 
 .navLink svg, .menuButton svg { flex: 0 0 auto; width: 1.25rem; height: 1.25rem; }
+.navLink svg, .menuButton svg {
+    transform-origin: center;
+    transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), filter 180ms ease;
+}
 .mainLinks .navLink { justify-content: flex-start; height: 100%; }
-.navLink:hover, .menuButton:hover { background-color: var(--dark-blue); }
-.navLink:hover span { text-decoration: underline; text-underline-offset: 0.3em; }
 
-.navLink.active {
-    color: var(--orange-yellow);
-    box-shadow: inset 0 -3px 0 currentColor;
+.navLink.active { background-color: var(--dark-blue); }
+
+.activeIndicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0;
+    border-radius: 999px;
+    pointer-events: none;
+    visibility: hidden;
+}
+
+.activeIndicator[data-visible] { visibility: visible; }
+.activeIndicator[data-ready] {
+    transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
+                width 360ms cubic-bezier(0.22, 1, 0.36, 1),
+                background-color 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .navLink:hover, .menuButton:hover { background-color: var(--dark-blue); }
+    .navLink:hover svg, .menuButton:hover svg {
+        transform: translateY(-1px);
+        filter: brightness(1.08);
+    }
+}
+
+.navLink:active svg, .menuButton:active svg {
+    transform: translateY(0) scale(0.94);
+    filter: none;
+    transition-duration: 90ms;
 }
 
 .header a:focus-visible, .header button:focus-visible {
@@ -84,4 +116,11 @@
     .header { grid-template-columns: auto minmax(0, 1fr) auto; }
     .mainNav { grid-column: 2; grid-row: 1; border-top: 0; padding-top: 0; }
     .utilities { grid-column: 3; padding-left: 1rem; border-left: 1px solid var(--dark-blue); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .activeIndicator[data-ready], .navLink, .menuButton,
+    .navLink svg, .menuButton svg { transition: none; }
+    .navLink:hover svg, .menuButton:hover svg,
+    .navLink:active svg, .menuButton:active svg { transform: none; filter: none; }
 }

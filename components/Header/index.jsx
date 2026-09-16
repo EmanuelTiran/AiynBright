@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { RiLogoutCircleRLine } from "react-icons/ri";
 import { IoMdLogIn } from "react-icons/io";
@@ -30,6 +30,7 @@ function HeaderLink({ href, text, Icon, color, pathname, onNavigate }) {
    return (
       <Link
          href={href}
+         data-header-link
          aria-current={active ? 'page' : undefined}
          className={`${style.navLink} ${color} ${active ? style.active : ''}`}
          onClick={onNavigate}
@@ -45,7 +46,64 @@ export default function Header() {
    const [isUser, setIsUser] = useState(false);
    const [menuOpen, setMenuOpen] = useState(false);
    const menuButton = useRef(null);
+   const header = useRef(null);
+   const activeIndicator = useRef(null);
    const pathname = usePathname();
+
+   useLayoutEffect(() => {
+      const container = header.current;
+      const indicator = activeIndicator.current;
+      let frame;
+      let disposed = false;
+
+      function measureIndicator() {
+         const activeLink = container.querySelector('[data-header-link][aria-current="page"]');
+         const rect = activeLink?.getBoundingClientRect();
+
+         // Hidden mobile links (and routes outside this navigation) have no target.
+         if (!rect?.width || !rect.height) {
+            indicator.removeAttribute('data-ready');
+            indicator.removeAttribute('data-visible');
+            return;
+         }
+
+         const bounds = container.getBoundingClientRect();
+         const x = rect.left - bounds.left - container.clientLeft + container.scrollLeft;
+         const y = rect.bottom - bounds.top - container.clientTop + container.scrollTop - indicator.offsetHeight;
+         indicator.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+         indicator.style.width = `${rect.width}px`;
+         indicator.style.backgroundColor = getComputedStyle(activeLink).color;
+         indicator.setAttribute('data-visible', '');
+
+         if (!indicator.hasAttribute('data-ready')) {
+            // Establish the first visible position before enabling transitions.
+            // Subsequent route changes retarget this same element mid-flight.
+            indicator.getBoundingClientRect();
+            indicator.setAttribute('data-ready', '');
+         }
+      }
+
+      function scheduleMeasurement() {
+         cancelAnimationFrame(frame);
+         frame = requestAnimationFrame(measureIndicator);
+      }
+
+      measureIndicator();
+      const observer = new ResizeObserver(scheduleMeasurement);
+      observer.observe(container);
+      container.querySelectorAll('[data-header-link], nav, [data-header-utilities]').forEach((element) => observer.observe(element));
+      window.addEventListener('resize', scheduleMeasurement);
+      document.fonts.addEventListener('loadingdone', scheduleMeasurement);
+      document.fonts.ready.then(() => { if (!disposed) scheduleMeasurement(); });
+
+      return () => {
+         disposed = true;
+         observer.disconnect();
+         cancelAnimationFrame(frame);
+         window.removeEventListener('resize', scheduleMeasurement);
+         document.fonts.removeEventListener('loadingdone', scheduleMeasurement);
+      };
+   }, [pathname, menuOpen, isManager, isUser]);
 
    useEffect(() => {
       async function checkAuth() {
@@ -64,6 +122,7 @@ export default function Header() {
 
    return (
       <header
+         ref={header}
          className={`${style.header} bg-gray-800`}
          onKeyDown={(event) => {
             if (event.key === 'Escape' && menuOpen) {
@@ -99,7 +158,7 @@ export default function Header() {
                </ul>
             </nav>
 
-            <div className={style.utilities}>
+            <div className={style.utilities} data-header-utilities>
                <nav aria-label="Utility navigation">
                   <ul className={style.utilityLinks}>
                      <li>
@@ -135,6 +194,7 @@ export default function Header() {
                </div>
             </div>
          </div>
+         <span ref={activeIndicator} className={style.activeIndicator} aria-hidden="true" />
       </header>
    );
 }
