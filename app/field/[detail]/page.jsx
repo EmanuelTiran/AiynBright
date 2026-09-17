@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Field from "@/components/Field";
-import ToLogin from "@/components/ToLogin";
+import GuestProductPreview from "@/components/GuestProductPreview";
 import { getCurrentUserDTO } from "@/server/data/current-user";
 import { parseFieldDetail } from "@/server/validation/route-params";
 
@@ -18,7 +18,7 @@ export default async function FieldDetailPage({
   const user = await getCurrentUserDTO();
 
   if (!user) {
-    return <ToLogin />;
+    return <GuestProductPreview product="field" training />;
   }
 
   return (

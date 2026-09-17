@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import ColorChanger from "@/components/Color";
-import ToLogin from "@/components/ToLogin";
+import GuestProductPreview from "@/components/GuestProductPreview";
 import { getCurrentUserDTO } from "@/server/data/current-user";
 import { parseColorDetail } from "@/server/validation/route-params";
 
@@ -20,7 +20,7 @@ export default async function ColorDetailPage({
     await getCurrentUserDTO();
 
   if (!user) {
-    return <ToLogin />;
+    return <GuestProductPreview product="color" training />;
   }
 
   return (

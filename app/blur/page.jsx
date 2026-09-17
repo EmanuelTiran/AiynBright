@@ -1,5 +1,5 @@
 ﻿import Link from "next/link";
-import ToLogin from "@/components/ToLogin";
+import { AccountAction, GuestAccess } from "@/components/GuestAccess";
 import { getCurrentUserDTO } from "@/server/data/current-user";
 import { BlurFrame, primaryAction, secondaryAction } from "@/components/Blur/FlowUI";
 
@@ -7,9 +7,9 @@ export const metadata = { title: "Blur test" };
 
 export default async function BlurPage() {
   const user = await getCurrentUserDTO();
-  if (!user) return <ToLogin />;
 
   return (
+    <GuestAccess>
     <BlurFrame stage={0}>
       <section className="overflow-hidden rounded-3xl border border-amber-200 bg-white shadow-sm">
         <div className="bg-gradient-to-r from-amber-300 to-amber-500 px-6 py-8 sm:px-10 sm:py-10">
@@ -22,8 +22,15 @@ export default async function BlurPage() {
             <li>About 3–5 minutes</li><li>Both eyes, separately</li><li>1 metre from the screen</li>
           </ul>
           <p className="text-slate-700">We’ll check your screen setup, then guide you through each eye. You can finish after one eye if you need to.</p>
-          <Link href="/blur/diagnosis" className={primaryAction}>Start test <span aria-hidden="true">→</span></Link>
-          {user.sizeWeaknesses.length > 0 && (
+          <AccountAction authenticated={Boolean(user)} href="/blur/diagnosis" className={primaryAction}>Start test <span aria-hidden="true">→</span></AccountAction>
+          {!user && (
+            <div className="flex flex-wrap gap-4">
+              <AccountAction href="/blur/improve" className={secondaryAction}>Begin training</AccountAction>
+              <AccountAction href="/user" className={secondaryAction}>View personal progress</AccountAction>
+              <a href="/blurRules.txt" target="_blank" rel="noreferrer" className={secondaryAction}>Read instructions (new tab)</a>
+            </div>
+          )}
+          {user?.sizeWeaknesses.length > 0 && (
             <div className="flex flex-wrap items-center gap-4 border-t border-slate-200 pt-6">
               <p className="w-full font-semibold">Pick up from your previous results</p>
               <Link href="/blur/improve" className={secondaryAction}>Continue training</Link>
@@ -34,5 +41,6 @@ export default async function BlurPage() {
         </div>
       </section>
     </BlurFrame>
+    </GuestAccess>
   );
 }

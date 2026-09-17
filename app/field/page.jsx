@@ -1,5 +1,5 @@
 import Field from "@/components/Field";
-import ToLogin from "@/components/ToLogin";
+import GuestProductPreview from "@/components/GuestProductPreview";
 import { getCurrentUserDTO } from "@/server/data/current-user";
 
 export const metadata = {
@@ -10,7 +10,7 @@ export default async function FieldPage() {
   const user = await getCurrentUserDTO();
 
   if (!user) {
-    return <ToLogin />;
+    return <GuestProductPreview product="field" />;
   }
 
   return <Field user={user} />;

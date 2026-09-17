@@ -1,5 +1,5 @@
 import ColorChanger from "@/components/Color";
-import ToLogin from "@/components/ToLogin";
+import GuestProductPreview from "@/components/GuestProductPreview";
 import { getCurrentUserDTO } from "@/server/data/current-user";
 
 export const metadata = {
@@ -10,7 +10,7 @@ export default async function ColorPage() {
   const user = await getCurrentUserDTO();
 
   if (!user) {
-    return <ToLogin />;
+    return <GuestProductPreview product="color" />;
   }
 
   return <ColorChanger user={user} />;
