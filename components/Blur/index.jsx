@@ -57,7 +57,6 @@ export default function Blur(props) {
 
 function CalibratedBlur({ user, sizeUser }) {
   const calibration = useCalibration();
-  const [open, setOpen] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] =
     useState(0);
 
@@ -201,24 +200,7 @@ function CalibratedBlur({ user, sizeUser }) {
     <section
       className={`${style.contain} border-b border-green-400 p-4`}
     >
-      <Button
-        variant="contained"
-        sx={{
-          backgroundColor: "#fbbf24",
-          color: "#1f2937",
-          fontWeight: "bold",
-          padding: "8px 16px",
-          borderRadius: "0.375rem",
-          "&:hover": {
-            backgroundColor: "#d97706",
-          },
-        }}
-        onClick={() =>
-          setOpen((current) => !current)
-        }
-      >
-        Please read the details before use
-      </Button>
+      <Popup type="blur" training />
 
       <p className={style.inContain}>
         Font size: {fontSize}mm
@@ -318,12 +300,6 @@ function CalibratedBlur({ user, sizeUser }) {
           {saveError}
         </p>
       )}
-
-      <Popup
-        open={open}
-        setOpen={setOpen}
-        type="blur"
-      />
     </section>
   );
 }

@@ -77,7 +77,6 @@ function CalibratedField({
   distanceUser,
 }) {
   const calibration = useCalibration();
-  const [open, setOpen] = useState(false);
 
   const [isLeft, setIsLeft] = useState(
     distanceUser?.side === "left",
@@ -208,24 +207,7 @@ function CalibratedField({
         transition: "border 0.3s ease",
       }}
     >
-      <Button
-        variant="contained"
-        sx={{
-          backgroundColor: "#bfdbfe",
-          color: "#1f2937",
-          fontWeight: "bold",
-          padding: "8px 16px",
-          borderRadius: "0.375rem",
-          "&:hover": {
-            backgroundColor: "#93c5fd",
-          },
-        }}
-        onClick={() =>
-          setOpen((current) => !current)
-        }
-      >
-        Please read the details before use
-      </Button>
+      <Popup key={distanceUser ? "training" : "test"} type="field" training={Boolean(distanceUser)} />
 
       <div
         className="w-full"
@@ -236,7 +218,10 @@ function CalibratedField({
             "transform 0.3s ease-in-out",
         }}
       >
-        <p className="flex h-[42vh] w-[96vw] flex-row items-center justify-center text-7xl">
+        <p
+          className="flex h-[42vh] w-[96vw] flex-row items-center justify-center"
+          style={{ fontSize: "4.5rem" }}
+        >
           {
             CHARACTERS[
               currentCharacterIndex
@@ -382,12 +367,6 @@ function CalibratedField({
           {saveError}
         </p>
       )}
-
-      <Popup
-        open={open}
-        setOpen={setOpen}
-        type="field"
-      />
     </section>
   );
 }

@@ -1,7 +1,7 @@
 .contain {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     flex-direction: column;
     width: 66%;
     margin: auto;
@@ -17,7 +17,7 @@
     justify-content: center;
     flex-direction: column;
     width: 96vw;
-    height: 50vh;
+    height: auto;
 }
 
 

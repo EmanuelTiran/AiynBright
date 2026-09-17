@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Popup from "../Popup";
 import styles from "./style.module.css";
 
 const COLORS = [
@@ -196,6 +197,7 @@ export default function ColorChanger({
     <section
       className={`w-2/3 p-4 ${styles.contain}`}
     >
+      <Popup key={colorsUser ? "training" : "test"} type="color" training={Boolean(colorsUser)} />
       <div className={styles.inContain}>
         <div
           className={styles.rekaBackground}

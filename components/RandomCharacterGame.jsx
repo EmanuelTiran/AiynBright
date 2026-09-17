@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ScreenCalibration, { useCalibration } from "./ScreenCalibration";
+import Popup from "./Popup";
 import ResultTestBlur from "./ResultTestBlur";
 import { BlurFrame, ResultCard, primaryAction, secondaryAction } from "./Blur/FlowUI";
 import { mmToPx } from "@/lib/calibration.mjs";
@@ -129,26 +130,8 @@ function BlurFlow({ user }) {
       <ScreenCalibration>
         <section className="w-full rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
           <FocusStep heading={heading} step={flow.step} paused={paused} />
-          {flow.step === "instructions" && (
-            <div className="space-y-6">
-              <div><p className="mb-2 font-semibold text-slate-700">GET READY</p><h1 ref={heading} tabIndex={-1} className="text-3xl font-bold">A moment to get comfortable</h1></div>
-              <ul className="grid gap-4 sm:grid-cols-2">
-                {[
-                  ["1 metre away", "Measure from your eyes to the screen. Keep the screen at eye level."],
-                  ["One eye at a time", "Cover the other eye gently, without pressing on it."],
-                  ["Steady room lighting", "Use good, consistent lighting and avoid glare on the screen."],
-                  ["Same glasses or contacts", "Keep the same lens conditions when comparing tests."],
-                ].map(([title, detail]) => <li key={title} className="rounded-2xl bg-stone-50 p-5"><h2 className="text-lg font-semibold">{title}</h2><p className="mt-2 leading-relaxed text-slate-700">{detail}</p></li>)}
-              </ul>
-              <p className="text-lg">Choose the matching character, or “Not sure” if you cannot tell. Take your time.</p>
-              <div className="flex flex-wrap gap-3">
-                <button type="button" className={primaryAction} onClick={() => commit({ ...flow, step: "choose" })}>I understand — continue</button>
-                <Link href="/blur" className={secondaryAction}>Back to Blur</Link>
-              </div>
-              <a href="/blurRules.txt" target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center font-semibold underline underline-offset-4">Detailed existing rules (opens a new tab)</a>
-            </div>
-          )}
-          {flow.step === "choose" && (
+          <Popup type="blur" />
+          {["instructions", "choose"].includes(flow.step) && (
             <div className="space-y-6">
               <h1 ref={heading} tabIndex={-1} className="text-3xl font-bold">Which eye would you like to test?</h1>
               <p className="text-lg text-slate-700">Choose either eye to begin.</p>
@@ -164,7 +147,6 @@ function BlurFlow({ user }) {
               <p className="rounded-xl bg-stone-50 p-4">Cover your <strong className="font-semibold">{remainingEye} eye</strong>. Keep your {flow.eye} eye open.</p>
               <div className="flex flex-wrap gap-3">
                 <button type="button" className={primaryAction} onClick={() => startEye(flow.eye)}>Start test</button>
-                <button type="button" className={secondaryAction} onClick={() => commit({ ...flow, step: "instructions" })}>Back to preparation</button>
               </div>
             </div>
           )}
