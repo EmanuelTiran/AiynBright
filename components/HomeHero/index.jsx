@@ -30,7 +30,9 @@ export default function HomeHero() {
         </div>
 
         <figure className={styles.visual}>
-          <OpticalIrisOrb focused={hovered || focused} interactionRef={hero} />
+          <div className={styles.orbStage}>
+            <OpticalIrisOrb focused={hovered || focused} interactionRef={hero} />
+          </div>
           <svg className={styles.opticalMarks} viewBox="0 0 600 600" fill="none" aria-hidden="true" focusable="false">
             <g stroke="currentColor" strokeWidth=".65">
               <path d="M 60 267 A 237 237 0 0 1 170 67 M 525 203 A 240 240 0 0 1 486 401" />
