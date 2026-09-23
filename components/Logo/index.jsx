@@ -4,26 +4,24 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function Logo() {
-  const brightColors = ["text-red-500", "text-blue-500", "text-green-500", "text-yellow-500", "text-purple-500", "text-orange-400"]; // Array of colors for each letter in "BRIGHT"
-  const CharBright = ["B", "r", "i", "g", "h", "t"]
   return (
-<Link href="/" title='home'>
-  <div className="flex justify-center items-center">
-    <div className={`${style['blinking-eye']}`}>
-    <Image src="/favicon.ico" alt="favicon" width={50} height={50} />
-    </div>
-    <div className="text-center relative">
-      <span className="text-2xl relative z-10">
-        <span className="font-thin text-orange-200">AYIN</span>
-        {brightColors.map((color, index) => (
-          <span key={index} className={`font-bold text-orange-200 ${style.blur}`}>
-            {CharBright[index]}
-          </span>
-        ))}
+    <Link href="/" title="AyinBright home" className={style.logo}>
+      <span className={style.mark} aria-hidden="true">
+        <Image
+          className={style.logoIcon}
+          src="/favicon.ico"
+          alt=""
+          width={50}
+          height={50}
+          priority
+        />
       </span>
-    </div>
-  </div>
-</Link>
-
+      <span className={style.identity}>
+        <span className={style.wordmark}>
+          <strong>Ayin</strong><span>Bright</span>
+        </span>
+        <span className={style.tagline}>See a brighter you</span>
+      </span>
+    </Link>
   );
 }

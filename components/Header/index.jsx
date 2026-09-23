@@ -72,7 +72,7 @@ export default function Header() {
          const y = rect.bottom - bounds.top - container.clientTop + container.scrollTop - indicator.offsetHeight;
          indicator.style.transform = `translate3d(${x}px, ${y}px, 0)`;
          indicator.style.width = `${rect.width}px`;
-         indicator.style.backgroundColor = getComputedStyle(activeLink).color;
+         indicator.style.backgroundColor = 'var(--header-accent)';
          indicator.setAttribute('data-visible', '');
 
          if (!indicator.hasAttribute('data-ready')) {
@@ -123,7 +123,8 @@ export default function Header() {
    return (
       <header
          ref={header}
-         className={`${style.header} bg-gray-800`}
+         className={style.header}
+         data-home={pathname === '/' ? '' : undefined}
          onKeyDown={(event) => {
             if (event.key === 'Escape' && menuOpen) {
                setMenuOpen(false);
@@ -189,7 +190,7 @@ export default function Header() {
                         </button>
                      </form>
                   ) : (
-                     <HeaderLink href="/login" text="Login" Icon={IoMdLogIn} color="text-orange-200" pathname={pathname} onNavigate={() => setMenuOpen(false)} />
+                     <HeaderLink href="/login" text="Sign In" Icon={IoMdLogIn} color="text-orange-200" pathname={pathname} onNavigate={() => setMenuOpen(false)} />
                   )}
                </div>
             </div>

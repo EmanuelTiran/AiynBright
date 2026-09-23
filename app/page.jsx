@@ -1,8 +1,7 @@
 import Link from "next/link";
 import CurrentTime from "@/components/CurrentTime";
-import ImageCarousel from "@/components/ImageCarousel";
+import HomeHero from "@/components/HomeHero";
 import SighnIn from "@/components/SighnIn";
-import VisionImprovementHub from "@/components/VisionImprovementHub";
 
 import {
   authAction,
@@ -14,9 +13,7 @@ export default async function HomePage() {
 
   return (
     <main>
-      <ImageCarousel>
-        <VisionImprovementHub />
-      </ImageCarousel>
+      <HomeHero />
 
       {authData ? (
         <section className="mx-auto my-10 max-w-md rounded-xl bg-white p-6 text-center shadow-xl">

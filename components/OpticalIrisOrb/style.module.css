@@ -1,0 +1,10 @@
+.orb { position: relative; width: 100%; height: 100%; aspect-ratio: 1; isolation: isolate; touch-action: pan-y; }
+.orb canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 650ms ease; pointer-events: none; }
+.orb[data-state="ready"] canvas { opacity: 1; }
+/* Only the loading/WebGL fallback is CSS. The live floor and contact are in WebGL. */
+.fallback { position: absolute; width: min(84%, 64svh); aspect-ratio: 1; top: 38%; left: 50%; transform: translate(-50%, -50%); border-radius: 50%; background: conic-gradient(from 90deg, #c98750, #ad455c, #4b438c, #346997, #4d9f9e, #809751, #cdaf58, #c98750); box-shadow: inset -12px -18px 28px #06101a99, inset 5px 7px 15px #ffffff70, 0 12px 30px #050a12aa; opacity: .65; transition: opacity 500ms; }
+.fallback > div { position: absolute; inset: 34%; background: #03070e; border-radius: 50%; box-shadow: 0 0 12px #071326, inset 2px 4px 6px #ffffff22; }
+.fallback::after { content: ""; position: absolute; top: 15%; left: 18%; width: 20%; height: 9%; border-radius: 50%; transform: rotate(-38deg); background: #ffffff95; filter: blur(3px); }
+.orb[data-state="ready"] .fallback { opacity: 0; }
+@media (max-width: 760px) { .orb { height: auto; aspect-ratio: 1; } .fallback { width: 72%; } }
+@media (prefers-reduced-motion: reduce) { .orb canvas, .fallback { transition: none; } }
