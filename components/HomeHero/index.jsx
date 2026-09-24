@@ -32,14 +32,14 @@ export default function HomeHero() {
         <figure className={styles.visual}>
           <div className={styles.orbStage}>
             <OpticalIrisOrb focused={hovered || focused} interactionRef={hero} />
+            <svg className={styles.opticalMarks} viewBox="0 0 600 600" fill="none" aria-hidden="true" focusable="false">
+              <g stroke="currentColor" strokeWidth=".65">
+                <path d="M 60 267 A 237 237 0 0 1 170 67 M 525 203 A 240 240 0 0 1 486 401" />
+                <path d="M 169 67 L 187 57 M 486 401 L 475 417 M 541 151 L 541 172 L 551 185" />
+              </g>
+              <g fill="currentColor"><circle cx="170" cy="67" r="1.5" /><circle cx="60" cy="267" r="1" /><circle cx="486" cy="401" r="1.5" /><circle cx="541" cy="151" r="1.5" /></g>
+            </svg>
           </div>
-          <svg className={styles.opticalMarks} viewBox="0 0 600 600" fill="none" aria-hidden="true" focusable="false">
-            <g stroke="currentColor" strokeWidth=".65">
-              <path d="M 60 267 A 237 237 0 0 1 170 67 M 525 203 A 240 240 0 0 1 486 401" />
-              <path d="M 169 67 L 187 57 M 486 401 L 475 417 M 541 151 L 541 172 L 551 185" />
-            </g>
-            <g fill="currentColor"><circle cx="170" cy="67" r="1.5" /><circle cx="60" cy="267" r="1" /><circle cx="486" cy="401" r="1.5" /><circle cx="541" cy="151" r="1.5" /></g>
-          </svg>
           <p className={styles.focusLabel}>Focus<br />Clarity<br />Health<br />Life</p>
           <figcaption>A sharper<br />tomorrow</figcaption>
         </figure>
