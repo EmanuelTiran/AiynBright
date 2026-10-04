@@ -6,26 +6,30 @@ import { IoMdLogIn } from "react-icons/io";
 import { AiFillHome } from "react-icons/ai";
 import { BiInfoCircle } from "react-icons/bi";
 import { FaUser } from "react-icons/fa";
-import { MdBlurOn } from "react-icons/md";
+import { MdBlurOn, MdAdminPanelSettings, MdClose, MdMenu } from "react-icons/md";
 import { IoColorPaletteSharp } from "react-icons/io5";
 import { GiField } from "react-icons/gi";
-import { MdAdminPanelSettings, MdClose, MdMenu } from "react-icons/md";
+import { FiActivity, FiCrosshair, FiDroplet, FiEye, FiHome } from "react-icons/fi";
 import style from './style.module.css';
 import Logo from '../Logo';
 import { authAction, logoutAction } from '@/server/BL/actions/login.action';
 import Link from 'next/link';
 
-// Keep each destination's existing color when changing its position.
+// Desktop icons and labels retain the existing navigation design.
 const mainLinks = [
-   { href: '/', text: 'Home', Icon: AiFillHome, color: 'text-red-500' },
-   { href: '/blur', text: 'Blur Vision', Icon: MdBlurOn, color: 'text-yellow-400' },
-   { href: '/color', text: 'Color Vision', Icon: IoColorPaletteSharp, color: 'text-orange-400' },
-   { href: '/field', text: 'Field Vision', Icon: GiField, color: 'text-blue-200' },
-   { href: '/user', text: 'User Status', Icon: FaUser, color: 'text-teal-400' },
+   { href: '/', text: 'Home', mobileText: 'Home', Icon: AiFillHome, MobileIcon: FiHome, color: 'text-red-500' },
+   { href: '/blur', text: 'Blur Vision', mobileText: 'Blur', Icon: MdBlurOn, MobileIcon: FiEye, color: 'text-yellow-400' },
+   { href: '/color', text: 'Color Vision', mobileText: 'Color', Icon: IoColorPaletteSharp, MobileIcon: FiDroplet, color: 'text-orange-400' },
+   { href: '/field', text: 'Field Vision', mobileText: 'Field', Icon: GiField, MobileIcon: FiCrosshair, color: 'text-blue-200' },
+   { href: '/user', text: 'User Status', mobileText: 'Status', Icon: FaUser, MobileIcon: FiActivity, color: 'text-teal-400' },
 ];
 
+function isActive(pathname, href) {
+   return pathname === href || (href !== '/' && pathname?.startsWith(`${href}/`));
+}
+
 function HeaderLink({ href, text, Icon, color, pathname, onNavigate }) {
-   const active = pathname === href || (href !== '/' && pathname?.startsWith(`${href}/`));
+   const active = isActive(pathname, href);
 
    return (
       <Link
@@ -45,6 +49,7 @@ export default function Header() {
    const [isManager, setIsManager] = useState(false);
    const [isUser, setIsUser] = useState(false);
    const [menuOpen, setMenuOpen] = useState(false);
+   const [navCollapsed, setNavCollapsed] = useState(false);
    const menuButton = useRef(null);
    const header = useRef(null);
    const activeIndicator = useRef(null);
@@ -57,10 +62,9 @@ export default function Header() {
       let disposed = false;
 
       function measureIndicator() {
-         const activeLink = container.querySelector('[data-header-link][aria-current="page"]');
+         const activeLink = container.querySelector(`.${style.navigation} [data-header-link][aria-current="page"]`);
          const rect = activeLink?.getBoundingClientRect();
 
-         // Hidden mobile links (and routes outside this navigation) have no target.
          if (!rect?.width || !rect.height) {
             indicator.removeAttribute('data-ready');
             indicator.removeAttribute('data-visible');
@@ -76,8 +80,6 @@ export default function Header() {
          indicator.setAttribute('data-visible', '');
 
          if (!indicator.hasAttribute('data-ready')) {
-            // Establish the first visible position before enabling transitions.
-            // Subsequent route changes retarget this same element mid-flight.
             indicator.getBoundingClientRect();
             indicator.setAttribute('data-ready', '');
          }
@@ -106,6 +108,46 @@ export default function Header() {
    }, [pathname, menuOpen, isManager, isUser]);
 
    useEffect(() => {
+      let lastY = window.scrollY;
+      let directionStart = lastY;
+      let direction = 0;
+
+      function update() {
+         const y = Math.max(0, window.scrollY);
+         if (window.matchMedia('(min-width: 64rem)').matches) {
+            lastY = y;
+            return;
+         }
+         if (y < 32) {
+            setNavCollapsed(false);
+            directionStart = y;
+         } else if (!menuOpen) {
+            const nextDirection = Math.sign(y - lastY);
+            if (nextDirection && nextDirection !== direction) {
+               direction = nextDirection;
+               directionStart = lastY;
+            }
+            if (direction > 0 && y > 96 && y - directionStart > 24) {
+               setNavCollapsed(true);
+            } else if (direction < 0 && directionStart - y > 18) {
+               setNavCollapsed(false);
+            }
+         }
+         lastY = y;
+      }
+
+      function onScroll() {
+         update();
+      }
+
+      update();
+      window.addEventListener('scroll', onScroll, { passive: true });
+      return () => {
+         window.removeEventListener('scroll', onScroll);
+      };
+   }, [menuOpen]);
+
+   useEffect(() => {
       async function checkAuth() {
          try {
             const authResult = await authAction();
@@ -121,81 +163,105 @@ export default function Header() {
    }, []);
 
    return (
-      <header
-         ref={header}
-         className={style.header}
-         data-home={pathname === '/' ? '' : undefined}
-         onKeyDown={(event) => {
-            if (event.key === 'Escape' && menuOpen) {
-               setMenuOpen(false);
-               menuButton.current?.focus();
-            }
-         }}
-      >
-         <div className={style.brand}>
-            <Logo />
-         </div>
-
-         <button
-            ref={menuButton}
-            type="button"
-            className={`${style.menuButton} text-orange-200`}
-            aria-expanded={menuOpen}
-            aria-controls="header-navigation"
-            onClick={() => setMenuOpen((open) => !open)}
+      <div className={style.headerShell}>
+         <header
+            ref={header}
+            className={style.header}
+            data-home={pathname === '/' ? '' : undefined}
+            data-user={isUser ? '' : undefined}
+            data-collapsed={navCollapsed ? '' : undefined}
+            onKeyDown={(event) => {
+               if (event.key === 'Escape' && menuOpen) {
+                  setMenuOpen(false);
+                  menuButton.current?.focus();
+               }
+            }}
          >
-            {menuOpen ? <MdClose aria-hidden="true" /> : <MdMenu aria-hidden="true" />}
-            <span>{menuOpen ? 'Close' : 'Menu'}</span>
-         </button>
+            <div className={style.brand}>
+               <Logo />
+            </div>
 
-         <div id="header-navigation" className={`${style.navigation} ${menuOpen ? style.expanded : ''}`}>
-            <nav aria-label="Main navigation" className={style.mainNav}>
-               <ul className={style.mainLinks}>
-                  {mainLinks.map((link) => (
-                     <li key={link.href}>
-                        <HeaderLink {...link} pathname={pathname} onNavigate={() => setMenuOpen(false)} />
-                     </li>
+            <div className={style.mobileAccount}>
+               <Link href={isUser ? '/user' : '/login'} onClick={() => setMenuOpen(false)}>
+                  {isUser ? 'Account' : 'Sign In'}
+               </Link>
+            </div>
+
+            <button
+               ref={menuButton}
+               type="button"
+               className={`${style.menuButton} text-orange-200`}
+               aria-label={menuOpen ? 'Close secondary menu' : 'Open secondary menu'}
+               aria-expanded={menuOpen}
+               aria-controls="header-navigation"
+               onClick={() => setMenuOpen((open) => !open)}
+            >
+               {menuOpen ? <MdClose aria-hidden="true" /> : <MdMenu aria-hidden="true" />}
+            </button>
+
+            <div className={`${style.mobileNavWrap} ${navCollapsed ? style.collapsed : ''}`} inert={navCollapsed ? true : undefined} aria-hidden={navCollapsed ? 'true' : undefined}>
+               <nav aria-label="Main navigation" className={style.mobileNav}>
+                  {mainLinks.map(({ href, mobileText, MobileIcon }) => (
+                     <Link
+                        key={href}
+                        href={href}
+                        aria-current={isActive(pathname, href) ? 'page' : undefined}
+                        className={`${style.mobileNavLink} ${isActive(pathname, href) ? style.mobileActive : ''}`}
+                        onClick={() => setMenuOpen(false)}
+                     >
+                        <MobileIcon aria-hidden="true" focusable="false" />
+                        <span>{mobileText}</span>
+                     </Link>
                   ))}
-               </ul>
-            </nav>
+               </nav>
+            </div>
 
-            <div className={style.utilities} data-header-utilities>
-               <nav aria-label="Utility navigation">
-                  <ul className={style.utilityLinks}>
-                     <li>
-                        <HeaderLink href="/about" text="About" Icon={BiInfoCircle} color="text-purple-500" pathname={pathname} onNavigate={() => setMenuOpen(false)} />
-                     </li>
-                     {isManager && (
-                        <li>
-                           <HeaderLink href="/admin" text="Admin" Icon={MdAdminPanelSettings} color="text-orange-200" pathname={pathname} onNavigate={() => setMenuOpen(false)} />
+            <div id="header-navigation" className={`${style.navigation} ${menuOpen ? style.expanded : ''}`}>
+               <nav aria-label="Main navigation" className={style.mainNav}>
+                  <ul className={style.mainLinks}>
+                     {mainLinks.map((link) => (
+                        <li key={link.href}>
+                           <HeaderLink {...link} pathname={pathname} onNavigate={() => setMenuOpen(false)} />
                         </li>
-                     )}
+                     ))}
                   </ul>
                </nav>
 
-               <div className={style.accountAction}>
-                  {isUser ? (
-                     <form action={logoutAction}>
-                        <button
-                           className={`${style.navLink} ${style.logout} text-orange-200`}
-                           title="logout"
-                           type="submit"
-                           onClick={() => {
-                              setIsUser(false);
-                              logoutAction();
-                           }}
-                        >
-                           <RiLogoutCircleRLine aria-hidden="true" focusable="false" />
-                           <span>Logout</span>
-                        </button>
-                     </form>
-                  ) : (
-                     <HeaderLink href="/login" text="Sign In" Icon={IoMdLogIn} color="text-orange-200" pathname={pathname} onNavigate={() => setMenuOpen(false)} />
-                  )}
+               <div className={style.utilities} data-header-utilities>
+                  <nav aria-label="Utility navigation">
+                     <ul className={style.utilityLinks}>
+                        <li>
+                           <HeaderLink href="/about" text="About" Icon={BiInfoCircle} color="text-purple-500" pathname={pathname} onNavigate={() => setMenuOpen(false)} />
+                        </li>
+                        {isManager && (
+                           <li>
+                              <HeaderLink href="/admin" text="Admin" Icon={MdAdminPanelSettings} color="text-orange-200" pathname={pathname} onNavigate={() => setMenuOpen(false)} />
+                           </li>
+                        )}
+                     </ul>
+                  </nav>
+
+                  <div className={style.accountAction}>
+                     {isUser ? (
+                        <form action={logoutAction}>
+                           <button
+                              className={`${style.navLink} ${style.logout} text-orange-200`}
+                              title="logout"
+                              type="submit"
+                              onClick={() => setIsUser(false)}
+                           >
+                              <RiLogoutCircleRLine aria-hidden="true" focusable="false" />
+                              <span>Logout</span>
+                           </button>
+                        </form>
+                     ) : (
+                        <HeaderLink href="/login" text="Sign In" Icon={IoMdLogIn} color="text-orange-200" pathname={pathname} onNavigate={() => setMenuOpen(false)} />
+                     )}
+                  </div>
                </div>
             </div>
-         </div>
-         <span ref={activeIndicator} className={style.activeIndicator} aria-hidden="true" />
-      </header>
+            <span ref={activeIndicator} className={style.activeIndicator} aria-hidden="true" />
+         </header>
+      </div>
    );
 }
